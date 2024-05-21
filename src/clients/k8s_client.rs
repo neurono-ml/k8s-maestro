@@ -1,5 +1,5 @@
 use k8s_openapi::api::{batch::v1::Job, core::v1::{ConfigMap, Secret}};
-use kube::{api::{DeleteParams, PostParams}, runtime::reflector::Lookup, Api};
+use kube::{api::{DeleteParams, PostParams}, Api};
 use crate::entities::job::MaestroJob;
 
 pub struct MaestroK8sClient {
