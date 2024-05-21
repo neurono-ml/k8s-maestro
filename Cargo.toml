@@ -1,6 +1,6 @@
 [package]
 name = "k8s-maestro"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 description = "A Kubernetes job orchestrator tool library"
@@ -29,5 +29,5 @@ serde = { version = "1.0.198", features = ["serde_derive", "derive"] }
 
 [dev-dependencies]
 tokio = { version = "1", default-features=false, features = ["macros", "rt"] }
-serde_yml = "0.0.4"
+serde_yml = "0.0.7"
 env_logger = "0.11"
