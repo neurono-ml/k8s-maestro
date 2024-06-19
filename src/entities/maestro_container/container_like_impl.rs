@@ -124,7 +124,6 @@ fn extract_environment_variables(environment_variables: &BTreeMap<String, crate:
     .collect()
 }
 
-
 fn extract_resource_bounds(resources: &BTreeMap<ComputeResource, Quantity>) -> ResourceRequirements {
     let resource_map: BTreeMap<_, _> = resources.clone().into_iter().map(|(resource_key, resource_value)| {
         (resource_key.to_string(), resource_value)

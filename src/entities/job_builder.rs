@@ -1,4 +1,4 @@
-use k8s_openapi::api::{batch::v1::{Job, JobSpec}, core::v1::{Container, PodSpec, PodTemplateSpec, Volume}};
+use k8s_openapi::api::{batch::v1::{Job, JobSpec}, core::v1::{Container, LocalObjectReference, PodSpec, PodTemplateSpec, Volume}};
 use kube::api::ObjectMeta;
 
 use super::{container_like::ContainerLike, job_name_type::JobNameType, restart_policy::RestartPolicy};
@@ -11,6 +11,7 @@ pub struct JobBuilder {
 
     pub restart_policy: RestartPolicy,
     pub containers: Vec<Box<dyn ContainerLike>>,
+    pub image_pull_secret_names: Vec<String>,
     pub volumes: Vec<Volume>
 }
 
@@ -22,6 +23,7 @@ impl JobBuilder{
             
             backoff_limit: 6,
             restart_policy: RestartPolicy::default(),
+            image_pull_secret_names: Vec::new(),
             containers: Vec::new(),
             volumes: Vec::new(),
         }
@@ -54,18 +56,32 @@ impl JobBuilder{
         Ok(self)
     }
 
+    pub fn add_image_pull_secret_name(mut self, image_pull_secret_name: &str) -> JobBuilder {
+        self.image_pull_secret_names.push(image_pull_secret_name.to_owned());
+        self
+    }
+
+    pub fn set_image_pull_secret_names(mut self, image_pull_secret_names: Vec<String>)  -> JobBuilder {
+        self.image_pull_secret_names = image_pull_secret_names;
+        self
+    }
+
     pub fn build(self) -> anyhow::Result<Job> {
-        
+        let image_pull_secret_local_object_references =
+            self.image_pull_secret_names.iter().map(|name| LocalObjectReference{
+                name: Some(name.to_owned()),
+            }).collect();
+
         let pod_spec = PodSpec {
             restart_policy: self.restart_policy.into(),
             containers: extract_container_list(&self.containers),
             volumes: Some(self.volumes),
+            image_pull_secrets: Some(image_pull_secret_local_object_references),
             ..PodSpec::default()
         };
 
         let pod_template_spec = PodTemplateSpec{
             spec: Some(pod_spec),
-            
             ..PodTemplateSpec::default()
         };
                 

@@ -1,7 +1,7 @@
 use k8s_openapi::api::core::v1::{ConfigMapEnvSource, EnvFromSource, SecretEnvSource};
 
 #[derive(Debug, Clone)]
-pub enum EnvironmentVariableFromObject{
+pub enum EnvironmentVariableFromObject {
     Secret(String),
     ConfigMap(String),
 }
@@ -11,7 +11,7 @@ impl EnvironmentVariableFromObject {
         match self {
             Self::Secret(name) => {
                 let secret_source = SecretEnvSource {
-                    name: Some(name.into()),
+                    name: Some(name.to_owned()),
                     ..SecretEnvSource::default()
                 };
 
@@ -22,7 +22,7 @@ impl EnvironmentVariableFromObject {
             },
             Self::ConfigMap(name) => {
                 let configmap_source = ConfigMapEnvSource {
-                    name: Some(name.into()),
+                    name: Some(name.to_owned()),
                     ..ConfigMapEnvSource::default()
                 };
                 
