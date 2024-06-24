@@ -28,7 +28,8 @@ fn build_job(image: &str, name: &str, namespace: &str) -> anyhow::Result<Job> {
     let job_name = JobNameType::DefinedName(name.to_owned());
     let container_name = "main";
 
-    let environment_from_object = vec![EnvironmentVariableFromObject::Secret("s3-storage".into())];
+    let environment_from_object =
+        vec![EnvironmentVariableFromObject::Secret("s3-storage".into())];
     let resource_bounds: BTreeMap<ComputeResource, Quantity> = vec![
         (ComputeResource::Cpu, Quantity("100m".to_owned())),
         (ComputeResource::Memory, Quantity("50M".to_owned()))
