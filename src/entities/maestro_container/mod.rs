@@ -4,3 +4,4 @@ mod container_like_impl;
 mod maestro_container;
 
 pub use maestro_container::MaestroContainer;
+pub use image_pull_policy::ImagePullPolicy;
