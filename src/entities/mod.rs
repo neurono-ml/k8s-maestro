@@ -25,6 +25,7 @@ pub mod job {
 pub mod container {
     pub use super::container_like::ContainerLike;
     pub use super::maestro_container::MaestroContainer;
+    pub use super::maestro_container::ImagePullPolicy;
     pub use super::environment_variable_from_object::EnvironmentVariableFromObject;
     pub use super::environment_variable_source::EnvironmentVariableSource;
     pub use super::compute_resource::ComputeResource;
