@@ -4,7 +4,7 @@ use k8s_openapi::apimachinery::pkg::api::resource::Quantity;
 
 use crate::entities::{compute_resource::ComputeResource, container::EnvironmentVariableFromObject, environment_variable_source::EnvironmentVariableSource};
 
-use super::MaestroContainer;
+use super::{image_pull_policy::ImagePullPolicy, MaestroContainer};
 
 impl MaestroContainer {
     pub fn new(image: &str, name: &str) -> MaestroContainer {
@@ -17,6 +17,11 @@ impl MaestroContainer {
 
     pub fn set_image(mut self, image: &str) -> MaestroContainer {
         self.image = image.to_owned();
+        self
+    }
+
+    pub fn set_image_pull_policy(mut self, pull_policy: ImagePullPolicy) -> MaestroContainer {
+        self.image_pull_policy = pull_policy;
         self
     }
 

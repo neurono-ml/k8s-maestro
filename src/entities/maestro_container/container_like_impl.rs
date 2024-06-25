@@ -4,7 +4,7 @@ use k8s_openapi::{api::core::v1::{Container, EnvFromSource, EnvVar, EnvVarSource
 
 use crate::entities::{compute_resource::ComputeResource, container::EnvironmentVariableFromObject, container_like::ContainerLike, volumes::VolumeMountLike};
 
-use super::MaestroContainer;
+use super::{image_pull_policy::ImagePullPolicy, MaestroContainer};
 
 impl ContainerLike for MaestroContainer {
     fn into_container(&self) -> anyhow::Result<Container> {
@@ -12,6 +12,7 @@ impl ContainerLike for MaestroContainer {
         let environment_variables = extract_environment_variables(&self.environment_variables);
         let environments_from_objects = extract_environment_variables_from_objects(&self.environment_variables_from_objects);
         let volume_mounts = extract_volume_mounts(&self.volume_mounts)?;
+        let image_pull_policy = <ImagePullPolicy as Clone>::clone(&self.image_pull_policy).try_into()?;
         
 
         let container = Container {
@@ -23,6 +24,7 @@ impl ContainerLike for MaestroContainer {
             env: Some(environment_variables),
             env_from: Some(environments_from_objects),
             volume_mounts: Some(volume_mounts),
+            image_pull_policy: Some(image_pull_policy),
 
             ..Container::default()
         };
