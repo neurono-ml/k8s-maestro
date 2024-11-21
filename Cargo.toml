@@ -1,6 +1,6 @@
 [package]
 name = "k8s-maestro"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 
 description = "A Kubernetes job orchestrator tool library"
@@ -35,7 +35,7 @@ k8s_v1_29 = ["k8s-openapi/v1_29", "k8s-openapi", "kube"]
 k8s_v1_30 = ["k8s-openapi/v1_30", "k8s-openapi", "kube"]
 k8s_v1_31 = ["k8s-openapi/v1_31", "k8s-openapi", "kube"]
 
-default = ["k8s_v1_26"]
+default = ["k8s-openapi", "kube"]
 
 [dev-dependencies]
 tokio = { version = "1", default-features=false, features = ["macros", "rt"] }
