@@ -69,7 +69,7 @@ impl JobBuilder{
     pub fn build(self) -> anyhow::Result<Job> {
         let image_pull_secret_local_object_references =
             self.image_pull_secret_names.iter().map(|name| LocalObjectReference{
-                name: Some(name.to_owned()),
+                name: name.to_owned(),
             }).collect();
 
         let pod_spec = PodSpec {

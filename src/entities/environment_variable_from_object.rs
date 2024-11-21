@@ -11,7 +11,7 @@ impl EnvironmentVariableFromObject {
         match self {
             Self::Secret(name) => {
                 let secret_source = SecretEnvSource {
-                    name: Some(name.to_owned()),
+                    name: name.to_owned(),
                     ..SecretEnvSource::default()
                 };
 
@@ -22,7 +22,7 @@ impl EnvironmentVariableFromObject {
             },
             Self::ConfigMap(name) => {
                 let configmap_source = ConfigMapEnvSource {
-                    name: Some(name.to_owned()),
+                    name: name.to_owned(),
                     ..ConfigMapEnvSource::default()
                 };
                 

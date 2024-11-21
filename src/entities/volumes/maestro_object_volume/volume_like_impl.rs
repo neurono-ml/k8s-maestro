@@ -11,7 +11,7 @@ impl VolumeLike for MaestroObjectMountVolume {
                 K8sObjectVolumeSource::ConfigMap(config_map_name) => {
                     let configmap_volume_source = ConfigMapVolumeSource{
                         optional: Some(true),
-                        name: Some(config_map_name),
+                        name: config_map_name,
                         ..Default::default()
                     };
 
