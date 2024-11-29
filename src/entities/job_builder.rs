@@ -11,6 +11,7 @@ pub struct JobBuilder {
 
     pub restart_policy: RestartPolicy,
     pub containers: Vec<Box<dyn ContainerLike>>,
+    pub init_containers: Vec<Box<dyn ContainerLike>>,
     pub image_pull_secret_names: Vec<String>,
     pub volumes: Vec<Volume>
 }
@@ -25,6 +26,7 @@ impl JobBuilder{
             restart_policy: RestartPolicy::default(),
             image_pull_secret_names: Vec::new(),
             containers: Vec::new(),
+            init_containers: Vec::new(),
             volumes: Vec::new(),
         }
     }
@@ -56,6 +58,13 @@ impl JobBuilder{
         Ok(self)
     }
 
+    pub fn add_init_container(mut self, container_like: Box<dyn ContainerLike>) -> anyhow::Result<JobBuilder> {
+        self.add_container_volumes(&container_like)?;
+        self.init_containers.push(container_like);
+
+        Ok(self)
+    }
+
     pub fn add_image_pull_secret_name(mut self, image_pull_secret_name: &str) -> JobBuilder {
         self.image_pull_secret_names.push(image_pull_secret_name.to_owned());
         self
@@ -75,6 +84,7 @@ impl JobBuilder{
         let pod_spec = PodSpec {
             restart_policy: self.restart_policy.into(),
             containers: extract_container_list(&self.containers),
+            init_containers: Some(extract_container_list(&self.init_containers)),
             volumes: Some(self.volumes),
             image_pull_secrets: Some(image_pull_secret_local_object_references),
             ..PodSpec::default()
@@ -114,11 +124,16 @@ impl JobBuilder{
     }
 
     fn add_container_volumes(&mut self, container_like: &Box<dyn ContainerLike>) -> Result<(), anyhow::Error> {
-        let mut container_volumes = container_like.get_volumes()?;
-        if self.volumes.len() == 0 {
-            self.volumes = vec![]
+        let container_volumes = container_like.get_volumes()?;
+
+        for container_volume in container_volumes.iter() {
+            if self.volumes.contains(container_volume) {
+                continue
+            } else {
+                self.volumes.push(container_volume.clone());
+            }
         }
-        self.volumes.append(&mut container_volumes);
+
         Ok(())
     }
     

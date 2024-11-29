@@ -45,8 +45,11 @@ impl MaestroContainer {
         self
     }
 
-    pub fn set_arguments(mut self, arguments: &Vec<String>) -> MaestroContainer {
-        self.arguments = arguments.to_owned();
+    pub fn set_arguments<S>(mut self, arguments: &Vec<S>) -> MaestroContainer where S: ToString {
+        self.arguments = arguments
+            .iter()
+            .map(|argument| argument.to_string().to_owned() )
+            .collect();
         self
     }
 

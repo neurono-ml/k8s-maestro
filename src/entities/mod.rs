@@ -11,6 +11,12 @@ mod environment_variable_source;
 mod environment_variable_from_object;
 mod maestro_container;
 
+
+pub mod log {
+    pub use super::maestro_log::MaestroLogLine;
+    pub use log::*;
+}
+
 pub mod volumes;
 
 pub mod job {
@@ -19,7 +25,6 @@ pub mod job {
     pub use super::job_builder::JobBuilder;
     pub use super::maestro_job_status::MaestroJobStatus;
     pub use super::maestro_job::MaestroJob;
-    pub use super::maestro_log::MaestroLogLine;
 }
 
 pub mod container {

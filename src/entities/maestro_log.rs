@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct MaestroLogLine {
     line: String,
     pod_name: String,
