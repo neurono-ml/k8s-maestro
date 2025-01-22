@@ -1,4 +1,4 @@
-mod builders;
+pub mod builders;
 mod maestro_log;
 mod job_name_type;
 mod restart_policy;
