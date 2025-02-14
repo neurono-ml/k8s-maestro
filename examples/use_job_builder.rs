@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use k8s_openapi::{api::batch::v1::Job, apimachinery::pkg::api::resource::Quantity};
-use k8s_maestro::{clients::MaestroK8sClient, entities::{container::{ComputeResource, EnvironmentVariableFromObject, EnvironmentVariableSource, MaestroContainer}, job::{JobBuilder, JobNameType, RestartPolicy}}};
+use k8s_maestro::{clients::MaestroK8sClient, entities::{builders::BuildJob, container::{ComputeResource, EnvironmentVariableFromObject, EnvironmentVariableSource, MaestroContainer}, job::{JobBuilder, JobNameType, RestartPolicy}}};
 
 
 #[tokio::main(flavor="current_thread")]
@@ -57,7 +57,7 @@ fn build_job(image: &str, name: &str, namespace: &str) -> anyhow::Result<Job> {
             .set_backoff_limit(4)
             .set_restart_policy(&RestartPolicy::OnFailure)
             .add_container(Box::new(container))?
-            .build()?;
+            .build_job()?;
 
     Ok(job)
 }

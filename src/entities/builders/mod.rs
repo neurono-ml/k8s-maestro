@@ -1,5 +1,11 @@
-mod build_job;
-pub use build_job::BuildJob;
+mod stateful_set;
+pub use stateful_set::BuildSatatefulSet;
 
-mod build_replica_set;
-pub use build_replica_set::BuildReplicaSet;
+mod deployment;
+pub use  deployment::BuildDeployment;
+
+mod job;
+pub use job::BuildJob;
+
+mod replica_set;
+pub use replica_set::BuildReplicaSet;

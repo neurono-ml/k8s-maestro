@@ -1,5 +1,6 @@
-use k8s_openapi::api::{batch::v1::{Job, JobSpec}, core::v1::{Container, LocalObjectReference, PodSpec, PodTemplateSpec, Volume}};
-use kube::api::ObjectMeta;
+use std::collections::BTreeMap;
+
+use k8s_openapi::{api::core::v1::{Container, Volume}, apimachinery::{self, pkg::apis::meta::v1::LabelSelectorRequirement}};
 
 use super::{container_like::ContainerLike, job_name_type::JobNameType, restart_policy::RestartPolicy};
 
@@ -13,7 +14,10 @@ pub struct JobBuilder {
     pub containers: Vec<Box<dyn ContainerLike>>,
     pub init_containers: Vec<Box<dyn ContainerLike>>,
     pub image_pull_secret_names: Vec<String>,
-    pub volumes: Vec<Volume>
+    pub volumes: Vec<Volume>,
+    pub num_replicas: Option<i32>,
+    pub match_expression: Vec<apimachinery::pkg::apis::meta::v1::LabelSelectorRequirement>,
+    pub match_labels: std::collections::BTreeMap<String, String>
 }
 
 impl JobBuilder{
@@ -28,6 +32,9 @@ impl JobBuilder{
             containers: Vec::new(),
             init_containers: Vec::new(),
             volumes: Vec::new(),
+            num_replicas: Some(1),
+            match_expression: Vec::new(),
+            match_labels: BTreeMap::new()
         }
     }
 
@@ -74,54 +81,6 @@ impl JobBuilder{
         self.image_pull_secret_names = image_pull_secret_names;
         self
     }
-
-    pub fn build(self) -> anyhow::Result<Job> {
-        let image_pull_secret_local_object_references =
-            self.image_pull_secret_names.iter().map(|name| LocalObjectReference{
-                name: name.to_owned(),
-            }).collect();
-
-        let pod_spec = PodSpec {
-            restart_policy: self.restart_policy.into(),
-            containers: extract_container_list(&self.containers),
-            init_containers: Some(extract_container_list(&self.init_containers)),
-            volumes: Some(self.volumes),
-            image_pull_secrets: Some(image_pull_secret_local_object_references),
-            ..PodSpec::default()
-        };
-
-        let pod_template_spec = PodTemplateSpec{
-            spec: Some(pod_spec),
-            ..PodTemplateSpec::default()
-        };
-                
-        let job_spec = JobSpec{
-            template: pod_template_spec,
-            backoff_limit: Some(self.backoff_limit as i32),
-            ..JobSpec::default()
-        };
-        
-        let job_meta = match self.name {
-            JobNameType::DefinedName(define_name) => ObjectMeta{
-                name: Some(define_name.to_string()),
-                namespace: Some(self.namespace.to_owned()),
-                ..ObjectMeta::default()
-            },
-            JobNameType::GenerateName(generate_name) => ObjectMeta{
-                generate_name: Some(generate_name.to_string()),
-                namespace: Some(self.namespace.to_owned()),
-                ..ObjectMeta::default()
-            },
-        };
-
-        let job = Job{ 
-            spec: Some(job_spec),
-            metadata: job_meta,
-            ..Job::default()
-        };
-        
-        Ok(job)
-    }
     
     fn add_container_volumes(&mut self, container_like: &Box<dyn ContainerLike>) -> Result<(), anyhow::Error> {
         let container_volumes = container_like.get_volumes()?;
@@ -137,9 +96,17 @@ impl JobBuilder{
         Ok(())
     }
     
+    pub fn set_num_replicas(mut self, num_replicas: i32) -> JobBuilder {
+        self.num_replicas = Some(num_replicas);
+        self
+    }
+
+    pub fn add_label_selector_expression(self, ) -> LabelSelectorRequirement{
+        todo!()
+    }
 }
 
-fn extract_container_list(containers: &Vec<Box<dyn ContainerLike>>) -> Vec<Container>{
+pub fn extract_container_list(containers: &Vec<Box<dyn ContainerLike>>) -> Vec<Container>{
     containers.iter().map(|container_line|{
         let container = container_line.into_container()?;
         anyhow::Ok(container.to_owned())
