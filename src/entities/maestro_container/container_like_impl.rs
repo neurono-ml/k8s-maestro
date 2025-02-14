@@ -1,10 +1,11 @@
 use std::collections::BTreeMap;
 
-use k8s_openapi::{api::core::v1::{Container, EnvFromSource, EnvVar, EnvVarSource, ResourceRequirements, Volume, VolumeMount}, apimachinery::pkg::api::resource::Quantity};
+use k8s_openapi::{api::core::v1::{Container, EnvFromSource, EnvVar, EnvVarSource, PersistentVolumeClaim, ResourceRequirements, Volume, VolumeMount}, apimachinery::pkg::api::resource::Quantity};
 
 use crate::entities::{compute_resource::ComputeResource, container::EnvironmentVariableFromObject, container_like::ContainerLike, volumes::VolumeMountLike};
 
 use super::{image_pull_policy::ImagePullPolicy, MaestroContainer};
+
 
 impl ContainerLike for MaestroContainer {
     fn into_container(&self) -> anyhow::Result<Container> {
@@ -42,6 +43,17 @@ impl ContainerLike for MaestroContainer {
         Ok(volumes)
     }
 
+    fn get_pvcs(&self) -> anyhow::Result<Vec<PersistentVolumeClaim>> {
+        let mut pvc_templates = Vec::new();
+        for volume_mount_like in self.volume_mounts.iter() {
+            let pvc_template = volume_mount_like.into_pvc()?;
+            pvc_templates.push(pvc_template);
+        }
+
+        Ok(pvc_templates)
+    }
+    
+
     fn add_volume_mount_like(mut self, volume_mount_like: Box<dyn VolumeMountLike>) -> anyhow::Result<Self> {
         if self.volume_mounts.len() == 0 {
             self.volume_mounts = vec![];
@@ -51,6 +63,7 @@ impl ContainerLike for MaestroContainer {
 
         Ok(self)
     }
+    
 }
 
 

@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 
-use k8s_openapi::{api::core::v1::{Container, Volume}, apimachinery::{self, pkg::apis::meta::v1::LabelSelectorRequirement}};
+use k8s_openapi::{api::core::v1::{Container, PersistentVolumeClaim, Volume}, apimachinery::{self, pkg::apis::meta::v1::LabelSelectorRequirement}};
 
-use super::{container_like::ContainerLike, job_name_type::JobNameType, restart_policy::RestartPolicy};
+use super::{container_like::ContainerLike, job_name_type::JobNameType, restart_policy::RestartPolicy, utils::LabelOperator};
 
 
 pub struct JobBuilder {
@@ -15,6 +15,7 @@ pub struct JobBuilder {
     pub init_containers: Vec<Box<dyn ContainerLike>>,
     pub image_pull_secret_names: Vec<String>,
     pub volumes: Vec<Volume>,
+    pub pvcs: Vec<PersistentVolumeClaim>,
     pub num_replicas: Option<i32>,
     pub match_expression: Vec<apimachinery::pkg::apis::meta::v1::LabelSelectorRequirement>,
     pub match_labels: std::collections::BTreeMap<String, String>
@@ -32,6 +33,7 @@ impl JobBuilder{
             containers: Vec::new(),
             init_containers: Vec::new(),
             volumes: Vec::new(),
+            pvcs: Vec::new(),
             num_replicas: Some(1),
             match_expression: Vec::new(),
             match_labels: BTreeMap::new()
@@ -83,26 +85,55 @@ impl JobBuilder{
     }
     
     fn add_container_volumes(&mut self, container_like: &Box<dyn ContainerLike>) -> Result<(), anyhow::Error> {
-        let container_volumes = container_like.get_volumes()?;
+        self.add_container_volume_likes(container_like)?;
 
-        for container_volume in container_volumes.iter() {
+        let pvc_templates = container_like.get_pvcs()?;
+
+        self.add_container_pvc_templates(pvc_templates);
+
+        Ok(())
+    }
+
+    fn add_container_pvc_templates(&mut self, pvc_templates: Vec<PersistentVolumeClaim>) {
+        for pvc_template in pvc_templates.into_iter() {
+            if self.pvcs.contains(&pvc_template) {
+                continue;
+            } else {
+                self.pvcs.push(pvc_template);
+            }
+        }
+    }
+    
+    fn add_container_volume_likes(&mut self, container_like: &Box<dyn ContainerLike>) -> Result<(), anyhow::Error> {
+        let container_volumes = container_like.get_volumes()?;
+        Ok(for container_volume in container_volumes.iter() {
             if self.volumes.contains(container_volume) {
                 continue
             } else {
                 self.volumes.push(container_volume.clone());
             }
-        }
-
-        Ok(())
-    }
+        })
+            }
     
     pub fn set_num_replicas(mut self, num_replicas: i32) -> JobBuilder {
         self.num_replicas = Some(num_replicas);
         self
     }
 
-    pub fn add_label_selector_expression(self, ) -> LabelSelectorRequirement{
-        todo!()
+    pub fn add_label_selector_expression<K, V, D>(self, key: K, operator: LabelOperator, values: V) -> LabelSelectorRequirement
+    where
+        K: Into<String>, D: Into<String>, V: Into<Vec<D>>
+    {
+        let values_string = values.into().into_iter().map(|v| v.into()).collect();
+
+        let label_selector = 
+            LabelSelectorRequirement {
+                operator: operator.to_string(),
+                key: key.into(),
+                values: Some(values_string)
+            };
+
+        label_selector
     }
 }
 

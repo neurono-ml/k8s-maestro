@@ -1,6 +1,6 @@
 
 use k8s_openapi::{
-    api::{apps::v1::{StatefulSet, StatefulSetSpec}, core::v1::{LocalObjectReference, PersistentVolumeClaim, PodSpec, PodTemplateSpec}},
+    api::{apps::v1::{StatefulSet, StatefulSetSpec}, core::v1::{LocalObjectReference, PodSpec, PodTemplateSpec}},
     apimachinery::pkg::apis::meta::v1::LabelSelector
 };
 use kube::api::ObjectMeta;
@@ -58,18 +58,18 @@ impl BuildSatatefulSet for JobBuilder {
 
         };
 
-        let stateful_set_volume_clain_template = PersistentVolumeClaim{
-            metadata: calin_template_name,
-            spec: 
-            ..PersistentVolumeClaim::default()
-
-        };
+        let pvc_templates = 
+            if self.pvcs.is_empty() {
+                None
+            } else {
+                Some(self.pvcs.clone())
+            };
 
         let stateful_set_spec = StatefulSetSpec {
             template: pod_template_spec,
             selector: selector,
             replicas: self.num_replicas,
-            volume_claim_templates: stateful_set_volume_clain_template,
+            volume_claim_templates: pvc_templates,
             ..StatefulSetSpec::default()
         };
         

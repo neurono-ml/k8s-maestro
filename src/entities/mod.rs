@@ -1,3 +1,4 @@
+mod label_operator;
 pub mod builders;
 mod maestro_log;
 mod job_name_type;
@@ -35,4 +36,9 @@ pub mod container {
     pub use super::environment_variable_from_object::EnvironmentVariableFromObject;
     pub use super::environment_variable_source::EnvironmentVariableSource;
     pub use super::compute_resource::ComputeResource;
+}
+
+
+pub mod utils {
+    pub use super::label_operator::LabelOperator;
 }

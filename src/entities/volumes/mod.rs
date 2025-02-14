@@ -1,10 +1,8 @@
-mod volume_mount_pvc_template_like;
 mod maestro_object_volume;
 mod maestro_pvc_mount_volume;
 mod volume_like;
 mod volume_mount_like;
 
-pub use volume_mount_pvc_template_like::VolumeMountPvcTemplateLike;
 pub use volume_like::VolumeLike;
 pub use volume_mount_like::VolumeMountLike;
 

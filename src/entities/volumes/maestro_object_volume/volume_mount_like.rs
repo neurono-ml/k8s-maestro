@@ -1,4 +1,4 @@
-use k8s_openapi::api::core::v1::VolumeMount;
+use k8s_openapi::api::core::v1::{PersistentVolumeClaim, VolumeMount};
 use crate::entities::volumes::{volume_mount_like::VolumeMountLike, VolumeLike};
 
 use super::volume::MaestroObjectMountVolume;
@@ -27,5 +27,9 @@ impl VolumeMountLike for MaestroObjectMountVolume {
 
     fn volume_like(&self) -> anyhow::Result<Box<dyn VolumeLike>> {
         Ok(Box::new(self.clone()))
+    }
+    
+    fn into_pvc(&self) -> anyhow::Result<PersistentVolumeClaim> {
+        todo!()
     }
 }
