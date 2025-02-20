@@ -65,6 +65,27 @@ impl MaestroContainer {
         
         self
     }
+
+    pub fn set_commands<S>(mut self, commands: &Vec<S>) -> MaestroContainer where S: ToString {
+        self.commands = commands
+            .iter()
+            .map(|command| command.to_string().to_owned() )
+            .collect();
+        self
+    }
+
+    pub fn add_command<S>(mut self, argument: S) -> MaestroContainer where S: Into<String> {
+        self.commands.push(argument.into());
+        self
+    }
+
+    pub fn add_commands<S>(mut self, commands: &[S]) -> MaestroContainer where S: Into<String> + Deref + Clone {
+        for command in commands {
+            self.commands.push((*command).clone().into());
+        }
+        
+        self
+    }
     
     pub fn set_environment_variables(mut self, environment_variables: BTreeMap<String, EnvironmentVariableSource>) -> MaestroContainer {
         self.environment_variables = environment_variables;

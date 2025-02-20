@@ -15,11 +15,23 @@ impl ContainerLike for MaestroContainer {
         let volume_mounts = extract_volume_mounts(&self.volume_mounts)?;
         let image_pull_policy = <ImagePullPolicy as Clone>::clone(&self.image_pull_policy).try_into()?;
         
+        let command = if self.commands.is_empty() {
+            None
+        } else {
+            Some(self.commands.clone())
+        };
+
+        let arguments = if self.arguments.is_empty() {
+            None
+        } else {
+            Some(self.arguments.clone())
+        };
 
         let container = Container {
             name: self.name.clone(),
             image: Some(self.image.clone()),
-            args: Some(self.arguments.clone()),
+            command,
+            args: arguments,
             resources: Some(resource_bounds),
 
             env: Some(environment_variables),
