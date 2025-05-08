@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use k8s_openapi::{api::batch::v1::Job, apimachinery::pkg::api::resource::Quantity};
-use k8s_maestro::{clients::MaestroK8sClient, entities::{container::{ComputeResource, ContainerLike, EnvironmentVariableFromObject, EnvironmentVariableSource, MaestroContainer}, job::{JobBuilder, JobNameType, RestartPolicy}, volumes::MaestroPVCMountVolumeBuilder}};
+use k8s_maestro::{clients::MaestroK8sClient, entities::{builders::BuildJob, container::{ComputeResource, ContainerLike, EnvironmentVariableFromObject, EnvironmentVariableSource, MaestroContainer}, job::{JobBuilder, JobNameType, RestartPolicy}, volumes::MaestroPVCMountVolumeBuilder}};
 use futures::{pin_mut, StreamExt};
 
 
@@ -70,7 +70,7 @@ fn build_job(image: &str, generate_name: &str, namespace: &str) -> anyhow::Resul
             .set_backoff_limit(4)
             .set_restart_policy(&RestartPolicy::OnFailure)
             .add_container(Box::new(container))?
-            .build()?;
+            .build_job()?;
 
     Ok(job)
 }

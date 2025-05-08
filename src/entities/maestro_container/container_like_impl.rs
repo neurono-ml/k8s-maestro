@@ -1,10 +1,11 @@
 use std::collections::BTreeMap;
 
-use k8s_openapi::{api::core::v1::{Container, EnvFromSource, EnvVar, EnvVarSource, ResourceRequirements, Volume, VolumeMount}, apimachinery::pkg::api::resource::Quantity};
+use k8s_openapi::{api::core::v1::{Container, EnvFromSource, EnvVar, EnvVarSource, PersistentVolumeClaim, ResourceRequirements, Volume, VolumeMount}, apimachinery::pkg::api::resource::Quantity};
 
 use crate::entities::{compute_resource::ComputeResource, container::EnvironmentVariableFromObject, container_like::ContainerLike, volumes::VolumeMountLike};
 
 use super::{image_pull_policy::ImagePullPolicy, MaestroContainer};
+
 
 impl ContainerLike for MaestroContainer {
     fn into_container(&self) -> anyhow::Result<Container> {
@@ -14,11 +15,23 @@ impl ContainerLike for MaestroContainer {
         let volume_mounts = extract_volume_mounts(&self.volume_mounts)?;
         let image_pull_policy = <ImagePullPolicy as Clone>::clone(&self.image_pull_policy).try_into()?;
         
+        let command = if self.commands.is_empty() {
+            None
+        } else {
+            Some(self.commands.clone())
+        };
+
+        let arguments = if self.arguments.is_empty() {
+            None
+        } else {
+            Some(self.arguments.clone())
+        };
 
         let container = Container {
             name: self.name.clone(),
             image: Some(self.image.clone()),
-            args: Some(self.arguments.clone()),
+            command,
+            args: arguments,
             resources: Some(resource_bounds),
 
             env: Some(environment_variables),
@@ -42,6 +55,16 @@ impl ContainerLike for MaestroContainer {
         Ok(volumes)
     }
 
+    fn get_pvcs(&self) -> anyhow::Result<Vec<PersistentVolumeClaim>> {
+        let mut pvc_templates = Vec::new();
+        for volume_mount_like in self.volume_mounts.iter() {
+            let pvc_template = volume_mount_like.into_pvc()?;
+            pvc_templates.push(pvc_template);
+        }
+
+        Ok(pvc_templates)
+    }
+    
     fn add_volume_mount_like(mut self, volume_mount_like: Box<dyn VolumeMountLike>) -> anyhow::Result<Self> {
         if self.volume_mounts.len() == 0 {
             self.volume_mounts = vec![];
@@ -51,6 +74,7 @@ impl ContainerLike for MaestroContainer {
 
         Ok(self)
     }
+    
 }
 
 

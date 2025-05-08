@@ -11,6 +11,7 @@ use super::{super::{compute_resource::ComputeResource, environment_variable_sour
 pub struct MaestroContainer {
     pub(super) name: String,
     pub(super) image: String,
+    pub(super) commands: Vec<String>,
     pub(super) arguments: Vec<String>,
     pub(super) resource_bounds: BTreeMap<ComputeResource, Quantity>,
     pub(super) environment_variables: BTreeMap<String, EnvironmentVariableSource>,

@@ -1,4 +1,4 @@
-use k8s_maestro::{clients::MaestroK8sClient, entities::{container::{EnvironmentVariableFromObject, MaestroContainer}, job::{JobBuilder, JobNameType}}};
+use k8s_maestro::{clients::MaestroK8sClient, entities::{builders::BuildJob, container::{EnvironmentVariableFromObject, MaestroContainer}, job::{JobBuilder, JobNameType}}};
 use k8s_openapi::api::batch::v1::Job;
 
 
@@ -54,7 +54,7 @@ pub fn build_job(image: &str, generate_name: &str, namespace: &str, backoff_limi
         .set_restart_policy(&k8s_maestro::entities::job::RestartPolicy::OnFailure)
         .add_container(Box::new(container))?
         .add_image_pull_secret_name(GHCR_IMAGE_PULL_SECRET)
-        .build()?;
+        .build_job()?;
 
     Ok(job)
 }
