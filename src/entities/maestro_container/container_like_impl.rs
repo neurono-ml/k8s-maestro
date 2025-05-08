@@ -65,7 +65,6 @@ impl ContainerLike for MaestroContainer {
         Ok(pvc_templates)
     }
     
-
     fn add_volume_mount_like(mut self, volume_mount_like: Box<dyn VolumeMountLike>) -> anyhow::Result<Self> {
         if self.volume_mounts.len() == 0 {
             self.volume_mounts = vec![];
