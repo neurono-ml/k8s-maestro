@@ -2,11 +2,11 @@ use std::collections::BTreeMap;
 
 use k8s_openapi::{api::core::v1::{Container, PersistentVolumeClaim, Volume}, apimachinery::{self, pkg::apis::meta::v1::LabelSelectorRequirement}};
 
-use super::{container_like::ContainerLike, job_name_type::JobNameType, restart_policy::RestartPolicy, utils::LabelOperator};
+use super::{container_like::ContainerLike, workflow_name_type::WorkflowNameType, restart_policy::RestartPolicy, utils::LabelOperator};
 
 
-pub struct JobBuilder {
-    pub name: JobNameType,
+pub struct WorkflowStepBuilder {
+    pub name: WorkflowNameType,
     pub namespace: String,
     pub backoff_limit: usize,
 
@@ -21,9 +21,9 @@ pub struct JobBuilder {
     pub match_labels: std::collections::BTreeMap<String, String>
 }
 
-impl JobBuilder{
-    pub fn new(name: &JobNameType, namespace: &str) -> JobBuilder {
-        JobBuilder {
+impl WorkflowStepBuilder{
+    pub fn new(name: &WorkflowNameType, namespace: &str) -> WorkflowStepBuilder {
+        WorkflowStepBuilder {
             name: name.clone(),
             namespace: namespace.to_owned(),
             
@@ -40,46 +40,46 @@ impl JobBuilder{
         }
     }
 
-    pub fn set_defined_name(mut self, defined_name: &str) -> JobBuilder {
-        self.name = JobNameType::DefinedName(defined_name.to_owned());
+    pub fn set_defined_name(mut self, defined_name: &str) -> WorkflowStepBuilder {
+        self.name = WorkflowNameType::DefinedName(defined_name.to_owned());
         self
     }
 
-    pub fn set_generate_name(mut self, defined_name: &str) -> JobBuilder {
-        self.name = JobNameType::GenerateName(defined_name.to_owned());
+    pub fn set_generate_name(mut self, defined_name: &str) -> WorkflowStepBuilder {
+        self.name = WorkflowNameType::GenerateName(defined_name.to_owned());
         self
     }
 
-    pub fn set_backoff_limit(mut self, backoff_limit: usize) -> JobBuilder {
+    pub fn set_backoff_limit(mut self, backoff_limit: usize) -> WorkflowStepBuilder {
         self.backoff_limit = backoff_limit;
         self
     }
 
-    pub fn set_restart_policy(mut self, restart_policy: &RestartPolicy) -> JobBuilder {
+    pub fn set_restart_policy(mut self, restart_policy: &RestartPolicy) -> WorkflowStepBuilder {
         self.restart_policy = restart_policy.to_owned();
         self
     }
 
-    pub fn add_container(mut self, container_like: Box<dyn ContainerLike>) -> anyhow::Result<JobBuilder> {
+    pub fn add_container(mut self, container_like: Box<dyn ContainerLike>) -> anyhow::Result<WorkflowStepBuilder> {
         self.add_container_volumes(&container_like)?;
         self.containers.push(container_like);
         
         Ok(self)
     }
 
-    pub fn add_init_container(mut self, container_like: Box<dyn ContainerLike>) -> anyhow::Result<JobBuilder> {
+    pub fn add_init_container(mut self, container_like: Box<dyn ContainerLike>) -> anyhow::Result<WorkflowStepBuilder> {
         self.add_container_volumes(&container_like)?;
         self.init_containers.push(container_like);
 
         Ok(self)
     }
 
-    pub fn add_image_pull_secret_name(mut self, image_pull_secret_name: &str) -> JobBuilder {
+    pub fn add_image_pull_secret_name(mut self, image_pull_secret_name: &str) -> WorkflowStepBuilder {
         self.image_pull_secret_names.push(image_pull_secret_name.to_owned());
         self
     }
 
-    pub fn set_image_pull_secret_names(mut self, image_pull_secret_names: Vec<String>)  -> JobBuilder {
+    pub fn set_image_pull_secret_names(mut self, image_pull_secret_names: Vec<String>)  -> WorkflowStepBuilder {
         self.image_pull_secret_names = image_pull_secret_names;
         self
     }
@@ -87,7 +87,9 @@ impl JobBuilder{
     fn add_container_volumes(&mut self, container_like: &Box<dyn ContainerLike>) -> Result<(), anyhow::Error> {
         self.add_container_volume_likes(container_like)?;
 
-        let pvc_templates = container_like.get_pvcs()?;
+        let pvc_templates =
+            container_like
+                .get_pvcs()?;
 
         self.add_container_pvc_templates(pvc_templates);
 
@@ -106,6 +108,7 @@ impl JobBuilder{
     
     fn add_container_volume_likes(&mut self, container_like: &Box<dyn ContainerLike>) -> Result<(), anyhow::Error> {
         let container_volumes = container_like.get_volumes()?;
+
         Ok(for container_volume in container_volumes.iter() {
             if self.volumes.contains(container_volume) {
                 continue
@@ -113,9 +116,9 @@ impl JobBuilder{
                 self.volumes.push(container_volume.clone());
             }
         })
-            }
+    }
     
-    pub fn set_num_replicas(mut self, num_replicas: i32) -> JobBuilder {
+    pub fn set_num_replicas(mut self, num_replicas: i32) -> WorkflowStepBuilder {
         self.num_replicas = Some(num_replicas);
         self
     }
@@ -138,7 +141,7 @@ impl JobBuilder{
 }
 
 pub fn extract_container_list(containers: &Vec<Box<dyn ContainerLike>>) -> Vec<Container>{
-    containers.iter().map(|container_line|{
+    containers.iter().rev().map(|container_line|{
         let container = container_line.into_container()?;
         anyhow::Ok(container.to_owned())
     }).filter_map(|container_result| {

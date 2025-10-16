@@ -8,16 +8,15 @@ pub async fn main() -> anyhow::Result<()>{
 
     let suceed_name = "suceed-job";
     let namespace = "staging";
-    let dry_run = false;
     
     let maestro_client = MaestroK8sClient::new().await?;
     
     let test_job_input = create_job(suceed_name, &namespace);
 
-    let suceed_job = maestro_client.create_job(&test_job_input, namespace, dry_run).await?;
-    suceed_job.wait().await?;
-    suceed_job.delete_associated_pods().await?;
-    suceed_job.delete_job(dry_run).await?;
+    let succeed_job = maestro_client.create_job(&test_job_input).await?;
+    succeed_job.wait().await?;
+    succeed_job.delete_associated_pods().await?;
+    succeed_job.delete().await?;
     
     Ok(())
 }

@@ -5,21 +5,21 @@ use k8s_openapi::{
 };
 use kube::api::ObjectMeta;
 
-use crate::entities::{job::{JobBuilder, JobNameType}, job_builder::extract_container_list};
+use crate::entities::{job::{WorkflowStepBuilder, WorkflowNameType}, job_builder::extract_container_list};
 
 pub trait BuildSatatefulSet {
     fn build_stateful_set(self) -> anyhow::Result<StatefulSet>;
 }
 
-impl BuildSatatefulSet for JobBuilder {
+impl BuildSatatefulSet for WorkflowStepBuilder {
     fn build_stateful_set(self) -> anyhow::Result<StatefulSet> {
         let stateful_set_meta = match self.name {
-            JobNameType::DefinedName(define_name) => ObjectMeta{
+            WorkflowNameType::DefinedName(define_name) => ObjectMeta{
                 name: Some(define_name.to_string()),
                 namespace: Some(self.namespace.to_owned()),
                 ..ObjectMeta::default()
             },
-            JobNameType::GenerateName(generate_name) => ObjectMeta{
+            WorkflowNameType::GenerateName(generate_name) => ObjectMeta{
                 generate_name: Some(generate_name.to_string()),
                 namespace: Some(self.namespace.to_owned()),
                 ..ObjectMeta::default()

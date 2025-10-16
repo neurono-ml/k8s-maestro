@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use k8s_openapi::{api::batch::v1::Job, apimachinery::pkg::api::resource::Quantity};
-use k8s_maestro::{clients::MaestroK8sClient, entities::{builders::BuildJob, container::{ComputeResource, EnvironmentVariableFromObject, EnvironmentVariableSource, MaestroContainer}, job::{JobBuilder, JobNameType, RestartPolicy}}};
+use k8s_maestro::{clients::MaestroK8sClient, entities::{builders::BuildJob, container::{ComputeResource, EnvironmentVariableFromObject, EnvironmentVariableSource, MaestroContainer}, job::{WorkflowStepBuilder, WorkflowNameType, RestartPolicy}}};
 
 
 #[tokio::main(flavor="current_thread")]
@@ -11,21 +11,21 @@ pub async fn main() -> anyhow::Result<()>{
     let job_name = "maestro";
     let namespace = "staging";
     let image = "docker.io/bash:5.2";
-    let dry_run = false;
     
     let maestro_client = MaestroK8sClient::new().await?;
     
     let test_job_input = build_job(&image, &job_name, &namespace)?;
     println!("{}", serde_yml::to_string(&test_job_input)?);
-    let suceed_job = maestro_client.create_job(&test_job_input, namespace, dry_run).await?;
-    suceed_job.wait().await?;
-    suceed_job.delete_job(dry_run).await?;
+    let succeed_job = maestro_client.create_job(&test_job_input).await?;
+    succeed_job.wait().await?;
+    succeed_job.delete_associated_pods().await?;
+    succeed_job.delete().await?;
     
     Ok(())
 }
 
 fn build_job(image: &str, name: &str, namespace: &str) -> anyhow::Result<Job> {
-    let job_name = JobNameType::DefinedName(name.to_owned());
+    let job_name = WorkflowNameType::DefinedName(name.to_owned());
     let container_name = "main";
 
     let environment_from_object =
@@ -53,7 +53,7 @@ fn build_job(image: &str, name: &str, namespace: &str) -> anyhow::Result<Job> {
             .set_resource_bounds(resource_bounds);
 
     let job = 
-        JobBuilder::new(&job_name, namespace)
+        WorkflowStepBuilder::new(&job_name, namespace)
             .set_backoff_limit(4)
             .set_restart_policy(&RestartPolicy::OnFailure)
             .add_container(Box::new(container))?

@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use k8s_openapi::{api::batch::v1::Job, apimachinery::pkg::api::resource::Quantity};
-use k8s_maestro::{clients::MaestroK8sClient, entities::{builders::BuildJob, container::{ComputeResource, ContainerLike, EnvironmentVariableFromObject, EnvironmentVariableSource, MaestroContainer}, job::{JobBuilder, JobNameType, RestartPolicy}, volumes::MaestroPVCMountVolumeBuilder}};
+use k8s_maestro::{clients::MaestroK8sClient, entities::{builders::BuildJob, container::{ComputeResource, ContainerLike, EnvironmentVariableFromObject, EnvironmentVariableSource, MaestroContainer}, job::{WorkflowStepBuilder, WorkflowNameType, RestartPolicy}, volumes::MaestroPVCMountVolumeBuilder}};
 use futures::{pin_mut, StreamExt};
 
 
@@ -12,28 +12,28 @@ pub async fn main() -> anyhow::Result<()>{
     let job_generate_name = "maestro";
     let namespace = "argo";
     let image = "docker.io/bash:5.2";
-    let dry_run = false;
     
     let maestro_client = MaestroK8sClient::new().await?;
     
     let test_job_input = build_job(&image, &job_generate_name, &namespace)?;
     println!("{}", serde_yml::to_string(&test_job_input)?);
-    let suceed_job = maestro_client.create_job(&test_job_input, namespace, dry_run).await?;
+    let succeed_job = maestro_client.create_job(&test_job_input).await?;
 
-    let log_stream = suceed_job.stream_logs(None).await;
+    let log_stream = succeed_job.stream_logs(None).await;
 
     pin_mut!(log_stream);
     while let Some(log_line) = log_stream.next().await.transpose()? {
         println!("{}", log_line.rich_message());
     }
 
-    suceed_job.delete_job(dry_run).await?;
+    succeed_job.delete_associated_pods().await?;
+    succeed_job.delete().await?;
     
     Ok(())
 }
 
 fn build_job(image: &str, generate_name: &str, namespace: &str) -> anyhow::Result<Job> {
-    let job_name = JobNameType::GenerateName(generate_name.to_owned());
+    let job_name = WorkflowNameType::GenerateName(generate_name.to_owned());
     let container_name = "main";
 
     let environment_from_object = vec![EnvironmentVariableFromObject::Secret("s3-storage".into())];
@@ -66,7 +66,7 @@ fn build_job(image: &str, generate_name: &str, namespace: &str) -> anyhow::Resul
             
 
     let job = 
-        JobBuilder::new(&job_name, namespace)
+        WorkflowStepBuilder::new(&job_name, namespace)
             .set_backoff_limit(4)
             .set_restart_policy(&RestartPolicy::OnFailure)
             .add_container(Box::new(container))?

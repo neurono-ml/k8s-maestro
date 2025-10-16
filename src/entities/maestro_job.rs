@@ -9,19 +9,19 @@ use super::{maestro_job_status::MaestroJobStatus, maestro_log::MaestroLogLine};
 
 const POD_PHASE_RUNNING: &str = "RUNNING";
 
-pub struct MaestroJob {
+pub struct MaestroWorkflow {
     client: kube::Client,
     namespace: String,
     name: String,
 }
 
-impl MaestroJob {
-    pub fn new(job: &Job, client: kube::Client) -> MaestroJob {
+impl MaestroWorkflow {
+    pub fn new(job: &Job, client: kube::Client) -> MaestroWorkflow {
         let job_metadata = job.metadata.clone();
         let name = job_metadata.name.unwrap();
         let namespace = job_metadata.namespace.unwrap();
 
-        MaestroJob {
+        MaestroWorkflow {
             client: client.clone(),
             namespace,
             name,
@@ -82,10 +82,10 @@ impl MaestroJob {
 
     /// TODO Implement a way to be sure that delection is competed
     /// TODO the delete job function do not delete the pod created by the job, this should be implemented
-    pub async fn delete_job(&self, dry_run: bool) -> anyhow::Result<()> {
+    pub async fn delete(&self) -> anyhow::Result<()> {
         let jobs_api = Api::<Job>::namespaced(self.client.clone(), &self.namespace);
         let job_name = &self.name;
-        let delete_params = DeleteParams{dry_run, ..DeleteParams::default()};
+        let delete_params = DeleteParams::default();
         
         jobs_api.delete(job_name, &delete_params).await?;
         
@@ -118,9 +118,6 @@ impl MaestroJob {
         stream
     }
 
-    /// TODO: Tratar casos de erro, quando o pod não está disponível por exemplo,
-    /// pensar uma solução para o caso de multiplos pods ou verificar como aguardar
-    /// até que o pod esteja em estado running
     pub async fn stream_logs(&self, timeout: Option<u32>) -> impl Stream<Item = anyhow::Result<MaestroLogLine>>{
         let client = self.client.clone();
         let namespace = self.namespace.clone();

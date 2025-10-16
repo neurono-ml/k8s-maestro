@@ -9,15 +9,14 @@ pub async fn main() -> anyhow::Result<()>{
     let suceed_name = "suceed-job";
     let failing_name = "failing-job";
     let namespace = "staging";
-    let dry_run = false;
     
     let maestro_client = MaestroK8sClient::new().await?;
     
     let test_job_input = make_sleep_job(suceed_name, &namespace);
     let failed_job_input = make_failing_job(failing_name, &namespace);
 
-    let suceed_job = maestro_client.create_job(&test_job_input, namespace, dry_run).await?;
-    let failed_job = maestro_client.create_job(&failed_job_input, namespace, dry_run).await?;
+    let suceed_job = maestro_client.create_job(&test_job_input).await?;
+    let failed_job = maestro_client.create_job(&failed_job_input).await?;
     
     let _ = futures::join!(failed_job.wait(), suceed_job.wait());
     

@@ -1,22 +1,22 @@
 use k8s_openapi::{api::{apps::v1::{ReplicaSet, ReplicaSetSpec}, core::v1::{LocalObjectReference, PodSpec, PodTemplateSpec}}, apimachinery::pkg::apis::meta::v1::LabelSelector};
 use kube::api::ObjectMeta;
 
-use crate::entities::{job::{JobBuilder, JobNameType}, job_builder::extract_container_list};
+use crate::entities::{job::{WorkflowStepBuilder, WorkflowNameType}, job_builder::extract_container_list};
 
 pub trait BuildReplicaSet {
     fn build_replicaset(self) -> anyhow::Result<ReplicaSet>;
 }
 
-impl BuildReplicaSet for JobBuilder {
+impl BuildReplicaSet for WorkflowStepBuilder {
     fn build_replicaset(self) -> anyhow::Result<ReplicaSet> {
     
         let replicaset_metadata = match self.name {
-            JobNameType::DefinedName(defined_name) => ObjectMeta {
+            WorkflowNameType::DefinedName(defined_name) => ObjectMeta {
                 name: Some(defined_name.to_string()),
                 namespace: Some(self.namespace.to_string()),
                 ..ObjectMeta::default()
             },
-            JobNameType::GenerateName(generate_name) => ObjectMeta{
+            WorkflowNameType::GenerateName(generate_name) => ObjectMeta{
                 generate_name: Some(generate_name.to_string()),
                 namespace: Some(self.namespace.to_owned()),
                 ..ObjectMeta::default()

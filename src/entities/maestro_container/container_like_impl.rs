@@ -55,16 +55,7 @@ impl ContainerLike for MaestroContainer {
         Ok(volumes)
     }
 
-    fn get_pvcs(&self) -> anyhow::Result<Vec<PersistentVolumeClaim>> {
-        let mut pvc_templates = Vec::new();
-        for volume_mount_like in self.volume_mounts.iter() {
-            let pvc_template = volume_mount_like.into_pvc()?;
-            pvc_templates.push(pvc_template);
-        }
-
-        Ok(pvc_templates)
-    }
-    
+   
     fn add_volume_mount_like(mut self, volume_mount_like: Box<dyn VolumeMountLike>) -> anyhow::Result<Self> {
         if self.volume_mounts.len() == 0 {
             self.volume_mounts = vec![];
@@ -73,6 +64,20 @@ impl ContainerLike for MaestroContainer {
         self.volume_mounts.push(volume_mount_like);
 
         Ok(self)
+    }
+    
+    fn get_pvcs(&self) -> anyhow::Result<Vec<PersistentVolumeClaim>> {
+        let total_volume_mounts = self.volume_mounts.len();
+        let mut pvcs = Vec::with_capacity(total_volume_mounts);
+
+        for volume_mount in self.volume_mounts.iter() {
+            match volume_mount.get_pvc()? {
+                Some(volume) => pvcs.push(volume),
+                None => continue
+            }
+        }
+            
+        Ok(pvcs)
     }
     
 }
