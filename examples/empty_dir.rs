@@ -1,4 +1,4 @@
-use futures::{pin_mut, StreamExt, TryStreamExt};
+use futures::{pin_mut, TryStreamExt};
 use k8s_openapi::api::batch::v1::Job;
 use k8s_maestro::{clients::MaestroK8sClient, entities::{builders::BuildJob,
     container::{ContainerLike, MaestroContainer}, job::{WorkflowStepBuilder, WorkflowNameType, RestartPolicy},
@@ -29,8 +29,6 @@ pub async fn main() -> anyhow::Result<()>{
 
     
     succeed_job.wait().await?;
-    // succeed_job.delete_associated_pods().await?;
-    // succeed_job.delete().await?;
     
     Ok(())
 }
@@ -40,7 +38,7 @@ fn build_job(image: &str, name: &str, namespace: &str) -> anyhow::Result<Job> {
 
     let empty_dir_volume = MaestroEmptydirMountVolumeBuilder::new("/test", "empty")
         .set_medium(EmptyDirMedium::Memory)
-        .set_size("1Gi")
+        .set_size("1Mi")
         .build();
     
     let main_container =
