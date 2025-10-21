@@ -36,5 +36,8 @@
 				"fill-labs.dependi"
 			]
 		}
-	}
+	},
+	"runArgs": [
+		"--env-file", ".devcontainer/.env"
+	]
 }
