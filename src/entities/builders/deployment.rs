@@ -2,21 +2,21 @@
 use k8s_openapi::{api::{apps::v1::{Deployment, DeploymentSpec}, core::v1::{LocalObjectReference, PodSpec, PodTemplateSpec}}, apimachinery::pkg::apis::meta::v1::LabelSelector};
 use kube::api::ObjectMeta;
 
-use crate::entities::{job::{JobBuilder, JobNameType}, job_builder::extract_container_list};
+use crate::entities::{job::{WorkflowStepBuilder, WorkflowNameType}, job_builder::extract_container_list};
 
 pub trait BuildDeployment {
     fn build_deployment(self) -> anyhow::Result<Deployment>;
 }
 
-impl BuildDeployment for JobBuilder {
+impl BuildDeployment for WorkflowStepBuilder {
     fn build_deployment(self) -> anyhow::Result<Deployment> {
         let deployment_meta = match self.name {
-            JobNameType::DefinedName(define_name) => ObjectMeta{
+            WorkflowNameType::DefinedName(define_name) => ObjectMeta{
                 name: Some(define_name.to_string()),
                 namespace: Some(self.namespace.to_owned()),
                 ..ObjectMeta::default()
             },
-            JobNameType::GenerateName(generate_name) => ObjectMeta{
+            WorkflowNameType::GenerateName(generate_name) => ObjectMeta{
                 generate_name: Some(generate_name.to_string()),
                 namespace: Some(self.namespace.to_owned()),
                 ..ObjectMeta::default()

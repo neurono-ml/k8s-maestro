@@ -7,10 +7,15 @@ use crate::entities::{compute_resource::ComputeResource, container::EnvironmentV
 use super::{image_pull_policy::ImagePullPolicy, MaestroContainer};
 
 impl MaestroContainer {
-    pub fn new(image: &str, name: &str) -> MaestroContainer {
+    pub fn new<I, N>(image: I, name: N) -> MaestroContainer
+    
+    where
+        I: Into<String>,
+        N: Into<String>
+    {
         MaestroContainer {
-            name: name.to_owned(),
-            image: image.to_owned(),
+            name: name.into(),
+            image: image.into(),
             ..MaestroContainer::default()
         }
     }

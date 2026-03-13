@@ -1,7 +1,7 @@
 mod label_operator;
 pub mod builders;
 mod maestro_log;
-mod job_name_type;
+mod workflow_name_type;
 mod restart_policy;
 mod container_like;
 mod job_builder;
@@ -22,11 +22,11 @@ pub mod log {
 pub mod volumes;
 
 pub mod job {
-    pub use super::job_name_type::JobNameType;
+    pub use super::workflow_name_type::WorkflowNameType;
     pub use super::restart_policy::RestartPolicy;
-    pub use super::job_builder::JobBuilder;
+    pub use super::job_builder::WorkflowStepBuilder;
     pub use super::maestro_job_status::MaestroJobStatus;
-    pub use super::maestro_job::MaestroJob;
+    pub use super::maestro_job::MaestroWorkflow;
 }
 
 pub mod container {

@@ -1,7 +1,7 @@
 use k8s_openapi::api::core::v1::{PersistentVolumeClaim, PersistentVolumeClaimSpec, ResourceRequirements, VolumeMount};
 use kube::api::ObjectMeta;
 
-use crate::entities::volumes::{volume_mount_like::VolumeMountLike, VolumeLike};
+use crate::entities::volumes::{volume_mount_like::VolumeMountLike, PVCVolumeMountLike, VolumeLike};
 
 use super::volume::MaestroPVCMountVolume;
 
@@ -30,8 +30,12 @@ impl VolumeMountLike for MaestroPVCMountVolume {
     fn volume_like(&self) -> anyhow::Result<Box<dyn VolumeLike>> {
         Ok(Box::new(self.clone()))
     }
-    
-    fn into_pvc(&self) -> anyhow::Result<PersistentVolumeClaim> {
+
+}
+
+
+impl PVCVolumeMountLike for MaestroPVCMountVolume {
+    fn try_into_pvc(&self) -> anyhow::Result<PersistentVolumeClaim> {
         let pvc_spec_resources = ResourceRequirements{
             limits: Some(self.pvc_resource_limits.to_owned()),
             requests: Some(self.pvc_resource_requests.to_owned()),
