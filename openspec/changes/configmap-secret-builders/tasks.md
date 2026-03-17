@@ -79,4 +79,4 @@
 - [ ] 9.2 Create example for ConfigMapBuilder usage
 - [ ] 9.3 Create example for SecretBuilder usage
 - [ ] 9.4 Create example for ImagePullSecretBuilder usage
-- [ ] 9.5 Update CHANGELOG.md with new features
+- [x] 9.5 Update CHANGELOG.md with new features
