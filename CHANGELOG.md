@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### MaestroClient with Builder Pattern
+- `MaestroClient` with builder pattern for configuring Kubernetes workflow client
+- `MaestroClientBuilder` with fluent API for client construction
+- Centralized configuration including `dry_run`, namespace, timeouts, logging, and resource limits
+- `CreatedWorkflow` enum wrapping workflows in dry run or runtime mode
+- Workflow management API: `create_workflow()`, `get_workflow()`, `list_workflows()`
+- `WorkflowLike` trait for common workflow interface
+- Complete documentation with examples for all public APIs
+- Unit tests covering builder pattern, client configuration, and workflow operations
+
 #### Test Infrastructure
 - Comprehensive test infrastructure with three-tier organization (unit, integration, E2E)
 - Kind cluster lifecycle management using testcontainers
