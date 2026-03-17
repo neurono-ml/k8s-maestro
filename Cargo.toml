@@ -31,6 +31,7 @@ uuid = { version = "1.10", features = ["v4", "serde"] }
 tokio = { version = "1", default-features = false, features = ["macros", "rt", "rt-multi-thread", "time"] }
 chrono = { version = "0.4", features = ["serde"] }
 reqwest = { version = "0.12", features = ["json"] }
+base64 = "0.22"
 
 [features]
 k8s-openapi = []

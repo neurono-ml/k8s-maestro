@@ -1,21 +1,21 @@
 ## 1. Module Structure
 
-- [ ] 1.1 Create `src/entities/config/mod.rs` with public re-exports
-- [ ] 1.2 Create `src/entities/config/configmap.rs` with ConfigMapBuilder struct
-- [ ] 1.3 Create `src/entities/config/secret.rs` with SecretBuilder and SecretType
-- [ ] 1.4 Create `src/entities/config/image_pull_secret.rs` with ImagePullSecretBuilder
-- [ ] 1.5 Update `src/entities/mod.rs` to export config module
+- [x] 1.1 Create `src/entities/config/mod.rs` with public re-exports
+- [x] 1.2 Create `src/entities/config/configmap.rs` with ConfigMapBuilder struct
+- [x] 1.3 Create `src/entities/config/secret.rs` with SecretBuilder and SecretType
+- [x] 1.4 Create `src/entities/config/image_pull_secret.rs` with ImagePullSecretBuilder
+- [x] 1.5 Update `src/entities/mod.rs` to export config module
 
 ## 2. ConfigMapBuilder Implementation
 
-- [ ] 2.1 Implement `ConfigMapBuilder::new(name)` constructor
-- [ ] 2.2 Implement `with_namespace(namespace)` method
-- [ ] 2.3 Implement `with_data(key, value)` method for string data
-- [ ] 2.4 Implement `with_binary_data(key, bytes)` method for binary data
-- [ ] 2.5 Implement `with_labels(labels)` method
-- [ ] 2.6 Implement `with_annotations(annotations)` method
-- [ ] 2.7 Implement `with_immutable(immutable)` method
-- [ ] 2.8 Implement `build()` method returning `Result<ConfigMap>`
+- [x] 2.1 Implement `ConfigMapBuilder::new(name)` constructor
+- [x] 2.2 Implement `with_namespace(namespace)` method
+- [x] 2.3 Implement `with_data(key, value)` method for string data
+- [x] 2.4 Implement `with_binary_data(key, bytes)` method for binary data
+- [x] 2.5 Implement `with_labels(labels)` method
+- [x] 2.6 Implement `with_annotations(annotations)` method
+- [x] 2.7 Implement `with_immutable(immutable)` method
+- [x] 2.8 Implement `build()` method returning `Result<ConfigMap>`
 
 ## 3. ConfigMap Helper Functions
 
@@ -24,17 +24,17 @@
 
 ## 4. SecretBuilder Implementation
 
-- [ ] 4.1 Implement `SecretType` enum with all Kubernetes secret types
-- [ ] 4.2 Implement `Display` trait for `SecretType`
-- [ ] 4.3 Implement `SecretBuilder::new(name)` constructor
-- [ ] 4.4 Implement `with_namespace(namespace)` method
-- [ ] 4.5 Implement `with_type(type)` method
-- [ ] 4.6 Implement `with_string_data(key, value)` method
-- [ ] 4.7 Implement `with_data(key, bytes)` method for binary data
-- [ ] 4.8 Implement `with_labels(labels)` method
-- [ ] 4.9 Implement `with_annotations(annotations)` method
-- [ ] 4.10 Implement `with_immutable(immutable)` method
-- [ ] 4.11 Implement `build()` method returning `Result<Secret>`
+- [x] 4.1 Implement `SecretType` enum with all Kubernetes secret types
+- [x] 4.2 Implement `Display` trait for `SecretType`
+- [x] 4.3 Implement `SecretBuilder::new(name)` constructor
+- [x] 4.4 Implement `with_namespace(namespace)` method
+- [x] 4.5 Implement `with_type(type)` method
+- [x] 4.6 Implement `with_string_data(key, value)` method
+- [x] 4.7 Implement `with_data(key, bytes)` method for binary data
+- [x] 4.8 Implement `with_labels(labels)` method
+- [x] 4.9 Implement `with_annotations(annotations)` method
+- [x] 4.10 Implement `with_immutable(immutable)` method
+- [x] 4.11 Implement `build()` method returning `Result<Secret>`
 
 ## 5. Secret Helper Functions
 
@@ -44,12 +44,12 @@
 
 ## 6. ImagePullSecretBuilder Implementation
 
-- [ ] 6.1 Implement `ImagePullSecretBuilder::new(name)` constructor
-- [ ] 6.2 Implement `with_registry(registry)` method
-- [ ] 6.3 Implement `with_username(username)` method
-- [ ] 6.4 Implement `with_password(password)` method
-- [ ] 6.5 Implement `with_email(email)` method
-- [ ] 6.6 Implement `build()` method with validation and `Result<Secret>`
+- [x] 6.1 Implement `ImagePullSecretBuilder::new(name)` constructor
+- [x] 6.2 Implement `with_registry(registry)` method
+- [x] 6.3 Implement `with_username(username)` method
+- [x] 6.4 Implement `with_password(password)` method
+- [x] 6.5 Implement `with_email(email)` method
+- [x] 6.6 Implement `build()` method with validation and `Result<Secret>`
 
 ## 7. Unit Tests
 
@@ -75,7 +75,7 @@
 
 ## 9. Documentation and Examples
 
-- [ ] 9.1 Add rustdoc comments to all public types and methods
+- [x] 9.1 Add rustdoc comments to all public types and methods
 - [ ] 9.2 Create example for ConfigMapBuilder usage
 - [ ] 9.3 Create example for SecretBuilder usage
 - [ ] 9.4 Create example for ImagePullSecretBuilder usage
