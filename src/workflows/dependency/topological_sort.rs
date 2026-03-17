@@ -29,10 +29,10 @@ pub fn topological_sort(graph: &super::dag::DependencyGraph) -> anyhow::Result<V
     let mut levels = Vec::new();
 
     while !queue.is_empty() {
-        let current_level = std::mem::take(&mut queue);
-        levels.push(current_level.clone());
+        let level_nodes: Vec<String> = queue.drain(..).collect();
+        levels.push(level_nodes.clone());
 
-        for node in current_level {
+        for node in level_nodes {
             if let Some(neighbors) = adjacency.get(&node) {
                 for neighbor in neighbors {
                     if let Some(degree) = in_degree.get_mut(neighbor) {
@@ -47,7 +47,9 @@ pub fn topological_sort(graph: &super::dag::DependencyGraph) -> anyhow::Result<V
     }
 
     if levels.iter().flatten().count() != graph.nodes.len() {
-        return Err(anyhow::anyhow!("Graph has cycles, cannot perform topological sort"));
+        return Err(anyhow::anyhow!(
+            "Graph has cycles, cannot perform topological sort"
+        ));
     }
 
     Ok(levels)
@@ -58,10 +60,11 @@ pub fn detect_cycles(graph: &super::dag::DependencyGraph) -> anyhow::Result<()> 
     let mut rec_stack = HashSet::new();
 
     for node in &graph.nodes {
-        if !visited.contains(node) {
-            if dfs_cycle_detect(graph, node, &mut visited, &mut rec_stack)? {
-                return Err(anyhow::anyhow!("Graph contains a cycle involving node: {}", node));
-            }
+        if !visited.contains(node) && dfs_cycle_detect(graph, node, &mut visited, &mut rec_stack)? {
+            return Err(anyhow::anyhow!(
+                "Graph contains a cycle involving node: {}",
+                node
+            ));
         }
     }
 
@@ -102,7 +105,10 @@ fn dfs_cycle_detect(
 mod tests {
     use super::*;
 
-    fn create_graph(nodes: Vec<&str>, edges: Vec<(&str, &str)>) -> super::super::dag::DependencyGraph {
+    fn create_graph(
+        nodes: Vec<&str>,
+        edges: Vec<(&str, &str)>,
+    ) -> super::super::dag::DependencyGraph {
         super::super::dag::DependencyGraph {
             nodes: nodes.into_iter().map(String::from).collect(),
             edges: edges
@@ -133,7 +139,10 @@ mod tests {
 
     #[test]
     fn test_cycle_detection_simple_cycle() {
-        let graph = create_graph(vec!["A", "B", "C"], vec![("A", "B"), ("B", "C"), ("C", "A")]);
+        let graph = create_graph(
+            vec!["A", "B", "C"],
+            vec![("A", "B"), ("B", "C"), ("C", "A")],
+        );
         assert!(detect_cycles(&graph).is_err());
     }
 

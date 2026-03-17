@@ -1,13 +1,11 @@
 use std::collections::BTreeMap;
-use std::sync::Arc;
 
-use super::topological_sort;
-use crate::steps::result::StepResult;
 use super::condition::ConditionFn;
+use super::topological_sort;
 
 pub type StepId = String;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct DependencyInfo {
     pub step_id: StepId,
     pub depends_on: Vec<StepId>,
@@ -15,7 +13,7 @@ pub struct DependencyInfo {
     pub condition: Option<ConditionFn>,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct DependencyGraph {
     pub nodes: Vec<StepId>,
     pub edges: Vec<(StepId, StepId)>,
@@ -50,6 +48,10 @@ impl DependencyGraph {
 
     pub fn topological_sort(&self) -> anyhow::Result<Vec<Vec<StepId>>> {
         topological_sort::topological_sort(self)
+    }
+
+    pub fn get_execution_levels(&self) -> anyhow::Result<Vec<Vec<StepId>>> {
+        self.topological_sort()
     }
 
     pub fn detect_cycles(&self) -> anyhow::Result<()> {
@@ -115,5 +117,40 @@ mod tests {
     fn test_cycle_detection_no_cycle() {
         let graph = create_graph_from_edges(vec!["A", "B", "C"], vec![("A", "B"), ("B", "C")]);
         assert!(graph.detect_cycles().is_ok());
+    }
+
+    #[test]
+    fn test_diamond_pattern() {
+        let graph = create_graph_from_edges(
+            vec!["A", "B", "C", "D"],
+            vec![("A", "B"), ("A", "C"), ("B", "D"), ("C", "D")],
+        );
+        let levels = graph.topological_sort().unwrap();
+        assert_eq!(levels.len(), 3);
+        assert_eq!(levels[0].len(), 1);
+        assert_eq!(levels[1].len(), 2);
+        assert_eq!(levels[2].len(), 1);
+    }
+
+    #[test]
+    fn test_parallel_starts() {
+        let graph = create_graph_from_edges(vec!["A", "B", "C"], vec![]);
+        let levels = graph.topological_sort().unwrap();
+        assert_eq!(levels.len(), 1);
+        assert_eq!(levels[0].len(), 3);
+    }
+
+    #[test]
+    fn test_disconnected_graphs() {
+        let graph = create_graph_from_edges(vec!["A", "B", "C", "D"], vec![("A", "B"), ("C", "D")]);
+        let levels = graph.topological_sort().unwrap();
+        assert_eq!(levels.len(), 2);
+    }
+
+    #[test]
+    fn test_get_execution_levels() {
+        let graph = create_graph_from_edges(vec!["A", "B", "C"], vec![("A", "B"), ("B", "C")]);
+        let levels = graph.get_execution_levels().unwrap();
+        assert_eq!(levels, vec![vec!["A"], vec!["B"], vec!["C"]]);
     }
 }

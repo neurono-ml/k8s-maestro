@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Checkpointing System
+- SQLite-based checkpoint storage with StatefulSet persistence
+- `CheckpointStorage` plugin trait for extensible storage backends
+- `Checkpoint` and `StepCheckpoint` data structures with serde support
+- `CheckpointConfig` with multiple frequency options (OnStepCompletion, OnSuccess, Periodic)
+- `CheckpointStore` with automatic retry logic and exponential backoff
+- StatefulSet lifecycle management (create, update, delete)
+- Cleanup manager with retention policies (age-based and count-based)
+- Configuration support for multiple storage backends (SQLite, Etcd, Redis, Postgres)
+- 143 comprehensive unit tests for all checkpointing operations
+- Complete documentation with usage examples
+
 #### Dependency Chain System
 - `DependencyChain` builder for constructing dependency graphs with fluent API
 - `DependencyGraph` for managing workflow step dependencies

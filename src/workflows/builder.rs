@@ -1,14 +1,14 @@
 use crate::steps::traits::{ResourceLimits, WorkFlowStep};
 use anyhow::Result;
 
-use super::{CheckpointConfig, ExecutionMode, Workflow, WorkflowMetadata};
+use super::{ExecutionMode, LegacyCheckpointConfig, Workflow, WorkflowMetadata};
 
 pub struct WorkflowBuilder {
     name: Option<String>,
     namespace: Option<String>,
     steps: Vec<Box<dyn WorkFlowStep>>,
     resource_limits: Option<ResourceLimits>,
-    checkpoint_config: Option<CheckpointConfig>,
+    checkpoint_config: Option<LegacyCheckpointConfig>,
     metadata: WorkflowMetadata,
     parallelism: usize,
     execution_mode: ExecutionMode,
@@ -66,7 +66,7 @@ impl WorkflowBuilder {
         self
     }
 
-    pub fn with_checkpointing(mut self, config: CheckpointConfig) -> Self {
+    pub fn with_checkpointing(mut self, config: LegacyCheckpointConfig) -> Self {
         self.checkpoint_config = Some(config);
         self
     }
@@ -207,9 +207,11 @@ mod tests {
 
     #[test]
     fn test_builder_with_checkpointing() {
-        use super::super::CheckpointConfig;
+        use super::super::LegacyCheckpointConfig;
 
-        let config = CheckpointConfig::new().enabled(true).with_interval_secs(60);
+        let config = LegacyCheckpointConfig::new()
+            .enabled(true)
+            .with_interval_secs(60);
 
         let builder = WorkflowBuilder::new().with_checkpointing(config);
         assert!(builder.checkpoint_config.is_some());
@@ -316,7 +318,7 @@ mod tests {
     fn test_builder_fluent_api() {
         let limits = ResourceLimits::new().with_cpu("1000m").with_memory("1Gi");
 
-        let checkpoint = super::super::CheckpointConfig::new()
+        let checkpoint = super::super::LegacyCheckpointConfig::new()
             .enabled(true)
             .with_interval_secs(60);
 

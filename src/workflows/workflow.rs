@@ -34,15 +34,15 @@ impl Default for ExecutionMode {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct CheckpointConfig {
+#[derive(Debug, Clone, PartialEq)]
+pub struct LegacyCheckpointConfig {
     pub enabled: bool,
     pub checkpoint_interval_secs: u64,
     pub retention_count: usize,
     pub storage_path: Option<String>,
 }
 
-impl Default for CheckpointConfig {
+impl Default for LegacyCheckpointConfig {
     fn default() -> Self {
         Self {
             enabled: false,
@@ -53,7 +53,7 @@ impl Default for CheckpointConfig {
     }
 }
 
-impl CheckpointConfig {
+impl LegacyCheckpointConfig {
     pub fn new() -> Self {
         Self::default()
     }
@@ -85,7 +85,7 @@ pub struct Workflow {
     pub namespace: String,
     pub steps: Vec<Box<dyn WorkFlowStep>>,
     pub resource_limits: Option<ResourceLimits>,
-    pub checkpoint_config: Option<CheckpointConfig>,
+    pub checkpoint_config: Option<LegacyCheckpointConfig>,
     pub metadata: WorkflowMetadata,
     pub parallelism: usize,
     pub execution_mode: ExecutionMode,
@@ -235,7 +235,7 @@ mod tests {
 
     #[test]
     fn test_checkpoint_config_default() {
-        let config = CheckpointConfig::default();
+        let config = LegacyCheckpointConfig::default();
         assert!(!config.enabled);
         assert_eq!(config.checkpoint_interval_secs, 300);
         assert_eq!(config.retention_count, 10);
@@ -244,7 +244,7 @@ mod tests {
 
     #[test]
     fn test_checkpoint_config_builder() {
-        let config = CheckpointConfig::new()
+        let config = LegacyCheckpointConfig::new()
             .enabled(true)
             .with_interval_secs(120)
             .with_retention_count(20)
@@ -539,7 +539,7 @@ mod tests {
     fn test_workflow_with_all_configurations() {
         let limits = ResourceLimits::new().with_cpu("2000m").with_memory("2Gi");
 
-        let checkpoint = CheckpointConfig::new()
+        let checkpoint = LegacyCheckpointConfig::new()
             .enabled(true)
             .with_interval_secs(60)
             .with_retention_count(5);
