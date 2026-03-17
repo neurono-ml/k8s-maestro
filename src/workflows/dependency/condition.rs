@@ -33,16 +33,13 @@ impl ConditionBuilder {
         let key = key.to_string();
         Arc::new(move |deps| {
             deps.iter()
-                .any(|r| r.get_output_value(&key).and_then(|v| v.as_i64()).unwrap_or(0) > threshold)
+                .any(|r| r.get_output(&key).and_then(|v| v.as_i64()).unwrap_or(0) > threshold)
         })
     }
 
     pub fn output_equals(key: &str, value: serde_json::Value) -> ConditionFn {
         let key = key.to_string();
-        Arc::new(move |deps| {
-            deps.iter()
-                .any(|r| r.get_output_value(&key).map_or(false, |v| v == &value))
-        })
+        Arc::new(move |deps| deps.iter().any(|r| r.get_output(&key) == Some(&value)))
     }
 
     pub fn exit_code_equals(code: i32) -> ConditionFn {
@@ -73,6 +70,10 @@ impl ConditionBuilder {
 impl StepResult {
     pub fn get_output_value(&self, key: &str) -> Option<&serde_json::Value> {
         self.outputs.get(key)
+    }
+
+    pub fn get_output(&self, key: &str) -> Option<&serde_json::Value> {
+        self.get_output_value(key)
     }
 }
 
