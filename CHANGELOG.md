@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### ConfigMap and Secret Builders
+- `ConfigMapBuilder` with fluent API for building Kubernetes ConfigMaps
+- Support for string data, binary data, labels, annotations, and immutable ConfigMaps
+- `SecretBuilder` with fluent API for building Kubernetes Secrets
+- `SecretType` enum for type-safe secret types (Opaque, ServiceAccountToken, Dockercfg, DockerConfigJson, BasicAuth, SshAuth, Tls, BootstrapToken)
+- `ImagePullSecretBuilder` for creating docker-registry type secrets
+- Support for string data, binary data, labels, annotations, and immutable Secrets
+- `ByteString` type conversion for binary data compatibility with k8s-openapi
+- Base64 encoding support for secret data and docker authentication
+- Module structure in `src/entities/config/` with public re-exports
+- Comprehensive rustdoc documentation on all public types and methods
+- Basic unit tests for builder construction and validation
+- Fluent builder pattern consistent with existing codebase patterns
+
 #### Container Infrastructure (MVP)
 - `ComputeResource` type for container resource specifications
 - Support for cpu, memory, and ephemeral_storage resources
