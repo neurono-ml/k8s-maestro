@@ -14,6 +14,7 @@ pub mod steps;
 pub mod workflows;
 
 pub use client::{CreatedWorkflow, MaestroClient, MaestroClientBuilder};
+pub use entities::ComputeResource;
 pub use steps::{StepResult, StepStatus};
 pub use workflows::{
     ExecutionMode, LegacyCheckpointConfig, Workflow, WorkflowBuilder, WorkflowMetadata,

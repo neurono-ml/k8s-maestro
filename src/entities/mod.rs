@@ -1,5 +1,7 @@
 //! Entities module for Kubernetes resource definitions.
 //!
-//! This module will contain entity definitions for Kubernetes resources.
+//! This module contains entity definitions for Kubernetes resources.
 
-// TODO: Implement entity definitions
+pub mod container;
+
+pub use container::ComputeResource;
