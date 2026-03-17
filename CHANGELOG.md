@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Container Infrastructure (MVP)
+- `ComputeResource` type for container resource specifications
+- Support for cpu, memory, and ephemeral_storage resources
+- `AsRef<str>` trait implementation for string conversion
+- Foundation for container builder pattern (full implementation in future PR)
+- Export from entities module
+- Simplified MVP implementation
+
 #### Checkpointing System
 - SQLite-based checkpoint storage with StatefulSet persistence
 - `CheckpointStorage` plugin trait for extensible storage backends
