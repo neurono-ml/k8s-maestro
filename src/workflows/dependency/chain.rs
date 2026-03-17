@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
-use super::condition::{ConditionBuilder, ConditionFn};
+use super::condition::ConditionFn;
 use super::dag::{DependencyGraph, DependencyInfo};
 
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct DependencyChain {
     steps: Vec<DependencyInfo>,
 }
@@ -95,7 +95,7 @@ impl DependencyChain {
         self
     }
 
-    pub fn build_dag(self) -> DependencyGraph {
+    pub fn build_dag(self) -> anyhow::Result<DependencyGraph> {
         let mut graph = DependencyGraph::new();
 
         for step_info in &self.steps {
@@ -114,7 +114,9 @@ impl DependencyChain {
             }
         }
 
-        graph
+        graph.detect_cycles()?;
+
+        Ok(graph)
     }
 
     pub fn len(&self) -> usize {
@@ -166,7 +168,8 @@ mod tests {
     fn test_with_conditional_dependency() {
         let mut chain = DependencyChain::new();
         chain.add_step("A");
-        chain.add_step("B")
+        chain
+            .add_step("B")
             .with_conditional_dependency("A", |deps| deps.iter().all(|r| r.is_success()));
 
         let step = chain.get_step(1).unwrap();
@@ -198,7 +201,7 @@ mod tests {
         chain.add_step("B").with_dependency("A");
         chain.add_step("C").with_dependency("B");
 
-        let graph = chain.clone().build_dag();
+        let graph = chain.clone().build_dag().unwrap();
         assert_eq!(graph.nodes.len(), 3);
         assert_eq!(graph.edges.len(), 2);
     }
@@ -210,7 +213,7 @@ mod tests {
         chain.add_step("B").with_dependency("A");
         chain.add_step("C").with_dependency("B");
 
-        let graph = chain.clone().build_dag();
+        let graph = chain.clone().build_dag().unwrap();
         let levels = graph.topological_sort().unwrap();
         assert_eq!(levels, vec![vec!["A"], vec!["B"], vec!["C"]]);
     }
@@ -219,7 +222,7 @@ mod tests {
     fn test_chain_single_step() {
         let mut chain = DependencyChain::new();
         chain.add_step("A");
-        let graph = chain.clone().build_dag();
+        let graph = chain.clone().build_dag().unwrap();
         assert_eq!(graph.nodes.len(), 1);
         assert_eq!(graph.edges.len(), 0);
     }
