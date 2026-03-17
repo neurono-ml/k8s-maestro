@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Dependency Chain System
+- `DependencyChain` builder for constructing dependency graphs with fluent API
+- `DependencyGraph` for managing workflow step dependencies
+- `ConditionBuilder` with predefined conditions: all_success, any_success, all_failure, any_failure
+- Conditional execution based on step results using closures
+- `depends_on_any` for any-of dependency semantics
+- Topological sort using Kahn's algorithm
+- Cycle detection during DAG construction
+- Parallel execution level computation
+- Diamond pattern, parallel starts, and disconnected graphs support
+- Complete unit tests for all dependency scenarios
+
 #### MaestroClient with Builder Pattern
 - `MaestroClient` with builder pattern for configuring Kubernetes workflow client
 - `MaestroClientBuilder` with fluent API for client construction
