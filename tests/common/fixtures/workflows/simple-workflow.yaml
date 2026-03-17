@@ -1,0 +1,18 @@
+# Sample workflow fixture for testing
+# This represents a simple two-step workflow
+
+apiVersion: maestro.k8s.io/v1
+kind: Workflow
+metadata:
+  name: sample-workflow
+  namespace: default
+spec:
+  steps:
+    - name: step-one
+      image: busybox:latest
+      command: ["echo", "Hello from step one"]
+    - name: step-two
+      image: busybox:latest
+      command: ["echo", "Hello from step two"]
+      dependsOn:
+        - step-one

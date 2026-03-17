@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "changelog-generator": {
+      "source": "decebals/claude-code-java",
+      "sourceType": "github",
+      "computedHash": "ae7f884ec04f19c3f47ea5f51a976ed3062aadccf361a50a87106e8c038bc46f"
+    },
+    "kind-testcontainers-skill": {
+      "source": "neurono-ml/kind-testcontainers-skill",
+      "sourceType": "github",
+      "computedHash": "977a922c768b9fe19a5116d19391ba9554ae3bbd17d7b26d16ad7519d2bee0ef"
+    }
+  }
+}

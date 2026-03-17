@@ -22,8 +22,10 @@ kube = { version = "0.99", default-features = false, features = ["runtime", "der
 
 async-stream = "0.3.4"
 serde = { version = "1.0.198", features = ["serde_derive", "derive"] }
+serde_json = "1.0"
 dyn-clone = "1.0.17"
 futures = "0.3.31"
+uuid = { version = "1.10", features = ["v4", "serde"] }
 
 [features]
 k8s-openapi = []
@@ -38,8 +40,10 @@ k8s_v1_32 = ["k8s-openapi/v1_32", "k8s-openapi", "kube"]
 default = ["k8s_v1_28"]
 
 [dev-dependencies]
-tokio = { version = "1", default-features=false, features = ["macros", "rt"] }
+tokio = { version = "1", default-features=false, features = ["macros", "rt", "rt-multi-thread"] }
 serde_yml = "0.0.12"
 env_logger = "0.11"
-
-k8s-openapi = { version = "0.24", features = ["v1_31"]}
+testcontainers = "0.27"
+mockall = "0.14"
+tokio-test = "0.4"
+base64 = "0.22"

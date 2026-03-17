@@ -1,0 +1,17 @@
+# Sample failure scenario fixture for testing
+# This represents a job that will fail
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: failing-job
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+        - name: failing-container
+          image: busybox:latest
+          command: ["/bin/sh", "-c", "exit 1"]
+      restartPolicy: Never
+  backoffLimit: 0
