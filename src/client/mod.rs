@@ -1,5 +1,10 @@
 //! Client module for Kubernetes API interactions.
 //!
-//! This module will contain implementations for Kubernetes client operations.
+//! This module provides the MaestroClient and MaestroClientBuilder for managing
+//! Kubernetes workflows with a fluent builder pattern and centralized configuration.
 
-// TODO: Implement client functionality
+mod builder;
+mod maestro_client;
+
+pub use builder::MaestroClientBuilder;
+pub use maestro_client::{CreatedWorkflow, MaestroClient};

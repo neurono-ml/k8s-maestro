@@ -13,5 +13,6 @@ pub mod security;
 pub mod steps;
 pub mod workflows;
 
+pub use client::{CreatedWorkflow, MaestroClient, MaestroClientBuilder};
 pub use steps::{StepResult, StepStatus};
 pub use workflows::{CheckpointConfig, ExecutionMode, Workflow, WorkflowBuilder, WorkflowMetadata};
