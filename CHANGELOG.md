@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Multi-Language Execution Steps (MVP)
+- `PythonStep` for executing Python code in Kubernetes Pods
+- `PythonStepBuilder` with fluent API for Python step configuration
+- `PackageSource` enum supporting Git, RemotePath, LocalPath, and Registry sources
+- `PackageLoader` for loading packages from multiple sources with caching
+- `PackageCache` with SHA-256 based cache key generation
+- Support for Python requirements.txt and pip package installation
+- ConfigMap-based code injection for inline scripts
+- Resource limits support (CPU, memory, requests)
+- Volume mounts support for data access
+- Environment variables support
+- Pod spec generation with python:3.12-slim image
+- Trait implementations: `WorkFlowStep`, `ExecutableWorkFlowStep`, `WaitableWorkFlowStep`, `DeletableWorkFlowStep`, `LoggableWorkFlowStep`
+- Dry run support for all operations
+- Module structure in `src/steps/exec/` with public re-exports
+- Unit tests for package loader and Python step builder
+
 #### Kube Workflow Steps Implementation (MVP)
 - `KubeJobStep` with full Kubernetes Job lifecycle management
 - `KubePodStep` with full Kubernetes Pod lifecycle management

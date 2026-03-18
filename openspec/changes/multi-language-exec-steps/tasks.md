@@ -1,36 +1,36 @@
 ## 1. Module Structure and Dependencies
 
-- [ ] 1.1 Create `src/steps/exec/mod.rs` with module exports
-- [ ] 1.2 Create `src/steps/exec/package_loader.rs` with PackageSource enum
-- [ ] 1.3 Add dependencies to Cargo.toml (git2, reqwest, sha2, tempfile)
-- [ ] 1.4 Update `src/steps/mod.rs` to export exec module
+- [x] 1.1 Create `src/steps/exec/mod.rs` with module exports
+- [x] 1.2 Create `src/steps/exec/package_loader.rs` with PackageSource enum
+- [x] 1.3 Add dependencies to Cargo.toml (git2, reqwest, sha2, tempfile)
+- [x] 1.4 Update `src/steps/mod.rs` to export exec module
 
 ## 2. Package Loader Implementation
 
-- [ ] 2.1 Implement `PackageSource` enum with Git, RemotePath, LocalPath, Registry variants
-- [ ] 2.2 Implement `PackageLoader` struct with load() method
-- [ ] 2.3 Implement `fetch_git()` method for Git repository cloning
-- [ ] 2.4 Implement `fetch_remote()` method for HTTP downloads
-- [ ] 2.5 Implement `validate_local()` method for local path validation
-- [ ] 2.6 Implement `PackageCache` struct with cache key generation (SHA-256)
-- [ ] 2.7 Add unit tests for PackageSource parsing
+- [x] 2.1 Implement `PackageSource` enum with Git, RemotePath, LocalPath, Registry variants
+- [x] 2.2 Implement `PackageLoader` struct with load() method
+- [x] 2.3 Implement `fetch_git()` method for Git repository cloning
+- [x] 2.4 Implement `fetch_remote()` method for HTTP downloads
+- [x] 2.5 Implement `validate_local()` method for local path validation
+- [x] 2.6 Implement `PackageCache` struct with cache key generation (SHA-256)
+- [x] 2.7 Add unit tests for PackageSource parsing
 - [ ] 2.8 Add unit tests for PackageLoader (with mocked network calls)
-- [ ] 2.9 Add unit tests for PackageCache operations
+- [x] 2.9 Add unit tests for PackageCache operations
 
 ## 3. Python Execution Step
 
-- [ ] 3.1 Create `src/steps/exec/python.rs` module
-- [ ] 3.2 Implement `PythonStep` struct with all required fields
-- [ ] 3.3 Implement `PythonStepBuilder` with fluent API
-- [ ] 3.4 Implement `WorkFlowStep` trait for PythonStep
-- [ ] 3.5 Implement `ExecutableWorkFlowStep` trait for PythonStep
-- [ ] 3.6 Implement `WaitableWorkFlowStep` trait for PythonStep
-- [ ] 3.7 Implement `DeletableWorkFlowStep` trait for PythonStep
-- [ ] 3.8 Implement `LoggableWorkFlowStep` trait for PythonStep
-- [ ] 3.9 Implement Pod spec generation with Python image (python:3.12-slim)
-- [ ] 3.10 Implement requirements.txt generation and installation
-- [ ] 3.11 Implement ConfigMap creation for code/scripts
-- [ ] 3.12 Add unit tests for PythonStepBuilder
+- [x] 3.1 Create `src/steps/exec/python.rs` module
+- [x] 3.2 Implement `PythonStep` struct with all required fields
+- [x] 3.3 Implement `PythonStepBuilder` with fluent API
+- [x] 3.4 Implement `WorkFlowStep` trait for PythonStep
+- [x] 3.5 Implement `ExecutableWorkFlowStep` trait for PythonStep
+- [x] 3.6 Implement `WaitableWorkFlowStep` trait for PythonStep
+- [x] 3.7 Implement `DeletableWorkFlowStep` trait for PythonStep
+- [x] 3.8 Implement `LoggableWorkFlowStep` trait for PythonStep
+- [x] 3.9 Implement Pod spec generation with Python image (python:3.12-slim)
+- [x] 3.10 Implement requirements.txt generation and installation
+- [x] 3.11 Implement ConfigMap creation for code/scripts
+- [x] 3.12 Add unit tests for PythonStepBuilder
 - [ ] 3.13 Add unit tests for Pod spec generation
 
 ## 4. Rust Execution Step
