@@ -1,5 +1,4 @@
 use super::SidecarPlugin;
-use crate::steps::traits::KubeWorkFlowStep;
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -45,17 +44,6 @@ impl PluginRegistry {
                 author: String::new(),
             })
             .collect()
-    }
-
-    pub fn install_plugin_to_step(
-        &self,
-        plugin_name: &str,
-        step: &mut impl KubeWorkFlowStep,
-    ) -> anyhow::Result<()> {
-        let plugin = self
-            .get_plugin(plugin_name)
-            .ok_or_else(|| anyhow::anyhow!("Plugin '{}' not registered", plugin_name))?;
-        plugin.install(step)
     }
 
     pub fn unregister_plugin(&mut self, name: &str) -> anyhow::Result<()> {
