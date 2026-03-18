@@ -44,6 +44,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Module structure in `src/steps/exec/` with public re-exports
 - Unit tests for package loader and Python step builder
 
+#### Workflow Execution Orchestrator (MVP)
+- `WorkflowExecution` struct for tracking workflow state and lifecycle
+- `WorkflowStatus` enum (Pending, Running, Succeeded, Failed, Cancelled)
+- `Checkpoint` struct for state serialization
+- `Scheduler` for parallel step execution with semaphore-based rate limiting
+- `FailureStrategy` enum (Stop, Continue) for configurable failure handling
+- `StepExecutor` for executing KubeJob and KubePod step types
+- `WorkflowOrchestrator` for DAG-based workflow execution with dependency resolution
+- Condition evaluation against dependency results using closures
+- Cycle detection before workflow execution
+- Execution loop with level-by-level step execution
+- `wait()`, `cancel()`, `get_status()`, `get_step_result()`, `delete()`, `get_checkpoint()` methods on WorkflowExecution
+- Module structure in `src/workflows/execution/` with public re-exports
+- Integration with existing `DependencyGraph` and `ConditionFn` types
+- Basic unit tests for scheduler components
+- MVP implementation with essential functionality only
+
 #### Kube Workflow Steps Implementation (MVP)
 - `KubeJobStep` with full Kubernetes Job lifecycle management
 - `KubePodStep` with full Kubernetes Pod lifecycle management
