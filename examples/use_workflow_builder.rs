@@ -14,7 +14,7 @@ use k8s_maestro::{
 };
 use k8s_openapi::{
     api::batch::v1::{Job, JobSpec},
-    api::core::v1::{PodTemplateSpec, PodSpec},
+    api::core::v1::{PodSpec, PodTemplateSpec},
     apimachinery::pkg::api::resource::Quantity,
 };
 
@@ -40,7 +40,9 @@ pub async fn main() -> anyhow::Result<()> {
     let jobs_api = kube::Api::<Job>::namespaced(maestro_client.inner().clone(), namespace);
 
     if !dry_run {
-        let created_job = jobs_api.create(&Default::default(), &test_job_input).await?;
+        let created_job = jobs_api
+            .create(&Default::default(), &test_job_input)
+            .await?;
         let job_name = created_job.metadata.name.as_ref().unwrap();
 
         println!("Job {} created, waiting for completion...", job_name);
@@ -78,10 +80,11 @@ fn build_job(image: &str, name: &str) -> anyhow::Result<Job> {
     limits_map.insert("memory".to_string(), Quantity("50M".to_owned()));
 
     println!("Building container with image: {}", image);
-    let maestro_container = MaestroContainer::new(image, container_name)
-        .set_arguments(&["bash".to_owned(),
-            "-c".to_owned(),
-            "echo 'Testing pod'; sleep 3; echo 'Finalizado'".to_owned()]);
+    let maestro_container = MaestroContainer::new(image, container_name).set_arguments(&[
+        "bash".to_owned(),
+        "-c".to_owned(),
+        "echo 'Testing pod'; sleep 3; echo 'Finalizado'".to_owned(),
+    ]);
 
     // Convert MaestroContainer to Kubernetes Container
     let mut container = ContainerLike::as_container(&maestro_container);

@@ -116,15 +116,13 @@ impl RetentionPolicy {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[derive(Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct CheckpointConfig {
     pub enabled: bool,
     pub frequency: CheckpointFrequency,
     pub storage: CheckpointStorageConfig,
     pub retention_policy: RetentionPolicy,
 }
-
 
 impl CheckpointConfig {
     pub fn new() -> Self {

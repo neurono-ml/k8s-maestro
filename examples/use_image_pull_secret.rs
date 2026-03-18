@@ -4,7 +4,7 @@ use k8s_maestro::{
 };
 use k8s_openapi::{
     api::batch::v1::{Job, JobSpec},
-    api::core::v1::{PodTemplateSpec, PodSpec, LocalObjectReference},
+    api::core::v1::{LocalObjectReference, PodSpec, PodTemplateSpec},
 };
 
 const GHCR_IMAGE_PULL_SECRET: &str = "oci-registry";
@@ -41,7 +41,9 @@ pub async fn main() -> anyhow::Result<()> {
     let jobs_api = kube::Api::<Job>::namespaced(maestro_client.inner().clone(), namespace);
 
     if !dry_run {
-        let created_job = jobs_api.create(&Default::default(), &test_job_input).await?;
+        let created_job = jobs_api
+            .create(&Default::default(), &test_job_input)
+            .await?;
         let job_name = created_job.metadata.name.as_ref().unwrap();
 
         println!("Job {} created", job_name);
@@ -81,15 +83,16 @@ pub fn build_job(
 ) -> anyhow::Result<Job> {
     let container_name = "main";
 
-    let maestro_container = MaestroContainer::new(image, container_name)
-        .set_arguments(&["--bucket".to_owned(),
-            bucket.to_owned(),
-            "--prefix".to_owned(),
-            prefix.to_owned(),
-            "--glob-pattern".to_owned(),
-            glob_pattern.to_owned(),
-            "--output-path".to_owned(),
-            output_path.to_owned()]);
+    let maestro_container = MaestroContainer::new(image, container_name).set_arguments(&[
+        "--bucket".to_owned(),
+        bucket.to_owned(),
+        "--prefix".to_owned(),
+        prefix.to_owned(),
+        "--glob-pattern".to_owned(),
+        glob_pattern.to_owned(),
+        "--output-path".to_owned(),
+        output_path.to_owned(),
+    ]);
 
     // Convert MaestroContainer to Kubernetes Container
     let container = ContainerLike::as_container(&maestro_container);
