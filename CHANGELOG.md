@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### File Observer Sidecar (MVP)
+- File event detection system with `FileEvent` enum (Created, Modified, Deleted)
+- `FileMetadata` tracking (filename, path, mime_type, size, timestamps)
+- `FileContent` combining metadata and byte content
+- Memory-only tiered cache with LRU eviction using `lru` crate
+- `MemoryCacheConfig` for cache size, file count, and TTL limits
+- `FileFilter` for pattern matching and size limits
+- `FileObserverBuilder` with fluent API for observer configuration
+- Observer modes support (channel, cache, http_service)
+- HTTP service with axum for file access endpoints:
+  - GET /files/{path} for file content retrieval
+  - GET /files for listing all cached files
+  - GET /files/{path}/metadata for file metadata
+  - HEAD /files/{path} for existence check
+- Sidecar binary with inotify-based file watching using `notify` crate
+- Unit tests for core types
+- Module structure in `src/steps/observers/` with public re-exports
+
 #### Multi-Language Execution Steps (MVP)
 - `PythonStep` for executing Python code in Kubernetes Pods
 - `PythonStepBuilder` with fluent API for Python step configuration
