@@ -56,8 +56,10 @@
 
 pub mod dns;
 pub mod ingress;
+pub mod plugins;
 pub mod service;
 
 pub use dns::{headless_service_dns_pattern, pod_dns_name, service_dns_name};
 pub use ingress::{IngressBuilder, IngressPath, PathType, TLSConfig};
+pub use plugins::{PluginInfo, PluginRegistry, SidecarPlugin};
 pub use service::{ServiceBuilder, ServicePort, ServiceType};

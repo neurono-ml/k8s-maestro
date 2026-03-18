@@ -19,7 +19,8 @@ pub use clients::MaestroK8sClient;
 pub use entities::ComputeResource;
 pub use networking::{
     headless_service_dns_pattern, pod_dns_name, service_dns_name, IngressBuilder, IngressPath,
-    PathType, ServiceBuilder, ServicePort, ServiceType, TLSConfig,
+    PathType, PluginInfo, PluginRegistry, ServiceBuilder, ServicePort, ServiceType, SidecarPlugin,
+    TLSConfig,
 };
 pub use steps::{StepResult, StepStatus};
 pub use workflows::{
