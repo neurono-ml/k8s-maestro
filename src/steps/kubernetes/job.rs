@@ -20,15 +20,27 @@ pub struct KubeJobStep {
     step_id: String,
     namespace: String,
     name: JobNameType,
+    // TODO: Implement proper usage of these fields to configure Kubernetes Job spec
+    // These fields are pending implementation per specification
+    #[allow(dead_code)]
     containers: Vec<Box<dyn ContainerLike + Send + Sync>>,
+    #[allow(dead_code)]
     sidecars: Vec<Box<dyn ContainerLike + Send + Sync>>,
+    #[allow(dead_code)]
     backoff_limit: Option<i32>,
+    #[allow(dead_code)]
     restart_policy: RestartPolicy,
+    #[allow(dead_code)]
     ttl_seconds: Option<i32>,
+    #[allow(dead_code)]
     completions: Option<i32>,
+    #[allow(dead_code)]
     parallelism: Option<i32>,
+    #[allow(dead_code)]
     resource_limits: Option<ResourceLimits>,
+    #[allow(dead_code)]
     service_config: Option<ServiceConfig>,
+    #[allow(dead_code)]
     ingress_config: Option<IngressConfig>,
     client: MaestroK8sClient,
     dry_run: bool,

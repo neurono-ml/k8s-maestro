@@ -142,7 +142,7 @@ impl ServiceBuilder {
             .into_iter()
             .map(|p| K8sServicePort {
                 name: p.name,
-                port: p.port as i32,
+                port: p.port,
                 target_port: Some(
                     k8s_openapi::apimachinery::pkg::util::intstr::IntOrString::Int(p.target_port),
                 ),

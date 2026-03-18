@@ -29,7 +29,6 @@ pub struct ResourceQuotaBuilder {
     scopes: Vec<QuotaScope>,
     labels: BTreeMap<String, String>,
     annotations: BTreeMap<String, String>,
-    status: Option<String>,
 }
 
 impl ResourceQuotaBuilder {
@@ -41,7 +40,6 @@ impl ResourceQuotaBuilder {
             scopes: Vec::new(),
             labels: BTreeMap::new(),
             annotations: BTreeMap::new(),
-            status: None,
         }
     }
 

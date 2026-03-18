@@ -20,11 +20,19 @@ pub struct KubePodStep {
     step_id: String,
     namespace: String,
     name: JobNameType,
+    // TODO: Implement proper usage of these fields to configure Kubernetes Pod spec
+    // These fields are pending implementation per specification
+    #[allow(dead_code)]
     containers: Vec<Box<dyn ContainerLike + Send + Sync>>,
+    #[allow(dead_code)]
     sidecars: Vec<Box<dyn ContainerLike + Send + Sync>>,
+    #[allow(dead_code)]
     restart_policy: RestartPolicy,
+    #[allow(dead_code)]
     resource_limits: Option<ResourceLimits>,
+    #[allow(dead_code)]
     service_config: Option<ServiceConfig>,
+    #[allow(dead_code)]
     ingress_config: Option<IngressConfig>,
     client: MaestroK8sClient,
     dry_run: bool,
@@ -121,6 +129,7 @@ impl DeletableWorkFlowStep for KubePodStep {
         }
     }
 
+    #[allow(clippy::manual_async_fn)]
     fn delete_associated_pods(
         &self,
         dry_run: bool,

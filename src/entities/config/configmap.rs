@@ -92,6 +92,7 @@ impl ConfigMapBuilder {
             )
         };
 
+        #[allow(clippy::needless_update)]
         Ok(ConfigMap {
             metadata,
             data: if self.data.is_empty() {

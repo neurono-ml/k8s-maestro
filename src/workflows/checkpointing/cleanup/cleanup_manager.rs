@@ -57,7 +57,7 @@ impl CleanupManager {
         for metadata in checkpoints {
             workflow_checkpoints
                 .entry(metadata.workflow_id.clone())
-                .or_insert_with(Vec::new)
+                .or_default()
                 .push((metadata.workflow_id.clone(), metadata.checkpoint_time));
         }
 
@@ -96,6 +96,7 @@ impl CleanupManager {
         }
 
         for workflow_id in &to_delete {
+            #[allow(clippy::redundant_pattern_matching)]
             if let Err(_) = self.storage.delete_checkpoint(workflow_id).await {
                 log::warn!("Failed to delete checkpoint for workflow: {}", workflow_id);
             } else {

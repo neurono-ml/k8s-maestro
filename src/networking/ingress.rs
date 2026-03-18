@@ -50,19 +50,10 @@ impl Default for IngressPath {
 }
 
 /// TLS configuration for Ingress.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct TLSConfig {
     pub hosts: Vec<String>,
     pub secret_name: String,
-}
-
-impl Default for TLSConfig {
-    fn default() -> Self {
-        Self {
-            hosts: Vec::new(),
-            secret_name: String::new(),
-        }
-    }
 }
 
 /// Builder for creating Kubernetes Ingress resources.

@@ -2,17 +2,12 @@ use chrono::Duration;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub enum CheckpointFrequency {
+    #[default]
     OnStepCompletion,
     OnSuccess,
     Periodic(Duration),
-}
-
-impl Default for CheckpointFrequency {
-    fn default() -> Self {
-        Self::OnStepCompletion
-    }
 }
 
 impl FromStr for CheckpointFrequency {
@@ -122,6 +117,7 @@ impl RetentionPolicy {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Default)]
 pub struct CheckpointConfig {
     pub enabled: bool,
     pub frequency: CheckpointFrequency,
@@ -129,16 +125,6 @@ pub struct CheckpointConfig {
     pub retention_policy: RetentionPolicy,
 }
 
-impl Default for CheckpointConfig {
-    fn default() -> Self {
-        Self {
-            enabled: false,
-            frequency: CheckpointFrequency::default(),
-            storage: CheckpointStorageConfig::default(),
-            retention_policy: RetentionPolicy::default(),
-        }
-    }
-}
 
 impl CheckpointConfig {
     pub fn new() -> Self {

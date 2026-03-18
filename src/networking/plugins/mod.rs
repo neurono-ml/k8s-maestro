@@ -1,6 +1,6 @@
 mod plugin_registry;
 
-use crate::entities::{ContainerLike, SidecarContainer};
+use crate::entities::SidecarContainer;
 use serde_json::Value;
 use std::collections::BTreeMap;
 

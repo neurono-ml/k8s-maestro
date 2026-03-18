@@ -127,6 +127,7 @@ impl SecretBuilder {
             )
         };
 
+        #[allow(clippy::needless_update)]
         Ok(Secret {
             metadata,
             type_: Some(self.secret_type.to_string()),

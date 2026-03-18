@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use k8s_openapi::api::networking::v1::{
     NetworkPolicy, NetworkPolicyEgressRule, NetworkPolicyIngressRule, NetworkPolicyPeer,
     NetworkPolicyPort,
@@ -100,11 +100,7 @@ impl NetworkPolicyBuilder {
         let peers = rule.to_peers();
         let ingress_rule = NetworkPolicyIngressRule {
             from: if peers.is_empty() { None } else { Some(peers) },
-            ports: if rule.port.is_some() {
-                Some(vec![rule.port.unwrap()])
-            } else {
-                None
-            },
+            ports: rule.port.map(|p| vec![p]),
         };
         self.ingress_rules.push(ingress_rule);
         self
@@ -114,11 +110,7 @@ impl NetworkPolicyBuilder {
         let peers = rule.to_peers();
         let egress_rule = NetworkPolicyEgressRule {
             to: if peers.is_empty() { None } else { Some(peers) },
-            ports: if rule.port.is_some() {
-                Some(vec![rule.port.unwrap()])
-            } else {
-                None
-            },
+            ports: rule.port.map(|p| vec![p]),
         };
         self.egress_rules.push(egress_rule);
         self

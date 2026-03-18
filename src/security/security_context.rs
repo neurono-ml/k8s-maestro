@@ -1,7 +1,6 @@
 use k8s_openapi::api::core::v1::{
     Capabilities, PodSecurityContext, SeccompProfile, SecurityContext as K8sSecurityContext,
 };
-use std::collections::BTreeMap;
 
 #[derive(Debug, Clone, Default)]
 pub struct SecurityContextConfig {
@@ -191,8 +190,7 @@ impl PodSecurityContextBuilder {
             .with_fs_group_change_policy(
                 config
                     .fs_group_change_policy
-                    .as_ref()
-                    .map(|s| s.as_str())
+                    .as_deref()
                     .unwrap_or("OnRootMismatch"),
             )
             .with_supplemental_groups(config.supplemental_groups.clone())
@@ -202,10 +200,15 @@ impl PodSecurityContextBuilder {
             .with_seccomp_profile(
                 config
                     .seccomp_profile_type
-                    .as_ref()
-                    .map(|s| s.as_str())
+                    .as_deref()
                     .unwrap_or("RuntimeDefault"),
             )
+    }
+}
+
+impl Default for PodSecurityContextBuilder {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -356,6 +359,12 @@ impl ContainerSecurityContextBuilder {
         }
 
         builder
+    }
+}
+
+impl Default for ContainerSecurityContextBuilder {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

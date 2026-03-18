@@ -187,8 +187,8 @@ pub type JobConfig = crate::workflows::WorkflowMetadata;
     since = "0.4.0",
     note = "Use `MaestroClientBuilder::new().build()` directly instead. This helper will be removed."
 )]
+#[allow(deprecated)]
 pub async fn create_legacy_client() -> anyhow::Result<MaestroK8sClient> {
-    #[allow(deprecated)]
     MaestroK8sClient::new().await
 }
 

@@ -22,16 +22,11 @@ impl Default for WorkflowMetadata {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub enum ExecutionMode {
+    #[default]
     Sequential,
     Parallel(usize),
-}
-
-impl Default for ExecutionMode {
-    fn default() -> Self {
-        Self::Sequential
-    }
 }
 
 #[derive(Debug, Clone, PartialEq)]

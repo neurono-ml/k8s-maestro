@@ -52,11 +52,13 @@ pub enum StorageError {
 
 pub type StorageResult<T> = Result<T, StorageError>;
 
+#[cfg(test)]
 #[derive(Debug)]
 struct MockStorage {
     checkpoints: tokio::sync::RwLock<std::collections::HashMap<String, Checkpoint>>,
 }
 
+#[cfg(test)]
 impl MockStorage {
     fn new() -> Self {
         Self {
@@ -65,6 +67,7 @@ impl MockStorage {
     }
 }
 
+#[cfg(test)]
 #[async_trait::async_trait]
 impl CheckpointStorage for MockStorage {
     async fn connect(&self) -> StorageResult<()> {
