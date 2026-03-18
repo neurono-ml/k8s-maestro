@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Volume Builders (MVP)
+- `MaestroPVCMountVolumeBuilder` for Persistent Volume Claim volumes
+- `ConfigMapVolumeBuilder` for ConfigMap volumes with item-level control
+- `SecretVolumeBuilder` for Secret volumes with item-level control
+- `EmptyDirVolumeBuilder` for temporary empty directory volumes with memory and size limit options
+- `HostPathVolumeBuilder` for host path volumes with type validation
+- Supporting types: `VolumeType`, `VolumeItem`, `AccessMode`, `Medium`, `HostPathType`
+- `VolumeMountLike` trait for polymorphic volume handling in containers
+- Fluent builder API consistent with existing codebase patterns
+- Comprehensive unit tests for all volume builders and conversions
+- Module structure in `src/entities/volumes/` with public re-exports
+
 #### Networking Module (MVP)
 - `ServiceBuilder` with fluent API for creating Kubernetes Services
 - Support for all service types: ClusterIP, Headless, NodePort, LoadBalancer
