@@ -8,15 +8,13 @@
 
 use std::collections::BTreeMap;
 
-use futures::{pin_mut, StreamExt};
 use k8s_maestro::{
     clients::MaestroK8sClient,
-    entities::{ComputeResource, ContainerLike, MaestroContainer},
-    steps::ResourceLimits,
+    entities::{ContainerLike, MaestroContainer},
 };
 use k8s_openapi::{
     api::batch::v1::{Job, JobSpec},
-    api::core::v1::{PodTemplateSpec, PodSpec, Container},
+    api::core::v1::{PodTemplateSpec, PodSpec},
     apimachinery::pkg::api::resource::Quantity,
 };
 
@@ -31,11 +29,11 @@ pub async fn main() -> anyhow::Result<()> {
 
     let maestro_client = MaestroK8sClient::new().await?;
 
-    let test_job_input = build_job(&image, &job_generate_name)?;
+    let test_job_input = build_job(image, job_generate_name)?;
     println!("{}", serde_yml::to_string(&test_job_input)?);
 
     // Create the job using Kubernetes API directly
-    let jobs_api = kube::Api::<Job>::namespaced(maestro_client.inner().clone(), &namespace);
+    let jobs_api = kube::Api::<Job>::namespaced(maestro_client.inner().clone(), namespace);
 
     if !dry_run {
         let created_job = jobs_api.create(&Default::default(), &test_job_input).await?;
@@ -46,7 +44,7 @@ pub async fn main() -> anyhow::Result<()> {
         // Stream logs from the job
         let pods_api = kube::Api::<k8s_openapi::api::core::v1::Pod>::namespaced(
             maestro_client.inner().clone(),
-            &namespace,
+            namespace,
         );
 
         // Wait a bit for the pod to start
@@ -93,11 +91,9 @@ fn build_job(image: &str, generate_name: &str) -> anyhow::Result<Job> {
 
     // Create the MaestroContainer
     let maestro_container = MaestroContainer::new(image, container_name)
-        .set_arguments(&vec![
-            "bash".to_owned(),
+        .set_arguments(&["bash".to_owned(),
             "-c".to_owned(),
-            "ls /samba; sleep 10; exit 137".to_owned(),
-        ]);
+            "ls /samba; sleep 10; exit 137".to_owned()]);
 
     // Convert MaestroContainer to Kubernetes Container
     let mut container = ContainerLike::as_container(&maestro_container);

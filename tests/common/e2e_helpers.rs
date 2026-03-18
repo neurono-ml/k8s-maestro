@@ -25,6 +25,7 @@ use kube::Client;
 ///     // Test complete workflow scenario...
 /// }
 /// ```
+#[allow(dead_code)]
 pub async fn setup_e2e_test(
 ) -> Result<(Client, KindCluster), Box<dyn std::error::Error + Send + Sync>> {
     // E2E tests use the same setup as integration tests
@@ -47,6 +48,7 @@ pub async fn setup_e2e_test(
 /// * `client` - The Kubernetes client
 /// * `workflow_yaml` - The workflow YAML content
 /// * `namespace` - The namespace to run the workflow in
+#[allow(dead_code)]
 pub async fn run_workflow_scenario(
     _client: &Client,
     _workflow_yaml: &str,

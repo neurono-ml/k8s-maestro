@@ -13,4 +13,5 @@ pub mod mocking;
 pub mod utilities;
 
 // Re-export commonly used types for convenience
-pub use utilities::{create_configmap, create_namespace, create_pvc, create_secret};
+// TODO: These functions are defined in utilities but are not yet re-exported here
+// Uncomment when needed: pub use utilities::{create_configmap, create_namespace, create_pvc, create_secret};

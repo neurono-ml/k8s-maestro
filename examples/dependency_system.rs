@@ -1,10 +1,6 @@
 // Example demonstrating the dependency chain system with conditional execution
 
-use k8s_maestro::{
-    workflows::{ConditionBuilder, DependencyChain, DependencyGraph},
-    StepResult, StepStatus,
-};
-use serde_json::json;
+use k8s_maestro::workflows::DependencyChain;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("=== Dependency Chain System Example ===\n");
@@ -46,10 +42,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with_conditional_dependency("fetch-data", |deps| deps.iter().all(|r| r.is_success()));
 
     let graph = chain.clone().build_dag()?;
-    println!(
-        "   Execution levels: {:?}",
-        graph.topological_sort()?
-    );
+    println!("   Execution levels: {:?}", graph.topological_sort()?);
     println!(
         "   Has condition: {:?}",
         graph.get_condition("process-data").is_some()
@@ -62,19 +55,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chain.add_step("generate-report");
     chain
         .add_step("analyze-report")
-        .with_conditional_dependency(
-            "generate-report",
-            |deps| {
-                deps.iter()
-                    .any(|r| r.get_output_value("report_size").and_then(|v| v.as_i64()).unwrap_or(0) > 1000)
-            },
-        );
+        .with_conditional_dependency("generate-report", |deps| {
+            deps.iter().any(|r| {
+                r.get_output_value("report_size")
+                    .and_then(|v| v.as_i64())
+                    .unwrap_or(0)
+                    > 1000
+            })
+        });
 
     let graph = chain.clone().build_dag()?;
-    println!(
-        "   Execution levels: {:?}",
-        graph.topological_sort()?
-    );
+    println!("   Execution levels: {:?}", graph.topological_sort()?);
     println!();
 
     // Example 5: Conditional dependency_any - execute if ANY dependency succeeds
@@ -84,16 +75,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chain.add_step("backup-db");
     chain
         .add_step("query-data")
-        .with_conditional_dependency_any(
-            vec!["primary-db", "backup-db"],
-            |deps| deps.iter().any(|r| r.is_success()),
-        );
+        .with_conditional_dependency_any(vec!["primary-db", "backup-db"], |deps| {
+            deps.iter().any(|r| r.is_success())
+        });
 
     let graph = chain.clone().build_dag()?;
-    println!(
-        "   Execution levels: {:?}",
-        graph.topological_sort()?
-    );
+    println!("   Execution levels: {:?}", graph.topological_sort()?);
     println!(
         "   query-data dependencies: {:?}",
         graph.get_dependencies("query-data")
@@ -112,10 +99,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with_conditional_dependency("validate-data", |deps| deps.iter().all(|r| r.is_success()));
     chain
         .add_step("backup-data")
-        .with_conditional_dependency_any(
-            vec!["validate-data", "transform-data"],
-            |deps| deps.iter().any(|r| r.is_success()),
-        );
+        .with_conditional_dependency_any(vec!["validate-data", "transform-data"], |deps| {
+            deps.iter().any(|r| r.is_success())
+        });
     chain
         .add_step("archive-data")
         .with_dependency("transform-data");
@@ -146,22 +132,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chain.add_step("collect-metrics");
     chain
         .add_step("analyze-metrics")
-        .with_conditional_dependency(
-            "collect-metrics",
-            |deps| {
-                let total: i64 = deps
-                    .iter()
-                    .filter_map(|r| r.get_output_value("total_count").and_then(|v| v.as_i64()))
-                    .sum();
-                total > 100 && deps.iter().all(|r| r.is_success())
-            },
-        );
+        .with_conditional_dependency("collect-metrics", |deps| {
+            let total: i64 = deps
+                .iter()
+                .filter_map(|r| r.get_output_value("total_count").and_then(|v| v.as_i64()))
+                .sum();
+            total > 100 && deps.iter().all(|r| r.is_success())
+        });
 
     let graph = chain.clone().build_dag()?;
-    println!(
-        "   Execution levels: {:?}",
-        graph.topological_sort()?
-    );
+    println!("   Execution levels: {:?}", graph.topological_sort()?);
     println!();
 
     // Example 10: Combined conditions (AND/OR/NOT)
@@ -169,16 +149,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut chain = DependencyChain::new();
     chain.add_step("step1");
     chain.add_step("step2");
-    chain.add_step("step3").with_conditional_dependency(
-        "step1",
-        |deps| deps.iter().all(|r| r.is_success()) && !(deps.iter().any(|r| r.is_failure())),
-    );
+    chain
+        .add_step("step3")
+        .with_conditional_dependency("step1", |deps| {
+            deps.iter().all(|r| r.is_success()) && !(deps.iter().any(|r| r.is_failure()))
+        });
 
     let graph = chain.clone().build_dag()?;
-    println!(
-        "   Execution levels: {:?}",
-        graph.topological_sort()?
-    );
+    println!("   Execution levels: {:?}", graph.topological_sort()?);
     println!();
 
     println!("=== All Examples Completed ===");

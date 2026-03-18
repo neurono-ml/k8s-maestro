@@ -173,7 +173,7 @@ mod tests {
         assert_eq!(volume.volume_name, "secret-vol");
         assert_eq!(volume.mount_path, "/secrets");
         assert_eq!(volume.secret_name, "db-credentials");
-        assert_eq!(volume.read_only, false);
+        assert!(!volume.read_only);
     }
 
     #[test]

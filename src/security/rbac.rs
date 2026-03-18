@@ -562,7 +562,7 @@ mod tests {
         assert_eq!(role.metadata.name, Some("executor".to_string()));
         assert!(role.rules.is_some());
         let rules = role.rules.unwrap();
-        assert!(rules.len() > 0);
+        assert!(!rules.is_empty());
         assert!(rules[0].verbs.contains(&"create".to_string()));
     }
 
@@ -576,7 +576,7 @@ mod tests {
         assert_eq!(role.metadata.name, Some("viewer".to_string()));
         assert!(role.rules.is_some());
         let rules = role.rules.unwrap();
-        assert!(rules.len() > 0);
+        assert!(!rules.is_empty());
         assert!(rules[0].verbs.contains(&"get".to_string()));
     }
 

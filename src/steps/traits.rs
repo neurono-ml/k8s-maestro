@@ -247,6 +247,7 @@ mod tests {
         }
     }
 
+    #[allow(clippy::manual_async_fn)]
     impl DeletableWorkFlowStep for MockDeletableStep {
         fn delete_workflow(
             &self,
@@ -332,6 +333,7 @@ mod tests {
         }
     }
 
+    #[allow(clippy::type_complexity)]
     struct MockConditionalStep {
         id: String,
         condition: Option<Box<dyn Fn(&dyn WorkFlowStep) -> bool + Send + Sync>>,
@@ -479,6 +481,7 @@ mod tests {
         }
     }
 
+    #[allow(clippy::manual_async_fn)]
     impl DeletableWorkFlowStep for CompositeStep {
         fn delete_workflow(
             &self,

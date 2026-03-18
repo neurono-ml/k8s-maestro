@@ -57,7 +57,7 @@ impl PluginRegistry {
     pub fn install_plugin_to_step(
         &self,
         plugin_name: &str,
-        step: &mut impl WorkFlowStep,
+        _step: &mut impl WorkFlowStep,
     ) -> anyhow::Result<()> {
         let plugin = self
             .get_plugin(plugin_name)
@@ -81,7 +81,6 @@ mod tests {
     use super::*;
     use crate::entities::SidecarContainer;
     use crate::steps::traits::WorkFlowStep;
-    use std::sync::RwLock;
 
     struct TestPlugin {
         name: String,

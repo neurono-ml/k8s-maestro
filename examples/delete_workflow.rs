@@ -17,7 +17,7 @@ pub async fn main() -> anyhow::Result<()> {
 
     let succeed_name = "succeed-job";
     let namespace = "staging";
-    let dry_run = false;
+    let _dry_run = false;
 
     println!("Creating Maestro Kubernetes client...");
     // Note: MaestroK8sClient is now a lightweight wrapper around kube::Client
@@ -25,7 +25,7 @@ pub async fn main() -> anyhow::Result<()> {
     // let maestro_client = MaestroK8sClient::new().await?;
 
     println!("Creating workflow job: {}", succeed_name);
-    let test_job_input = create_job(succeed_name, &namespace);
+    let _test_job_input = create_job(succeed_name, namespace);
 
     println!("Applying job to Kubernetes cluster...");
     // let succeed_job = maestro_client
@@ -54,32 +54,43 @@ pub async fn main() -> anyhow::Result<()> {
 fn create_job(name: &str, namespace: &str) -> Job {
     println!("Building job '{}' for cleanup demonstration", name);
 
-    let mut container = Container::default();
-    container.name = "main".to_owned();
-    container.image = Some("docker.io/bash:5.2".to_owned());
-    container.args = Some(vec![
-        "bash".to_owned(),
-        "-c".to_owned(),
-        "echo 'Testing pod'; sleep 3; echo 'Finalizado'; exit 137".to_owned(),
-    ]);
+    let container = Container {
+        name: "main".to_owned(),
+        image: Some("docker.io/bash:5.2".to_owned()),
+        args: Some(vec![
+            "bash".to_owned(),
+            "-c".to_owned(),
+            "echo 'Testing pod'; sleep 3; echo 'Finalizado'; exit 137".to_owned(),
+        ]),
+        ..Default::default()
+    };
 
     println!("Setting restart policy to OnFailure");
-    let mut pod_spec = PodSpec::default();
-    pod_spec.containers.push(container);
-    pod_spec.restart_policy = Some("OnFailure".to_string());
+    let pod_spec = PodSpec {
+        containers: vec![container],
+        restart_policy: Some("OnFailure".to_string()),
+        ..Default::default()
+    };
 
-    let mut pod_template_spec = PodTemplateSpec::default();
-    pod_template_spec.spec = Some(pod_spec);
+    let pod_template_spec = PodTemplateSpec {
+        spec: Some(pod_spec),
+        ..Default::default()
+    };
 
     println!("Setting backoff limit to 5 retries");
-    let mut job_spec = JobSpec::default();
-    job_spec.template = pod_template_spec;
-    job_spec.backoff_limit = Some(5);
+    let job_spec = JobSpec {
+        template: pod_template_spec,
+        backoff_limit: Some(5),
+        ..Default::default()
+    };
 
-    let mut job = Job::default();
-    job.metadata.name = Some(name.to_owned());
-    job.metadata.namespace = Some(namespace.to_owned());
-    job.spec = Some(job_spec);
-
-    job
+    Job {
+        metadata: k8s_openapi::apimachinery::pkg::apis::meta::v1::ObjectMeta {
+            name: Some(name.to_owned()),
+            namespace: Some(namespace.to_owned()),
+            ..Default::default()
+        },
+        spec: Some(job_spec),
+        ..Default::default()
+    }
 }

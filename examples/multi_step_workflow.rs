@@ -7,10 +7,7 @@
 //! - Conditional execution based on step results
 //! - Complex DAG (Directed Acyclic Graph) structures
 
-use k8s_maestro::{
-    client::MaestroClientBuilder,
-    workflows::{ConditionBuilder, DependencyChain, ExecutionMode, Workflow, WorkflowBuilder},
-};
+use k8s_maestro::workflows::DependencyChain;
 
 fn main() -> anyhow::Result<()> {
     println!("=== Multi-Step Workflow Examples ===\n");

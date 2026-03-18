@@ -115,23 +115,13 @@ impl KindCluster {
     ///
     /// Returns an error if the cluster doesn't become healthy within the timeout.
     async fn wait_for_health(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        let timeout = Duration::from_secs(HEALTH_CHECK_TIMEOUT_SECS);
         let interval = Duration::from_secs(HEALTH_CHECK_INTERVAL_SECS);
-        let start = std::time::Instant::now();
 
-        // Simulate health check polling
-        while start.elapsed() < timeout {
-            // In a real implementation, this would check cluster health
-            // For now, we just wait a short time and return success
-            sleep(interval).await;
-            return Ok(());
-        }
+        // Simulate health check - in a real implementation, this would check cluster health
+        // For now, we just wait a short time and return success
+        sleep(interval).await;
 
-        Err(format!(
-            "Cluster did not become healthy within {} seconds",
-            HEALTH_CHECK_TIMEOUT_SECS
-        )
-        .into())
+        Ok(())
     }
 
     /// Returns the kubeconfig content for connecting to this cluster.
@@ -189,6 +179,7 @@ users:
     ///
     /// This is automatically called when the `KindCluster` is dropped,
     /// but can be called explicitly for early cleanup.
+    #[allow(dead_code)]
     pub async fn cleanup(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         // In a real implementation, this would delete the Kind cluster
         // For now, it's a no-op

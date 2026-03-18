@@ -10,11 +10,11 @@ use std::collections::BTreeMap;
 
 use k8s_maestro::{
     clients::MaestroK8sClient,
-    entities::{ComputeResource, ContainerLike, MaestroContainer},
+    entities::{ContainerLike, MaestroContainer},
 };
 use k8s_openapi::{
     api::batch::v1::{Job, JobSpec},
-    api::core::v1::{PodTemplateSpec, PodSpec, Container},
+    api::core::v1::{PodTemplateSpec, PodSpec},
     apimachinery::pkg::api::resource::Quantity,
 };
 
@@ -31,13 +31,13 @@ pub async fn main() -> anyhow::Result<()> {
     let maestro_client = MaestroK8sClient::new().await?;
 
     println!("Building job workflow...");
-    let test_job_input = build_job(&image, &job_name)?;
+    let test_job_input = build_job(image, job_name)?;
     println!("{}", serde_yml::to_string(&test_job_input)?);
 
     println!("Applying job to Kubernetes cluster...");
 
     // Create the job using Kubernetes API directly
-    let jobs_api = kube::Api::<Job>::namespaced(maestro_client.inner().clone(), &namespace);
+    let jobs_api = kube::Api::<Job>::namespaced(maestro_client.inner().clone(), namespace);
 
     if !dry_run {
         let created_job = jobs_api.create(&Default::default(), &test_job_input).await?;
@@ -79,11 +79,9 @@ fn build_job(image: &str, name: &str) -> anyhow::Result<Job> {
 
     println!("Building container with image: {}", image);
     let maestro_container = MaestroContainer::new(image, container_name)
-        .set_arguments(&vec![
-            "bash".to_owned(),
+        .set_arguments(&["bash".to_owned(),
             "-c".to_owned(),
-            "echo 'Testing pod'; sleep 3; echo 'Finalizado'".to_owned(),
-        ]);
+            "echo 'Testing pod'; sleep 3; echo 'Finalizado'".to_owned()]);
 
     // Convert MaestroContainer to Kubernetes Container
     let mut container = ContainerLike::as_container(&maestro_container);

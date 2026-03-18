@@ -36,7 +36,7 @@ fn main() -> anyhow::Result<()> {
 fn example_logging_sidecar() -> anyhow::Result<()> {
     println!("Creating a container with Fluent Bit logging sidecar");
 
-    let mut main_container = MaestroContainer::new("nginx:latest", "web-server");
+    let main_container = MaestroContainer::new("nginx:latest", "web-server");
 
     let mut logging_env = std::collections::BTreeMap::new();
     logging_env.insert("FLUENT_HOST".to_string(), "logserver".to_string());
@@ -100,7 +100,7 @@ fn example_multiple_sidecars() -> anyhow::Result<()> {
 
     let metrics_sidecar = SidecarContainer::new("prom/prometheus-node-exporter:latest", "metrics");
 
-    let debug_sidecar = SidecarContainer::new("busybox:latest", "debug").set_arguments(&vec![
+    let debug_sidecar = SidecarContainer::new("busybox:latest", "debug").set_arguments(&[
         "sh".to_owned(),
         "-c".to_owned(),
         "sleep 3600".to_owned(),
@@ -129,7 +129,7 @@ impl SidecarPlugin for CustomSidecarPlugin {
 
     fn create_sidecar(&self) -> anyhow::Result<SidecarContainer> {
         Ok(
-            SidecarContainer::new(self.image(), self.name()).set_arguments(&vec![
+            SidecarContainer::new(self.image(), self.name()).set_arguments(&[
                 "sh".to_owned(),
                 "-c".to_owned(),
                 "sleep 3600".to_owned(),

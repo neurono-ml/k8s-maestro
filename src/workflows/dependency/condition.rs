@@ -91,6 +91,7 @@ mod tests {
         StepResult::new(step_id).with_output(key, value)
     }
 
+    #[allow(dead_code)]
     fn create_result_with_exit_code(step_id: &str, exit_code: i32) -> StepResult {
         StepResult::new(step_id).with_exit_code(exit_code)
     }

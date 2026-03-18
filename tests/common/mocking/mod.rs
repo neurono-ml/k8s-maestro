@@ -9,6 +9,7 @@ use std::collections::VecDeque;
 ///
 /// This trait defines the common operations that tests may need to mock
 /// for unit testing without a real Kubernetes cluster.
+#[allow(dead_code)]
 pub trait K8sClientOperations: Send + Sync {
     /// Creates a resource in the cluster.
     fn create_resource(
@@ -175,6 +176,7 @@ impl MockK8sClient {
     }
 
     /// Returns the next list response from the queue.
+    #[allow(dead_code)]
     pub fn next_list_response(&mut self) -> Result<Vec<serde_json::Value>, MockError> {
         self.list_responses
             .pop_front()
@@ -182,6 +184,7 @@ impl MockK8sClient {
     }
 
     /// Returns the next update response from the queue.
+    #[allow(dead_code)]
     pub fn next_update_response(&mut self) -> Result<serde_json::Value, MockError> {
         self.update_responses
             .pop_front()
@@ -259,14 +262,17 @@ pub fn mock_response_sequence(responses: Vec<MockResponse>) -> MockK8sClient {
 /// Types of mock responses for response sequences.
 pub enum MockResponse {
     /// Create operation response.
+    #[allow(dead_code)]
     Create(Result<serde_json::Value, MockError>),
     /// Get operation response.
     Get(Result<serde_json::Value, MockError>),
     /// Delete operation response.
     Delete(Result<(), MockError>),
     /// List operation response.
+    #[allow(dead_code)]
     List(Result<Vec<serde_json::Value>, MockError>),
     /// Update operation response.
+    #[allow(dead_code)]
     Update(Result<serde_json::Value, MockError>),
 }
 

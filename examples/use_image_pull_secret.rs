@@ -25,9 +25,9 @@ pub async fn main() -> anyhow::Result<()> {
 
     let maestro_client = MaestroK8sClient::new().await?;
     let test_job_input = build_job(
-        &image,
-        &job_generate_name,
-        &namespace,
+        image,
+        job_generate_name,
+        namespace,
         backoff_limit,
         bucket,
         prefix,
@@ -38,7 +38,7 @@ pub async fn main() -> anyhow::Result<()> {
     println!("{}", serde_yml::to_string(&test_job_input)?);
 
     // Create the job using Kubernetes API directly
-    let jobs_api = kube::Api::<Job>::namespaced(maestro_client.inner().clone(), &namespace);
+    let jobs_api = kube::Api::<Job>::namespaced(maestro_client.inner().clone(), namespace);
 
     if !dry_run {
         let created_job = jobs_api.create(&Default::default(), &test_job_input).await?;
@@ -68,6 +68,7 @@ pub async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn build_job(
     image: &str,
     generate_name: &str,
@@ -81,19 +82,17 @@ pub fn build_job(
     let container_name = "main";
 
     let maestro_container = MaestroContainer::new(image, container_name)
-        .set_arguments(&vec![
-            "--bucket".to_owned(),
+        .set_arguments(&["--bucket".to_owned(),
             bucket.to_owned(),
             "--prefix".to_owned(),
             prefix.to_owned(),
             "--glob-pattern".to_owned(),
             glob_pattern.to_owned(),
             "--output-path".to_owned(),
-            output_path.to_owned(),
-        ]);
+            output_path.to_owned()]);
 
     // Convert MaestroContainer to Kubernetes Container
-    let mut container = ContainerLike::as_container(&maestro_container);
+    let container = ContainerLike::as_container(&maestro_container);
 
     // Create pod spec
     let mut pod_spec = PodSpec {
@@ -105,7 +104,6 @@ pub fn build_job(
     // Add image pull secret
     pod_spec.image_pull_secrets = Some(vec![LocalObjectReference {
         name: GHCR_IMAGE_PULL_SECRET.to_string(),
-        ..Default::default()
     }]);
 
     // Create pod template spec

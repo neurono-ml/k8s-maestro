@@ -173,7 +173,7 @@ mod tests {
         assert_eq!(volume.volume_name, "config-vol");
         assert_eq!(volume.mount_path, "/config");
         assert_eq!(volume.config_map_name, "app-config");
-        assert_eq!(volume.read_only, false);
+        assert!(!volume.read_only);
     }
 
     #[test]

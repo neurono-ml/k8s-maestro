@@ -232,6 +232,7 @@ mod tests {
     use crate::workflows::checkpointing::models::StepCheckpoint;
     use std::collections::BTreeMap;
 
+    #[allow(dead_code)]
     fn create_test_checkpoint(workflow_id: &str) -> Checkpoint {
         let mut outputs = BTreeMap::new();
         outputs.insert("result".to_string(), serde_json::json!("success"));

@@ -39,11 +39,11 @@ async fn e2e_simple_workflow() {
 #[tokio::test]
 #[ignore = "Requires Docker and is slow - run with --ignored flag"]
 async fn e2e_workflow_with_dependencies() {
-    let (client, _cluster) = setup_e2e_test().await.expect("Failed to setup E2E test");
+    let (_client, _cluster) = setup_e2e_test().await.expect("Failed to setup E2E test");
 
     // This test would validate that step dependencies are correctly handled
     // and that steps execute in the correct order
 
     // For now, we just verify the setup works
-    assert!(true, "E2E setup completed successfully");
+    // TODO: Implement actual E2E workflow validation
 }

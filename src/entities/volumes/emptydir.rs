@@ -148,7 +148,7 @@ mod tests {
 
         assert_eq!(volume.volume_name, "temp-vol");
         assert_eq!(volume.mount_path, "/tmp");
-        assert_eq!(volume.read_only, false);
+        assert!(!volume.read_only);
     }
 
     #[test]
@@ -184,7 +184,7 @@ mod tests {
             .with_read_only(true)
             .build();
 
-        assert_eq!(volume.read_only, true);
+        assert!(volume.read_only);
     }
 
     #[test]

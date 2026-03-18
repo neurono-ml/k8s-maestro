@@ -194,6 +194,7 @@ mod tests {
             }
         }
 
+        #[allow(dead_code)]
         fn with_limits(mut self, limits: ResourceLimits) -> Self {
             self.limits = Some(limits);
             self

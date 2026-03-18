@@ -151,7 +151,7 @@ mod tests {
         assert_eq!(volume.volume_name, "host-vol");
         assert_eq!(volume.mount_path, "/host-data");
         assert_eq!(volume.host_path, "/var/data");
-        assert_eq!(volume.read_only, false);
+        assert!(!volume.read_only);
     }
 
     #[test]
@@ -178,7 +178,7 @@ mod tests {
             .with_read_only(true)
             .build();
 
-        assert_eq!(volume.read_only, true);
+        assert!(volume.read_only);
     }
 
     #[test]

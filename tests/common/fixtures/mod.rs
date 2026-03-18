@@ -3,7 +3,7 @@
 //! This module provides utilities for loading and parsing YAML fixtures
 //! for Kubernetes resources used in tests.
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use k8s_openapi::api::{
     batch::v1::Job,
@@ -91,6 +91,7 @@ pub fn load_job_fixture(name: &str) -> Result<Job, Box<dyn std::error::Error>> {
 /// # Note
 ///
 /// Workflows use a generic YAML value since the Workflow CRD is custom.
+#[allow(dead_code)]
 pub fn load_workflow_fixture(name: &str) -> Result<serde_yml::Value, Box<dyn std::error::Error>> {
     let path = format!("workflows/{}.yaml", name);
     load_yaml_fixture(&path)
@@ -132,7 +133,7 @@ pub fn list_fixtures(subdir: &str) -> Result<Vec<String>, Box<dyn std::error::Er
     for entry in std::fs::read_dir(dir)? {
         let entry = entry?;
         let path = entry.path();
-        if path.extension().map_or(false, |ext| ext == "yaml") {
+        if path.extension().is_some_and(|ext| ext == "yaml") {
             if let Some(name) = path.file_stem().and_then(|s| s.to_str()) {
                 fixtures.push(name.to_string());
             }

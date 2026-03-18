@@ -1,4 +1,5 @@
 #[cfg(test)]
+#[allow(clippy::module_inception)]
 mod tests {
     use crate::headless_service_dns_pattern;
     use crate::pod_dns_name;
