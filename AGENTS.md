@@ -199,8 +199,14 @@ fn test_with_mock() {
 - Add common GitHub badges
 
 ### GitHub Pages
-- Documentation updates → `site-docs/`
-- New features must update or create examples in `site-docs/`
+- Documentation updates → `docs/`
+- New features must update or create examples in `docs/`
+- Documentation structure:
+  - `docs/README.md` - Documentation landing page
+  - `docs/getting-started/` - Installation, quick start, and concepts
+  - `docs/guides/` - How-to guides
+  - `docs/reference/` - Configuration and troubleshooting
+  - `docs/migration-guide.md` - API migration guide
 
 ## Change Management
 
