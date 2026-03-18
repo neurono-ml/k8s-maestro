@@ -13,10 +13,11 @@ fn main() -> anyhow::Result<()> {
         .build()?;
 
     println!("Created ingress: {:?}", basic_ingress.metadata.name);
-    println!(
-        "Host: {:?}",
-        basic_ingress.spec.unwrap().rules.unwrap()[0].host
-    );
+    let spec = basic_ingress.spec.as_ref().unwrap();
+    let rules = spec.rules.as_ref().unwrap();
+    let host = rules[0].host.clone();
+
+    println!("Host: {:?}", host);
 
     println!("\nExample 2: Ingress with TLS");
     let tls_ingress = IngressBuilder::new()
@@ -28,10 +29,11 @@ fn main() -> anyhow::Result<()> {
         .build()?;
 
     println!("Created TLS ingress: {:?}", tls_ingress.metadata.name);
-    println!(
-        "TLS secret: {:?}",
-        tls_ingress.spec.unwrap().tls.unwrap()[0].secret_name
-    );
+    let spec = tls_ingress.spec.as_ref().unwrap();
+    let tls = spec.tls.as_ref().unwrap();
+    let secret_name = tls[0].secret_name.clone();
+
+    println!("TLS secret: {:?}", secret_name);
 
     println!("\nExample 3: Ingress with Multiple Paths");
     let paths = vec![
@@ -66,14 +68,11 @@ fn main() -> anyhow::Result<()> {
         "Created multi-path ingress: {:?}",
         multi_path_ingress.metadata.name
     );
-    println!(
-        "Number of paths: {:?}",
-        multi_path_ingress.spec.unwrap().rules.unwrap()[0]
-            .http
-            .unwrap()
-            .paths
-            .len()
-    );
+    let spec = multi_path_ingress.spec.as_ref().unwrap();
+    let rules = spec.rules.as_ref().unwrap();
+    let http = rules[0].http.as_ref().unwrap();
+
+    println!("Number of paths: {:?}", http.paths.len());
 
     println!("\nExample 4: Ingress with Annotations and Class");
     let mut annotations = BTreeMap::new();
@@ -133,12 +132,11 @@ fn main() -> anyhow::Result<()> {
         "Created multi-TLS ingress: {:?}",
         multi_tls_ingress.metadata.name
     );
-    println!(
-        "TLS hosts: {:?}",
-        multi_tls_ingress.spec.unwrap().tls.unwrap()[0]
-            .hosts
-            .unwrap()
-    );
+    let spec = multi_tls_ingress.spec.as_ref().unwrap();
+    let tls = spec.tls.as_ref().unwrap();
+    let hosts = tls[0].hosts.as_ref().unwrap();
+
+    println!("TLS hosts: {:?}", hosts);
 
     Ok(())
 }

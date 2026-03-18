@@ -1,11 +1,12 @@
 // Example demonstrating the dependency chain system with conditional execution
 
 use k8s_maestro::{
-    ChainBuilder, ConditionBuilder, DependencyChain, DependencyGraph, StepResult, StepStatus,
+    workflows::{ConditionBuilder, DependencyChain, DependencyGraph},
+    StepResult, StepStatus,
 };
 use serde_json::json;
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("=== Dependency Chain System Example ===\n");
 
     // Example 1: Simple chain A -> B -> C
@@ -15,8 +16,8 @@ fn main() {
     chain.add_step("B").with_dependency("A");
     chain.add_step("C").with_dependency("B");
 
-    let graph = chain.clone().build_dag();
-    let levels = graph.topological_sort().unwrap();
+    let graph = chain.clone().build_dag()?;
+    let levels = graph.topological_sort()?;
     println!("   Execution levels: {:?}", levels);
     println!("   Dependencies of C: {:?}", graph.get_dependencies("C"));
     println!();
@@ -29,8 +30,8 @@ fn main() {
     chain.add_step("C");
     chain.add_step("D").with_dependency_any(vec!["A", "B", "C"]);
 
-    let graph = chain.clone().build_dag();
-    let levels = graph.topological_sort().unwrap();
+    let graph = chain.clone().build_dag()?;
+    let levels = graph.topological_sort()?;
     println!("   Execution levels: {:?}", levels);
     println!("   D depends on ANY of: {:?}", graph.get_dependencies("D"));
     println!("   D is_depends_on_any: {}", graph.is_depends_on_any("D"));
@@ -42,12 +43,12 @@ fn main() {
     chain.add_step("fetch-data");
     chain
         .add_step("process-data")
-        .with_conditional_dependency("fetch-data", ConditionBuilder::all_success());
+        .with_conditional_dependency("fetch-data", |deps| deps.iter().all(|r| r.is_success()));
 
-    let graph = chain.clone().build_dag();
+    let graph = chain.clone().build_dag()?;
     println!(
         "   Execution levels: {:?}",
-        graph.topological_sort().unwrap()
+        graph.topological_sort()?
     );
     println!(
         "   Has condition: {:?}",
@@ -63,13 +64,16 @@ fn main() {
         .add_step("analyze-report")
         .with_conditional_dependency(
             "generate-report",
-            ConditionBuilder::output_greater_than("report_size", 1000),
+            |deps| {
+                deps.iter()
+                    .any(|r| r.get_output_value("report_size").and_then(|v| v.as_i64()).unwrap_or(0) > 1000)
+            },
         );
 
-    let graph = chain.clone().build_dag();
+    let graph = chain.clone().build_dag()?;
     println!(
         "   Execution levels: {:?}",
-        graph.topological_sort().unwrap()
+        graph.topological_sort()?
     );
     println!();
 
@@ -82,13 +86,13 @@ fn main() {
         .add_step("query-data")
         .with_conditional_dependency_any(
             vec!["primary-db", "backup-db"],
-            ConditionBuilder::any_success(),
+            |deps| deps.iter().any(|r| r.is_success()),
         );
 
-    let graph = chain.clone().build_dag();
+    let graph = chain.clone().build_dag()?;
     println!(
         "   Execution levels: {:?}",
-        graph.topological_sort().unwrap()
+        graph.topological_sort()?
     );
     println!(
         "   query-data dependencies: {:?}",
@@ -105,19 +109,19 @@ fn main() {
         .with_dependency("fetch-data");
     chain
         .add_step("transform-data")
-        .with_conditional_dependency("validate-data", ConditionBuilder::all_success());
+        .with_conditional_dependency("validate-data", |deps| deps.iter().all(|r| r.is_success()));
     chain
         .add_step("backup-data")
         .with_conditional_dependency_any(
             vec!["validate-data", "transform-data"],
-            ConditionBuilder::any_success(),
+            |deps| deps.iter().any(|r| r.is_success()),
         );
     chain
         .add_step("archive-data")
         .with_dependency("transform-data");
 
-    let graph = chain.clone().build_dag();
-    let levels = graph.topological_sort().unwrap();
+    let graph = chain.clone().build_dag()?;
+    let levels = graph.topological_sort()?;
     println!("   Execution levels: {:?}", levels);
     println!();
 
@@ -129,31 +133,11 @@ fn main() {
     chain.add_step("C").with_dependency("B");
     chain.add_step("A").with_dependency("C"); // Creates a cycle!
 
-    let graph = chain.clone().build_dag();
+    let graph = chain.clone().build_dag()?;
     match graph.detect_cycles() {
         Ok(()) => println!("   No cycles detected"),
         Err(e) => println!("   Cycle detected: {}", e),
     }
-    println!();
-
-    // Example 8: Getting ready steps based on completion
-    println!("8. Getting Ready Steps");
-    let mut chain = DependencyChain::new();
-    chain.add_step("A");
-    chain.add_step("B").with_dependency("A");
-    chain.add_step("C").with_dependency("A");
-    chain.add_step("D").with_dependency_any(vec!["B", "C"]);
-
-    let graph = chain.clone().build_dag();
-
-    let ready = graph.get_ready_steps(&vec![]);
-    println!("   Ready steps (none completed): {:?}", ready);
-
-    let ready = graph.get_ready_steps(&vec!["A".to_string()]);
-    println!("   Ready steps (A completed): {:?}", ready);
-
-    let ready = graph.get_ready_steps(&vec!["A".to_string(), "B".to_string()]);
-    println!("   Ready steps (A, B completed): {:?}", ready);
     println!();
 
     // Example 9: Complex condition using custom closures
@@ -164,19 +148,19 @@ fn main() {
         .add_step("analyze-metrics")
         .with_conditional_dependency(
             "collect-metrics",
-            ConditionBuilder::custom(|deps| {
+            |deps| {
                 let total: i64 = deps
                     .iter()
                     .filter_map(|r| r.get_output_value("total_count").and_then(|v| v.as_i64()))
                     .sum();
                 total > 100 && deps.iter().all(|r| r.is_success())
-            }),
+            },
         );
 
-    let graph = chain.clone().build_dag();
+    let graph = chain.clone().build_dag()?;
     println!(
         "   Execution levels: {:?}",
-        graph.topological_sort().unwrap()
+        graph.topological_sort()?
     );
     println!();
 
@@ -187,18 +171,16 @@ fn main() {
     chain.add_step("step2");
     chain.add_step("step3").with_conditional_dependency(
         "step1",
-        ConditionBuilder::and(vec![
-            ConditionBuilder::all_success(),
-            ConditionBuilder::not(ConditionBuilder::any_failure()),
-        ]),
+        |deps| deps.iter().all(|r| r.is_success()) && !(deps.iter().any(|r| r.is_failure())),
     );
 
-    let graph = chain.clone().build_dag();
+    let graph = chain.clone().build_dag()?;
     println!(
         "   Execution levels: {:?}",
-        graph.topological_sort().unwrap()
+        graph.topological_sort()?
     );
     println!();
 
     println!("=== All Examples Completed ===");
+    Ok(())
 }

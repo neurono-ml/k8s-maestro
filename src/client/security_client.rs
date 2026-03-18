@@ -120,7 +120,7 @@ mod tests {
 
     #[test]
     fn test_security_client_creation() {
-        use crate::client::{MaestroClient, MaestroClientBuilder};
+        use crate::client::MaestroClientBuilder;
 
         let client = MaestroClientBuilder::new()
             .with_namespace("test-ns")

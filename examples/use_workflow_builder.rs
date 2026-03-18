@@ -1,25 +1,22 @@
-//! This example demonstrates building workflows using the WorkflowBuilder API.
+//! This example demonstrates building Kubernetes Jobs with MaestroContainer.
 //!
 //! The example shows:
-//! - Creating a workflow with a single Kubernetes Job step
-//! - Configuring container arguments, environment variables, and resource limits
+//! - Creating a Kubernetes Job with a single container
+//! - Configuring container arguments and resource limits
 //! - Setting job-level configurations like backoff limit and restart policy
-//! - Executing the workflow and waiting for completion
-//! - Proper cleanup of workflow resources
+//! - Executing the job using the Kubernetes API directly
 
 use std::collections::BTreeMap;
 
 use k8s_maestro::{
     clients::MaestroK8sClient,
-    entities::{
-        container::{
-            ComputeResource, EnvironmentVariableFromObject, EnvironmentVariableSource,
-            MaestroContainer,
-        },
-        job::{JobBuilder, JobNameType, RestartPolicy},
-    },
+    entities::{ComputeResource, ContainerLike, MaestroContainer},
 };
-use k8s_openapi::{api::batch::v1::Job, apimachinery::pkg::api::resource::Quantity};
+use k8s_openapi::{
+    api::batch::v1::{Job, JobSpec},
+    api::core::v1::{PodTemplateSpec, PodSpec, Container},
+    apimachinery::pkg::api::resource::Quantity,
+};
 
 #[tokio::main(flavor = "current_thread")]
 pub async fn main() -> anyhow::Result<()> {
@@ -34,65 +31,91 @@ pub async fn main() -> anyhow::Result<()> {
     let maestro_client = MaestroK8sClient::new().await?;
 
     println!("Building job workflow...");
-    let test_job_input = build_job(&image, &job_name, &namespace)?;
+    let test_job_input = build_job(&image, &job_name)?;
     println!("{}", serde_yml::to_string(&test_job_input)?);
 
     println!("Applying job to Kubernetes cluster...");
-    let succeed_job = maestro_client
-        .create_job(&test_job_input, namespace, dry_run)
-        .await?;
 
-    println!("Waiting for job completion...");
-    succeed_job.wait().await?;
+    // Create the job using Kubernetes API directly
+    let jobs_api = kube::Api::<Job>::namespaced(maestro_client.inner().clone(), &namespace);
 
-    println!("Cleaning up job resources...");
-    succeed_job.delete_job(dry_run).await?;
+    if !dry_run {
+        let created_job = jobs_api.create(&Default::default(), &test_job_input).await?;
+        let job_name = created_job.metadata.name.as_ref().unwrap();
+
+        println!("Job {} created, waiting for completion...", job_name);
+
+        // Wait for job completion
+        tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+
+        let job = jobs_api.get(job_name).await?;
+        if let Some(status) = job.status {
+            if status.succeeded.unwrap_or(0) > 0 {
+                println!("Job completed successfully");
+            } else if status.failed.unwrap_or(0) > 0 {
+                println!("Job failed");
+            }
+        }
+
+        // Delete the job
+        jobs_api.delete(job_name, &Default::default()).await?;
+        println!("Job deleted");
+    } else {
+        println!("DRY RUN: Job would be created");
+    }
 
     Ok(())
 }
 
-fn build_job(image: &str, name: &str, namespace: &str) -> anyhow::Result<Job> {
-    println!("Configuring job: {} in namespace: {}", name, namespace);
+fn build_job(image: &str, name: &str) -> anyhow::Result<Job> {
+    println!("Configuring job: {} in namespace: staging", name);
 
-    let job_name = JobNameType::DefinedName(name.to_owned());
     let container_name = "main";
 
-    println!("Setting up environment variables from secrets...");
-    let environment_from_object = vec![EnvironmentVariableFromObject::Secret("s3-storage".into())];
-
     println!("Configuring resource limits (CPU: 100m, Memory: 50M)...");
-    let resource_bounds: BTreeMap<ComputeResource, Quantity> = vec![
-        (ComputeResource::Cpu, Quantity("100m".to_owned())),
-        (ComputeResource::Memory, Quantity("50M".to_owned())),
-    ]
-    .into_iter()
-    .collect();
-
-    println!("Setting environment variables...");
-    let environment_variables = vec![(
-        "MAESTRO_TEST".to_owned(),
-        EnvironmentVariableSource::Value("MAESTRO_TEST_VARIABLE".to_owned()),
-    )]
-    .into_iter()
-    .collect();
+    let mut limits_map = BTreeMap::new();
+    limits_map.insert("cpu".to_string(), Quantity("100m".to_owned()));
+    limits_map.insert("memory".to_string(), Quantity("50M".to_owned()));
 
     println!("Building container with image: {}", image);
-    let container = MaestroContainer::new(image, container_name)
+    let maestro_container = MaestroContainer::new(image, container_name)
         .set_arguments(&vec![
             "bash".to_owned(),
             "-c".to_owned(),
             "echo 'Testing pod'; sleep 3; echo 'Finalizado'".to_owned(),
-        ])
-        .set_environment_variables_from_objects(&environment_from_object)
-        .set_environment_variables(environment_variables)
-        .set_resource_bounds(resource_bounds);
+        ]);
+
+    // Convert MaestroContainer to Kubernetes Container
+    let mut container = ContainerLike::as_container(&maestro_container);
+    container.resources = Some(k8s_openapi::api::core::v1::ResourceRequirements {
+        limits: Some(limits_map),
+        ..Default::default()
+    });
 
     println!("Building job with backoff limit: 4, restart policy: OnFailure");
-    let job = JobBuilder::new(&job_name, namespace)
-        .set_backoff_limit(4)
-        .set_restart_policy(&RestartPolicy::OnFailure)
-        .add_container(Box::new(container))?
-        .build()?;
+    let pod_spec = PodSpec {
+        containers: vec![container],
+        restart_policy: Some("OnFailure".to_string()),
+        ..Default::default()
+    };
 
-    Ok(job)
+    let pod_template_spec = PodTemplateSpec {
+        spec: Some(pod_spec),
+        ..Default::default()
+    };
+
+    let job_spec = JobSpec {
+        template: pod_template_spec,
+        backoff_limit: Some(4),
+        ..Default::default()
+    };
+
+    Ok(Job {
+        metadata: k8s_openapi::apimachinery::pkg::apis::meta::v1::ObjectMeta {
+            name: Some(name.to_string()),
+            ..Default::default()
+        },
+        spec: Some(job_spec),
+        ..Default::default()
+    })
 }

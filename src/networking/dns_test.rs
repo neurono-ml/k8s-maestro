@@ -1,6 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::headless_service_dns_pattern;
+    use crate::pod_dns_name;
+    use crate::service_dns_name;
 
     #[test]
     fn test_service_dns_name() {

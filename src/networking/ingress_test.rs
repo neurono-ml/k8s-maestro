@@ -1,6 +1,9 @@
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::IngressBuilder;
+    use crate::IngressPath;
+    use crate::PathType;
+    use crate::TLSConfig;
     use std::collections::BTreeMap;
 
     #[test]

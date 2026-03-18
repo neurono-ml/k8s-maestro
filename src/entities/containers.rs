@@ -6,6 +6,7 @@ pub trait ContainerLike {
     fn as_container(&self) -> Container;
 }
 
+#[derive(Debug)]
 pub struct MaestroContainer {
     image: String,
     name: String,
@@ -127,6 +128,7 @@ impl ContainerLike for MaestroContainer {
     }
 }
 
+#[derive(Debug)]
 pub struct SidecarContainer {
     image: String,
     name: String,

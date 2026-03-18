@@ -1,18 +1,24 @@
+//! This example demonstrates building Kubernetes Jobs with MaestroContainer.
+//!
+//! The example shows:
+//! - Creating a Kubernetes Job with a single container
+//! - Configuring container arguments and resource limits
+//! - Setting job-level configurations like backoff limit
+//! - Executing the job using the Kubernetes API directly
+
 use std::collections::BTreeMap;
 
 use futures::{pin_mut, StreamExt};
 use k8s_maestro::{
     clients::MaestroK8sClient,
-    entities::{
-        container::{
-            ComputeResource, ContainerLike, EnvironmentVariableFromObject,
-            EnvironmentVariableSource, MaestroContainer,
-        },
-        job::{JobBuilder, JobNameType, RestartPolicy},
-        volumes::MaestroPVCMountVolumeBuilder,
-    },
+    entities::{ComputeResource, ContainerLike, MaestroContainer},
+    steps::ResourceLimits,
 };
-use k8s_openapi::{api::batch::v1::Job, apimachinery::pkg::api::resource::Quantity};
+use k8s_openapi::{
+    api::batch::v1::{Job, JobSpec},
+    api::core::v1::{PodTemplateSpec, PodSpec, Container},
+    apimachinery::pkg::api::resource::Quantity,
+};
 
 #[tokio::main(flavor = "current_thread")]
 pub async fn main() -> anyhow::Result<()> {
@@ -25,61 +31,108 @@ pub async fn main() -> anyhow::Result<()> {
 
     let maestro_client = MaestroK8sClient::new().await?;
 
-    let test_job_input = build_job(&image, &job_generate_name, &namespace)?;
+    let test_job_input = build_job(&image, &job_generate_name)?;
     println!("{}", serde_yml::to_string(&test_job_input)?);
-    let suceed_job = maestro_client
-        .create_job(&test_job_input, namespace, dry_run)
-        .await?;
 
-    let log_stream = suceed_job.stream_logs(None).await;
+    // Create the job using Kubernetes API directly
+    let jobs_api = kube::Api::<Job>::namespaced(maestro_client.inner().clone(), &namespace);
 
-    pin_mut!(log_stream);
-    while let Some(log_line) = log_stream.next().await.transpose()? {
-        println!("{}", log_line.rich_message());
+    if !dry_run {
+        let created_job = jobs_api.create(&Default::default(), &test_job_input).await?;
+        let job_name = created_job.metadata.name.as_ref().unwrap();
+
+        println!("Job {} created, waiting for completion...", job_name);
+
+        // Stream logs from the job
+        let pods_api = kube::Api::<k8s_openapi::api::core::v1::Pod>::namespaced(
+            maestro_client.inner().clone(),
+            &namespace,
+        );
+
+        // Wait a bit for the pod to start
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+        let pod_list = pods_api
+            .list(&Default::default())
+            .await?
+            .into_iter()
+            .filter(|pod| {
+                pod.metadata
+                    .labels
+                    .as_ref()
+                    .and_then(|labels| labels.get("job-name"))
+                    .map(|label| label.starts_with(job_name))
+                    .unwrap_or(false)
+            })
+            .collect::<Vec<_>>();
+
+        if let Some(pod) = pod_list.first() {
+            if let Some(pod_name) = pod.metadata.name.as_ref() {
+                let logs = pods_api.logs(pod_name, &Default::default()).await?;
+                println!("Job logs:\n{}", logs);
+            }
+        }
+
+        // Delete the job
+        jobs_api.delete(job_name, &Default::default()).await?;
+        println!("Job deleted");
+    } else {
+        println!("DRY RUN: Job would be created");
     }
-
-    suceed_job.delete_job(dry_run).await?;
 
     Ok(())
 }
 
-fn build_job(image: &str, generate_name: &str, namespace: &str) -> anyhow::Result<Job> {
-    let job_name = JobNameType::GenerateName(generate_name.to_owned());
+fn build_job(image: &str, generate_name: &str) -> anyhow::Result<Job> {
     let container_name = "main";
 
-    let environment_from_object = vec![EnvironmentVariableFromObject::Secret("s3-storage".into())];
-    let resource_bounds: BTreeMap<ComputeResource, Quantity> = vec![
-        (ComputeResource::Cpu, Quantity("100m".to_owned())),
-        (ComputeResource::Memory, Quantity("50M".to_owned())),
-    ]
-    .into_iter()
-    .collect();
+    // Create resource limits
+    let mut limits_map = BTreeMap::new();
+    limits_map.insert("cpu".to_string(), Quantity("100m".to_owned()));
+    limits_map.insert("memory".to_string(), Quantity("50M".to_owned()));
 
-    let environment_variables = vec![(
-        "MAESTRO_TEST".to_owned(),
-        EnvironmentVariableSource::Value("MAESTRO_TEST_VARIABLE".to_owned()),
-    )]
-    .into_iter()
-    .collect();
-
-    let volume = MaestroPVCMountVolumeBuilder::new("/samba", "samba", "samba").build();
-
-    let container = MaestroContainer::new(image, container_name)
+    // Create the MaestroContainer
+    let maestro_container = MaestroContainer::new(image, container_name)
         .set_arguments(&vec![
             "bash".to_owned(),
             "-c".to_owned(),
             "ls /samba; sleep 10; exit 137".to_owned(),
-        ])
-        .set_environment_variables_from_objects(&environment_from_object)
-        .set_environment_variables(environment_variables)
-        .set_resource_bounds(resource_bounds)
-        .add_volume_mount_like(Box::new(volume))?;
+        ]);
 
-    let job = JobBuilder::new(&job_name, namespace)
-        .set_backoff_limit(4)
-        .set_restart_policy(&RestartPolicy::OnFailure)
-        .add_container(Box::new(container))?
-        .build()?;
+    // Convert MaestroContainer to Kubernetes Container
+    let mut container = ContainerLike::as_container(&maestro_container);
+    container.resources = Some(k8s_openapi::api::core::v1::ResourceRequirements {
+        limits: Some(limits_map),
+        ..Default::default()
+    });
 
-    Ok(job)
+    // Create pod spec
+    let pod_spec = PodSpec {
+        containers: vec![container],
+        restart_policy: Some("OnFailure".to_string()),
+        ..Default::default()
+    };
+
+    // Create pod template spec
+    let pod_template_spec = PodTemplateSpec {
+        spec: Some(pod_spec),
+        ..Default::default()
+    };
+
+    // Create job spec
+    let job_spec = JobSpec {
+        template: pod_template_spec,
+        backoff_limit: Some(4),
+        ..Default::default()
+    };
+
+    // Create job
+    Ok(Job {
+        metadata: k8s_openapi::apimachinery::pkg::apis::meta::v1::ObjectMeta {
+            generate_name: Some(generate_name.to_owned()),
+            ..Default::default()
+        },
+        spec: Some(job_spec),
+        ..Default::default()
+    })
 }

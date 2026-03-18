@@ -10,7 +10,6 @@ use k8s_maestro::{
     entities::{MaestroContainer, SidecarContainer},
     networking::SidecarPlugin,
 };
-use std::collections::HashMap;
 
 fn main() -> anyhow::Result<()> {
     println!("=== Sidecar Container Examples ===\n");
@@ -38,12 +37,12 @@ fn example_logging_sidecar() -> anyhow::Result<()> {
     println!("Creating a container with Fluent Bit logging sidecar");
 
     let mut main_container = MaestroContainer::new("nginx:latest", "web-server");
-    main_container.set_port(80);
-    main_container.set_labels([("app", "frontend")]);
+
+    let mut logging_env = std::collections::BTreeMap::new();
+    logging_env.insert("FLUENT_HOST".to_string(), "logserver".to_string());
 
     let logging_sidecar = SidecarContainer::new("fluent/fluent-bit:2.2", "log-collector")
-        .with_shared_volume("/var/log/nginx", "/var/log/nginx")
-        .with_environment([("FLUENT_HOST", "logserver".to_string())]);
+        .set_environment_variables(logging_env);
 
     println!("Main container: {:?}", main_container);
     println!("Logging sidecar: {:?}", logging_sidecar);
@@ -55,19 +54,15 @@ fn example_logging_sidecar() -> anyhow::Result<()> {
 fn example_monitoring_sidecar() -> anyhow::Result<()> {
     println!("Creating a container with Prometheus metrics exporter sidecar");
 
-    let mut main_container = MaestroContainer::new("myapp:latest", "api-server");
-    main_container.set_port(8080);
-    main_container.set_labels([("app", "api")]);
+    let main_container = MaestroContainer::new("myapp:latest", "api-server");
+
+    let mut metrics_env = std::collections::BTreeMap::new();
+    metrics_env.insert("COLLECTOR_PROCFS".to_string(), "/host/proc".to_string());
+    metrics_env.insert("COLLECTOR_SYSFS".to_string(), "/host/sys".to_string());
 
     let metrics_sidecar =
         SidecarContainer::new("prom/prometheus-node-exporter:latest", "metrics-exporter")
-            .with_port(9100)
-            .with_environment([
-                ("COLLECTOR_PROCFS", "/host/proc".to_string()),
-                ("COLLECTOR_SYSFS", "/host/sys".to_string()),
-            ])
-            .with_host_path_mount("/proc", "/host/proc", "ro")
-            .with_host_path_mount("/sys", "/host/sys", "ro");
+            .set_environment_variables(metrics_env);
 
     println!("Main container: {:?}", main_container);
     println!("Metrics sidecar: {:?}", metrics_sidecar);
@@ -79,19 +74,14 @@ fn example_monitoring_sidecar() -> anyhow::Result<()> {
 fn example_proxy_sidecar() -> anyhow::Result<()> {
     println!("Creating a container with Envoy proxy sidecar");
 
-    let mut main_container = MaestroContainer::new("myapp:latest", "application");
-    main_container.set_port(8080);
-    main_container.set_labels([("app", "backend")]);
+    let main_container = MaestroContainer::new("myapp:latest", "application");
+
+    let mut proxy_env = std::collections::BTreeMap::new();
+    proxy_env.insert("ENVOY_UID".to_string(), "1337".to_string());
+    proxy_env.insert("ENVOY_GID".to_string(), "1337".to_string());
 
     let proxy_sidecar = SidecarContainer::new("envoyproxy/envoy:v1.28", "proxy")
-        .with_port(8080)
-        .with_port(9901)
-        .with_shared_volume("/etc/envoy", "/etc/envoy")
-        .with_shared_volume("/var/run/envoy", "/var/run/envoy")
-        .with_environment([
-            ("ENVOY_UID", "1337".to_string()),
-            ("ENVOY_GID", "1337".to_string()),
-        ]);
+        .set_environment_variables(proxy_env);
 
     println!("Main container: {:?}", main_container);
     println!("Proxy sidecar: {:?}", proxy_sidecar);
@@ -104,19 +94,17 @@ fn example_proxy_sidecar() -> anyhow::Result<()> {
 fn example_multiple_sidecars() -> anyhow::Result<()> {
     println!("Creating a container with multiple sidecars");
 
-    let mut main_container = MaestroContainer::new("myapp:latest", "main");
-    main_container.set_port(8080);
-    main_container.set_labels([("app", "multi-sidecar")]);
+    let main_container = MaestroContainer::new("myapp:latest", "main");
 
-    let logging_sidecar = SidecarContainer::new("fluent/fluent-bit:2.2", "log-collector")
-        .with_shared_volume("/var/log", "/var/log");
+    let logging_sidecar = SidecarContainer::new("fluent/fluent-bit:2.2", "log-collector");
 
-    let metrics_sidecar =
-        SidecarContainer::new("prom/prometheus-node-exporter:latest", "metrics").with_port(9100);
+    let metrics_sidecar = SidecarContainer::new("prom/prometheus-node-exporter:latest", "metrics");
 
-    let debug_sidecar = SidecarContainer::new("busybox:latest", "debug")
-        .with_command(["sh", "-c", "sleep 3600"])
-        .with_shared_volume("/app", "/app");
+    let debug_sidecar = SidecarContainer::new("busybox:latest", "debug").set_arguments(&vec![
+        "sh".to_owned(),
+        "-c".to_owned(),
+        "sleep 3600".to_owned(),
+    ]);
 
     println!("Main container: {:?}", main_container);
     println!("Sidecars:");
@@ -135,54 +123,40 @@ impl SidecarPlugin for CustomSidecarPlugin {
         "custom-sidecar-plugin"
     }
 
-    fn version(&self) -> &str {
-        "1.0.0"
+    fn image(&self) -> &str {
+        "busybox:latest"
     }
 
-    fn description(&self) -> &str {
-        "A custom sidecar plugin for demonstration"
-    }
-
-    fn init(&mut self) -> anyhow::Result<()> {
-        println!("Initializing custom sidecar plugin...");
-        Ok(())
-    }
-
-    fn get_sidecar_container(
-        &self,
-        main_container: &MaestroContainer,
-    ) -> anyhow::Result<SidecarContainer> {
-        let labels = main_container.labels().unwrap_or(&HashMap::new());
-        let app_name = labels.get("app").unwrap_or(&"app".to_string());
-
+    fn create_sidecar(&self) -> anyhow::Result<SidecarContainer> {
         Ok(
-            SidecarContainer::new("busybox:latest", format!("{}-sidecar", app_name))
-                .with_command(["sh", "-c", "sleep 3600"])
-                .with_environment([("MAIN_APP", app_name.clone())]),
+            SidecarContainer::new(self.image(), self.name()).set_arguments(&vec![
+                "sh".to_owned(),
+                "-c".to_owned(),
+                "sleep 3600".to_owned(),
+            ]),
         )
     }
 
-    fn cleanup(&mut self) -> anyhow::Result<()> {
-        println!("Cleaning up custom sidecar plugin...");
-        Ok(())
+    fn default_config(&self) -> std::collections::BTreeMap<String, serde_json::Value> {
+        let mut config = std::collections::BTreeMap::new();
+        config.insert(
+            "version".to_string(),
+            serde_json::Value::String("1.0.0".to_string()),
+        );
+        config
     }
 }
 
 fn example_custom_plugin_sidecar() -> anyhow::Result<()> {
     println!("Creating a sidecar using a custom plugin");
 
-    let mut main_container = MaestroContainer::new("myapp:latest", "app");
-    main_container.set_labels([("app", "custom-plugin-example")]);
-    main_container.set_port(8080);
+    let main_container = MaestroContainer::new("myapp:latest", "app");
 
-    let mut plugin = CustomSidecarPlugin;
-    plugin.init()?;
-
-    let sidecar = plugin.get_sidecar_container(&main_container)?;
+    let plugin = CustomSidecarPlugin;
+    let sidecar = plugin.create_sidecar()?;
 
     println!("Main container: {:?}", main_container);
     println!("Custom plugin sidecar: {:?}", sidecar);
 
-    plugin.cleanup()?;
     Ok(())
 }

@@ -1,6 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::ServiceBuilder;
+    use crate::ServicePort;
+    use crate::ServiceType;
     use std::collections::BTreeMap;
 
     #[test]
