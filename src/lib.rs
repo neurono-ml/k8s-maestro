@@ -6,6 +6,7 @@
 //! Kubernetes jobs with simplified builders and type-safe interfaces for workflow management.
 
 pub mod client;
+pub mod clients;
 pub mod entities;
 pub mod images;
 pub mod networking;
@@ -14,6 +15,7 @@ pub mod steps;
 pub mod workflows;
 
 pub use client::{CreatedWorkflow, MaestroClient, MaestroClientBuilder};
+pub use clients::MaestroK8sClient;
 pub use entities::ComputeResource;
 pub use networking::{
     headless_service_dns_pattern, pod_dns_name, service_dns_name, IngressBuilder, IngressPath,
