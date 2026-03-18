@@ -9,6 +9,7 @@ pub mod client;
 pub mod clients;
 pub mod entities;
 pub mod images;
+pub mod migration;
 pub mod networking;
 pub mod security;
 pub mod steps;

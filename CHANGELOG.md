@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Migration Guide and Utilities
+- Comprehensive migration guide for v0.3.0 → v0.4.0 API transition
+- Migration utilities module (`src/migration/mod.rs`) with type aliases for backward compatibility
+- Deprecated type aliases: `Job` → `Workflow`, `JobBuilder` → `WorkflowBuilder`, `MaestroK8sClient` → `MaestroClient`
+- Migration helper functions for client creation with different dry_run and namespace configurations
+- `allow_deprecated!` macro for temporarily suppressing deprecation warnings during migration
+- `MigrationChecklist` trait for tracking migration progress in tests
+- Detailed code examples showing old vs new API patterns
+- FAQ section addressing common migration questions
+- Complete migration checklist with step-by-step guidance
+
 #### File Observer Sidecar (MVP)
 - File event detection system with `FileEvent` enum (Created, Modified, Deleted)
 - `FileMetadata` tracking (filename, path, mime_type, size, timestamps)

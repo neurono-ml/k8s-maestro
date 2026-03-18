@@ -28,16 +28,20 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-k8s-maestro = "0.3"
+k8s-maestro = "0.4"
 ```
 
 Enable Kubernetes support with the appropriate version feature:
 
 ```toml
-k8s-maestro = { version = "0.3", features = ["k8s_v1_28"] }
+k8s-maestro = { version = "0.4", features = ["k8s_v1_28"] }
 ```
 
 Available features: `k8s_v1_28`, `k8s_v1_29`, `k8s_v1_30`, `k8s_v1_31`, `k8s_v1_32`
+
+### Migrating from v0.3.0?
+
+If you're upgrading from v0.3.x to v0.4.0, check out our [Migration Guide](docs/migration-guide.md) for detailed instructions on updating your code to the new workflow-centric API.
 
 ## Quick Start
 
