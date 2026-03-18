@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from tag
+        id: extract_version
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes from CHANGELOG
+        id: release_notes
+        run: |
+          # Get the version without 'v' prefix
+          VERSION="${{ steps.extract_version.outputs.version }}"
+          
+          # Extract release notes from CHANGELOG.md
+          # Find the section for this version and extract content until next version or end of file
+          if [ -f CHANGELOG.md ]; then
+            awk -v version="^## \\[$VERSION\\]" '
+              /^## \[/ { in_release=1 }
+              in_release && /^##/ { exit }
+              in_release { print }
+            ' CHANGELOG.md > release_notes.md
+            
+            # If no release notes found for this version, use a default message
+            if [ ! -s release_notes.md ] || [ $(wc -l < release_notes.md) -eq 0 ]; then
+              echo "Release $VERSION - See CHANGELOG.md for details" > release_notes.md
+            fi
+            
+            # Display release notes
+            echo "Release Notes:"
+            cat release_notes.md
+          else
+            echo "No CHANGELOG.md found, using default release notes" > release_notes.md
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ steps.extract_version.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ contains(steps.extract_version.outputs.version, 'beta') || contains(steps.extract_version.outputs.version, 'alpha') }}
+          generate_release_notes: false
