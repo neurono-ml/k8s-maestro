@@ -9,6 +9,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Security Module
+- `SecurityClient` for managing Kubernetes security resources
+- `NetworkPolicyBuilder` with `deny_all()`, `allow_all()`, and `allow_within_namespace()` presets
+- `ResourceQuotaBuilder` with `small_workload()`, `medium_workload()`, and `large_workload()` presets
+- RBAC builders: `ServiceAccountBuilder`, `RoleBuilder`, `RoleBindingBuilder`, `ClusterRoleBuilder`, `ClusterRoleBindingBuilder`
+- `SecurityContext` builders: `PodSecurityContextBuilder`, `SecurityContextConfig`
+- `LimitRangeBuilder` and `LimitRangeItemBuilder` for resource constraint management
+- Network policy rule types: `PolicyType` (Ingress, Egress, Both), `NetworkPolicyRule`
+- Resource quota types: `QuotaScope` (Terminating, NotTerminating, BestEffort, NotBestEffort)
+- Preset RBAC roles: `workflow_executor()`, `workflow_viewer()`, `admin()`
+- Module structure in `src/security/` with public re-exports
+- Unit tests for all security builders and preset configurations
+
+#### Sidecar Plugin System (MVP)
+- `SidecarContainer` struct with builder pattern for sidecar containers
+- `SidecarBuilder` fluent API for configuring sidecars
+- `SidecarPlugin` trait defining plugin interface
+- `PluginRegistry` for managing registered plugins
+- `PluginInfo` struct for plugin metadata
+- `ContainerPort` struct for port configuration
+- Module structure in `src/steps/kubernetes/sidecar.rs` and `src/networking/plugins/`
+- Unit tests for all plugin system components
+- MVP implementation with essential plugin functionality
+
+#### Documentation Update
+- Complete rewrite of README.md with professional structure
+- GitHub badges (version, license, build status, docs.rs, crates.io)
+- Comprehensive feature list (10 key features)
+- Installation instructions with feature flags
+- Quick start guide with workflow example
+- Usage examples (basic and advanced patterns)
+- API documentation links
+- Contributing guidelines
+
+#### Examples Update
+- Renamed examples to workflow-centric API:
+  - `use_job_builder.rs` → `use_workflow_builder.rs`
+  - `apply_and_watch.rs` → `apply_and_watch_workflow.rs`
+  - `delete.rs` → `delete_workflow.rs`
+- Created `examples/README.md` with comprehensive descriptions
+- New examples:
+  - `use_services.rs` - Service exposure
+  - `use_sidecar.rs` - Sidecar containers
+  - `multi_step_workflow.rs` - Multi-step workflows
+  - `python_step.rs` - Python step (aspirational)
+  - `rust_step.rs` - Rust step (aspirational)
+  - `wasm_step.rs` - WASM step (aspirational)
+- Updated all examples to use new workflow-centric API
+
+#### Site-Docs Structure
+- `site-docs/index.md` - Landing page with overview
+- `site-docs/getting-started/installation.md` - Installation guide
+- `site-docs/getting-started/quick-start.md` - Quick start guide
+- `site-docs/getting-started/concepts.md` - Core concepts
+- `site-docs/guides/basic-workflow.md` - Basic workflow guide
+- `site-docs/reference/configuration.md` - Configuration reference
+- `site-docs/reference/troubleshooting.md` - Troubleshooting guide
+
 #### Migration Guide and Utilities
 - Comprehensive migration guide for v0.3.0 → v0.4.0 API transition
 - Migration utilities module (`src/migration/mod.rs`) with type aliases for backward compatibility
