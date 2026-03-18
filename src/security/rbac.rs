@@ -160,6 +160,13 @@ impl RoleBuilder {
                     None
                 } else {
                     Some(self.annotations)
+                },
+                labels: if self.labels.is_empty() {
+                    None
+                } else {
+                    Some(self.labels)
+                },
+                ..Default::default()
             },
             rules: if k8s_rules.is_empty() {
                 None
@@ -344,13 +351,23 @@ impl RoleBindingBuilder {
 
 pub struct ClusterRoleBuilder {
     name: String,
-    aggregation_rule: Option<String>,
+    aggregation_rule: Option<k8s_openapi::api::rbac::v1::AggregationRule>,
     rules: Vec<PolicyRule>,
     labels: BTreeMap<String, String>,
     annotations: BTreeMap<String, String>,
 }
 
 impl ClusterRoleBuilder {
+    pub fn new(name: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            aggregation_rule: None,
+            rules: Vec::new(),
+            labels: BTreeMap::new(),
+            annotations: BTreeMap::new(),
+        }
+    }
+
     pub fn with_rules(mut self, rules: Vec<PolicyRule>) -> Self {
         self.rules = rules;
         self
@@ -371,11 +388,6 @@ impl ClusterRoleBuilder {
         self
     }
 
-    pub fn with_aggregation_rule(mut self, rule: &str) -> Self {
-        self.aggregation_rule = Some(rule.to_string());
-        self
-    }
-
     pub fn build(self) -> Result<ClusterRole> {
         let k8s_rules: Vec<k8s_openapi::api::rbac::v1::PolicyRule> =
             self.rules.iter().map(|r| r.to_k8s_rule()).collect();
@@ -388,9 +400,6 @@ impl ClusterRoleBuilder {
                 } else {
                     Some(self.annotations)
                 },
-                labels: if self.labels.is_empty() { None } else { Some(self.labels) },
-                ..Default::default()
-            },
                 labels: if self.labels.is_empty() {
                     None
                 } else {
@@ -398,6 +407,7 @@ impl ClusterRoleBuilder {
                 },
                 ..Default::default()
             },
+            aggregation_rule: self.aggregation_rule,
             rules: if k8s_rules.is_empty() {
                 None
             } else {

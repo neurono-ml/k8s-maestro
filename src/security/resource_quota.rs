@@ -108,17 +108,21 @@ impl ResourceQuotaBuilder {
                 },
                 ..Default::default()
             }),
+            status: None,
         })
     }
 
     pub fn small_workload(name: &str, namespace: &str) -> Result<Self> {
         let limits: BTreeMap<String, Quantity> = [
-            ("requests.cpu", Quantity("2".to_string())),
-            ("requests.memory", Quantity("4Gi".to_string())),
-            ("limits.cpu", Quantity("4".to_string())),
-            ("limits.memory", Quantity("8Gi".to_string())),
-            ("count/pods", Quantity("10".to_string())),
-            ("persistentvolumeclaims", Quantity("5".to_string())),
+            ("requests.cpu".to_string(), Quantity("2".to_string())),
+            ("requests.memory".to_string(), Quantity("4Gi".to_string())),
+            ("limits.cpu".to_string(), Quantity("4".to_string())),
+            ("limits.memory".to_string(), Quantity("8Gi".to_string())),
+            ("count/pods".to_string(), Quantity("10".to_string())),
+            (
+                "persistentvolumeclaims".to_string(),
+                Quantity("5".to_string()),
+            ),
         ]
         .iter()
         .cloned()
@@ -129,12 +133,15 @@ impl ResourceQuotaBuilder {
 
     pub fn medium_workload(name: &str, namespace: &str) -> Result<Self> {
         let limits: BTreeMap<String, Quantity> = [
-            ("requests.cpu", Quantity("10".to_string())),
-            ("requests.memory", Quantity("20Gi".to_string())),
-            ("limits.cpu", Quantity("20".to_string())),
-            ("limits.memory", Quantity("40Gi".to_string())),
-            ("count/pods", Quantity("50".to_string())),
-            ("persistentvolumeclaims", Quantity("20".to_string())),
+            ("requests.cpu".to_string(), Quantity("10".to_string())),
+            ("requests.memory".to_string(), Quantity("20Gi".to_string())),
+            ("limits.cpu".to_string(), Quantity("20".to_string())),
+            ("limits.memory".to_string(), Quantity("40Gi".to_string())),
+            ("count/pods".to_string(), Quantity("50".to_string())),
+            (
+                "persistentvolumeclaims".to_string(),
+                Quantity("20".to_string()),
+            ),
         ]
         .iter()
         .cloned()
@@ -145,12 +152,15 @@ impl ResourceQuotaBuilder {
 
     pub fn large_workload(name: &str, namespace: &str) -> Result<Self> {
         let limits: BTreeMap<String, Quantity> = [
-            ("requests.cpu", Quantity("50".to_string())),
-            ("requests.memory", Quantity("100Gi".to_string())),
-            ("limits.cpu", Quantity("100".to_string())),
-            ("limits.memory", Quantity("200Gi".to_string())),
-            ("count/pods", Quantity("200".to_string())),
-            ("persistentvolumeclaims", Quantity("100".to_string())),
+            ("requests.cpu".to_string(), Quantity("50".to_string())),
+            ("requests.memory".to_string(), Quantity("100Gi".to_string())),
+            ("limits.cpu".to_string(), Quantity("100".to_string())),
+            ("limits.memory".to_string(), Quantity("200Gi".to_string())),
+            ("count/pods".to_string(), Quantity("200".to_string())),
+            (
+                "persistentvolumeclaims".to_string(),
+                Quantity("100".to_string()),
+            ),
         ]
         .iter()
         .cloned()

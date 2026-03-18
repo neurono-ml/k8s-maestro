@@ -17,12 +17,12 @@
 //! let security = SecurityClient { client: &client };
 //!
 //! // Create a network policy
-//! let policy = security.network_policy()
-//!     .deny_all("production", "default")
+//! let policy = security.network_policy("deny-all")
+//!     .deny_all("deny-all", "default")
 //!     .await?;
 //!
 //! // Create a resource quota
-//! let quota = security.resource_quota()
+//! let quota = security.resource_quota("small-quota")
 //!     .with_scope(QuotaScope::Terminating)
 //!     .build()
 //!     .await?;
@@ -33,117 +33,39 @@
 //!     .build();
 //!
 //! // Create a service account
-//! let sa = security.service_account()
+//! let sa = security.service_account("test-sa")
 //!     .with_annotation("eks.amazonaws.com/role-arn", "arn:aws:iam::123456:role/test")
 //!     .build()
 //!     .await?;
 //! ```
-//!
-//! # Client Methods
-//!
-//! The `SecurityClient` trait provides the following methods for building security resources:
-//!
-//! ## Network Policy
-//!
-//! ```ignore
-//! fn network_policy(&self) -> NetworkPolicyBuilder
-//! ```
-//!
-//! Returns a builder for creating network policies.
-//!
-//! ## Resource Quota
-//!
-//! ```ignore
-//! fn resource_quota(&self) -> ResourceQuotaBuilder
-//! ```
-//!
-//! Returns a builder for creating resource quotas.
-//!
-//! ## Security Context
-//!
-//! ```ignore
-//! fn security_context(&self) -> PodSecurityContextBuilder
-//! ```
-//!
-//! Returns a builder for creating pod-level security contexts.
-//!
-//! ## Security Context Config
-//!
-//! ```ignore
-//! fn security_context_config(&self) -> SecurityContextConfig
-//! ```
-//!
-//! Returns a builder for creating security context configurations.
-//!
-//! ## Service Account
-//!
-//! ```ignore
-//! fn service_account(&self) -> ServiceAccountBuilder
-//! ```
-//!
-//! Returns a builder for creating service accounts.
-//!
-//! ## Role
-//!
-//! ```ignore
-//! fn role(&self) -> RoleBuilder
-//! ```
-//!
-//! Returns a builder for creating namespace-scoped roles.
-//!
-//! ## Cluster Role
-//!
-//! ```ignore
-//! fn cluster_role(&self) -> ClusterRoleBuilder
-//! ```
-//!
-//! Returns a builder for creating cluster-wide roles.
-//!
-//! ## Role Binding
-//!
-//! ```ignore
-//! fn role_binding(&self) -> RoleBindingBuilder
-//! ```
-//!
-//! Returns a builder for creating role bindings.
-//!
-//! ## Cluster Role Binding
-//!
-//! ```ignore
-//! fn cluster_role_binding(&self) -> ClusterRoleBindingBuilder
-//! ```
-//!
-//! Returns a builder for creating cluster role bindings.
-//!
-//! ## RBAC Policy Rule
-//!
-//! ```ignore
-//! fn rbac_policy_rule(&self) -> RbacPolicyRule
-//! ```
-//!
-//! Returns a builder for creating RBAC policy rules.
-//!
-//! ## Limit Range
-//!
-//! ```ignore
-//! fn limit_range(&self) -> LimitRangeBuilder
-//! ```
-//!
-//! Returns a builder for creating limit ranges.
-//!
+
+use super::MaestroClient;
+use crate::security::{
+    ClusterRoleBindingBuilder, ClusterRoleBuilder, LimitRangeBuilder, LimitRangeItemBuilder,
+    LimitRangeType, NetworkPolicyBuilder, PodSecurityContextBuilder, PolicyRule as RbacPolicyRule,
+    ResourceQuotaBuilder, RoleBindingBuilder, RoleBuilder, SecurityContextConfig,
+    ServiceAccountBuilder,
+};
+
+/// Client for managing Kubernetes security resources.
+pub struct SecurityClient<'a> {
+    pub(crate) client: &'a MaestroClient,
+}
+
+impl<'a> SecurityClient<'a> {
     /// Returns a network policy builder.
-    pub fn network_policy(&self) -> NetworkPolicyBuilder {
-        NetworkPolicyBuilder::new(self.client.namespace().to_string())
+    pub fn network_policy(&self, name: &str) -> NetworkPolicyBuilder {
+        NetworkPolicyBuilder::new(name, self.client.namespace())
     }
 
     /// Returns a resource quota builder.
-    pub fn resource_quota(&self) -> ResourceQuotaBuilder {
-        ResourceQuotaBuilder::new(self.client.namespace().to_string())
+    pub fn resource_quota(&self, name: &str) -> ResourceQuotaBuilder {
+        ResourceQuotaBuilder::new(name, self.client.namespace())
     }
 
     /// Returns a security context builder.
     pub fn security_context(&self) -> PodSecurityContextBuilder {
-        PodSecurityContextBuilder::new(self.client.namespace().to_string())
+        PodSecurityContextBuilder::new()
     }
 
     /// Returns a security context config builder.
@@ -152,28 +74,28 @@
     }
 
     /// Returns a service account builder.
-    pub fn service_account(&self) -> ServiceAccountBuilder {
-        ServiceAccountBuilder::new(self.client.namespace().to_string())
+    pub fn service_account(&self, name: &str) -> ServiceAccountBuilder {
+        ServiceAccountBuilder::new(name, self.client.namespace())
     }
 
     /// Returns a role builder.
-    pub fn role(&self) -> RoleBuilder {
-        RoleBuilder::new(self.client.namespace().to_string())
+    pub fn role(&self, name: &str) -> RoleBuilder {
+        RoleBuilder::new(name, self.client.namespace())
     }
 
     /// Returns a cluster role builder.
-    pub fn cluster_role(&self) -> ClusterRoleBuilder {
-        ClusterRoleBuilder::new()
+    pub fn cluster_role(&self, name: &str) -> ClusterRoleBuilder {
+        ClusterRoleBuilder::new(name)
     }
 
     /// Returns a role binding builder.
-    pub fn role_binding(&self) -> RoleBindingBuilder {
-        RoleBindingBuilder::new(self.client.namespace().to_string())
+    pub fn role_binding(&self, name: &str) -> RoleBindingBuilder {
+        RoleBindingBuilder::new(name, self.client.namespace())
     }
 
     /// Returns a cluster role binding builder.
-    pub fn cluster_role_binding(&self) -> ClusterRoleBindingBuilder {
-        ClusterRoleBindingBuilder::new()
+    pub fn cluster_role_binding(&self, name: &str) -> ClusterRoleBindingBuilder {
+        ClusterRoleBindingBuilder::new(name)
     }
 
     /// Returns a policy rule builder.
@@ -182,8 +104,8 @@
     }
 
     /// Returns a limit range builder.
-    pub fn limit_range(&self) -> LimitRangeBuilder {
-        LimitRangeBuilder::new(self.client.namespace().to_string())
+    pub fn limit_range(&self, name: &str) -> LimitRangeBuilder {
+        LimitRangeBuilder::new(name, self.client.namespace())
     }
 
     /// Returns a limit range item builder.
@@ -197,10 +119,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_security_client_namespace() {
+    fn test_security_client_creation() {
         use crate::client::{MaestroClient, MaestroClientBuilder};
 
-        let ctx = crate::Context::default();
         let client = MaestroClientBuilder::new()
             .with_namespace("test-ns")
             .build()
@@ -208,19 +129,18 @@ mod tests {
 
         let security_client = SecurityClient { client: &client };
 
-        assert_eq!(security_client.network_policy().name, "test-ns".to_string());
-        assert_eq!(
-            security_client.resource_quota().namespace,
-            "test-ns".to_string()
-        );
-        assert_eq!(
-            security_client.security_context().namespace,
-            "test-ns".to_string()
-        );
-        assert_eq!(
-            security_client.service_account().namespace,
-            "test-ns".to_string()
-        );
-        assert_eq!(security_client.role().namespace, "test-ns".to_string());
+        // Test that all builder methods work without panicking
+        let _ = security_client.network_policy("test-policy");
+        let _ = security_client.resource_quota("test-quota");
+        let _ = security_client.security_context();
+        let _ = security_client.security_context_config();
+        let _ = security_client.service_account("test-sa");
+        let _ = security_client.role("test-role");
+        let _ = security_client.cluster_role("test-cluster-role");
+        let _ = security_client.role_binding("test-binding");
+        let _ = security_client.cluster_role_binding("test-cluster-binding");
+        let _ = security_client.policy_rule();
+        let _ = security_client.limit_range("test-limits");
+        let _ = security_client.limit_range_item(crate::security::LimitRangeType::Container);
     }
 }

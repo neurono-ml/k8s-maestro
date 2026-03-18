@@ -14,7 +14,7 @@ pub mod security;
 pub mod steps;
 pub mod workflows;
 
-pub use client::{CreatedWorkflow, MaestroClient, MaestroClientBuilder};
+pub use client::{MaestroClient, MaestroClientBuilder};
 pub use clients::MaestroK8sClient;
 pub use entities::ComputeResource;
 pub use networking::{

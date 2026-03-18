@@ -206,7 +206,7 @@ impl NetworkPolicyBuilder {
                 match_labels: None,
                 match_expressions: None,
             })
-            .with_ingress_rule(rule)
+            .with_ingress_rule(rule.clone())
             .with_egress_rule(rule))
     }
 }
