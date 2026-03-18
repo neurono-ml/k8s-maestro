@@ -28,14 +28,26 @@ serde_json = "1.0"
 dyn-clone = "1.0.17"
 futures = "0.3.31"
 uuid = { version = "1.10", features = ["v4", "serde"] }
-tokio = { version = "1", default-features = false, features = ["macros", "rt", "rt-multi-thread", "time"] }
+tokio = { version = "1", default-features = false, features = ["macros", "rt", "rt-multi-thread", "time", "sync"] }
 chrono = { version = "0.4", features = ["serde"] }
-reqwest = { version = "0.12", features = ["json"] }
+reqwest = { version = "0.12", features = ["json", "blocking"] }
 base64 = "0.22"
+
+notify = "8.0"
+axum = "0.8"
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+lru = "0.12"
+mime_guess = "2.0"
+mime = "0.3"
+git2 = { version = "0.20.4", optional = true }
+sha2 = { version = "0.10.9", optional = true }
+tempfile = { version = "3.27.0", optional = true }
+libloading = "0.8"
 
 [features]
 k8s-openapi = []
 kube = []
+exec-steps = ["git2", "sha2", "tempfile"]
 
 k8s_v1_28 = ["k8s-openapi/v1_28", "k8s-openapi", "kube"]
 k8s_v1_29 = ["k8s-openapi/v1_29", "k8s-openapi", "kube"]
@@ -43,7 +55,10 @@ k8s_v1_30 = ["k8s-openapi/v1_30", "k8s-openapi", "kube"]
 k8s_v1_31 = ["k8s-openapi/v1_31", "k8s-openapi", "kube"]
 k8s_v1_32 = ["k8s-openapi/v1_32", "k8s-openapi", "kube"]
 
-default = ["k8s_v1_28"]
+default = ["k8s_v1_28", "exec-steps"]
+git2 = ["dep:git2"]
+sha2 = ["dep:sha2"]
+tempfile = ["dep:tempfile"]
 
 [dev-dependencies]
 tokio = { version = "1", default-features=false, features = ["macros", "rt", "rt-multi-thread"] }
