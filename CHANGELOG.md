@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Networking Module (MVP)
+- `ServiceBuilder` with fluent API for creating Kubernetes Services
+- Support for all service types: ClusterIP, Headless, NodePort, LoadBalancer
+- `ServiceType` enum for type-safe service type selection
+- `ServicePort` struct for port configuration with protocol support
+- Multiple ports configuration with named ports
+- Advanced options: session affinity, external traffic policy, custom cluster IP
+- Service selector configuration for pod targeting
+- `IngressBuilder` with fluent API for creating Kubernetes Ingress resources
+- `IngressPath` struct with path type support (Exact, Prefix, ImplementationSpecific)
+- `PathType` enum for type-safe path type selection
+- `TLSConfig` struct for TLS configuration with multiple hosts
+- Multiple paths support for complex routing rules
+- Custom annotations support for ingress-specific configurations
+- Ingress class support for controller selection
+- DNS utilities: `service_dns_name()`, `pod_dns_name()`, `headless_service_dns_pattern()`
+- Module structure in `src/networking/` with public re-exports
+- Comprehensive rustdoc documentation on all public types and methods
+- Unit tests for all builder types and validation
+- Examples: `use_service_builder.rs`, `use_ingress_builder.rs`
+- Fluent builder pattern consistent with existing codebase patterns
+
 #### ConfigMap and Secret Builders
 - `ConfigMapBuilder` with fluent API for building Kubernetes ConfigMaps
 - Support for string data, binary data, labels, annotations, and immutable ConfigMaps

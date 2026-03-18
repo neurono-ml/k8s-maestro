@@ -15,6 +15,10 @@ pub mod workflows;
 
 pub use client::{CreatedWorkflow, MaestroClient, MaestroClientBuilder};
 pub use entities::ComputeResource;
+pub use networking::{
+    headless_service_dns_pattern, pod_dns_name, service_dns_name, IngressBuilder, IngressPath,
+    PathType, ServiceBuilder, ServicePort, ServiceType, TLSConfig,
+};
 pub use steps::{StepResult, StepStatus};
 pub use workflows::{
     ExecutionMode, LegacyCheckpointConfig, Workflow, WorkflowBuilder, WorkflowMetadata,
