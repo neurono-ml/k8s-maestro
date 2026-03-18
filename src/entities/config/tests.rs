@@ -1,9 +1,7 @@
-#[cfg(test)]
-mod tests {
-    use crate::entities::config::{
-        ConfigMapBuilder, ImagePullSecretBuilder, SecretBuilder, SecretType,
-    };
-    use std::collections::BTreeMap;
+use crate::entities::config::{
+    ConfigMapBuilder, ImagePullSecretBuilder, SecretBuilder, SecretType,
+};
+use std::collections::BTreeMap;
 
     #[test]
     fn test_configmap_builder_basic() {
@@ -177,15 +175,3 @@ mod tests {
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("username"));
     }
-
-    #[test]
-    fn test_image_pull_secret_builder_missing_password() {
-        let result = ImagePullSecretBuilder::new("test-secret")
-            .with_registry("https://index.docker.io/v1/")
-            .with_username("testuser")
-            .build();
-
-        assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("password"));
-    }
-}

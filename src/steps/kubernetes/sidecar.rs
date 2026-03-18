@@ -40,6 +40,7 @@ impl ContainerPort {
     }
 }
 
+#[derive(Debug)]
 pub struct SidecarContainer {
     pub name: String,
     pub image: String,

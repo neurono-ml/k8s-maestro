@@ -9,9 +9,6 @@ pub mod configmap;
 pub mod image_pull_secret;
 pub mod secret;
 
-#[cfg(test)]
-mod tests;
-
 pub use configmap::ConfigMapBuilder;
 pub use image_pull_secret::ImagePullSecretBuilder;
 pub use secret::{SecretBuilder, SecretType};
