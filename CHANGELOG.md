@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Kube Workflow Steps Implementation (MVP)
+- `KubeJobStep` with full Kubernetes Job lifecycle management
+- `KubePodStep` with full Kubernetes Pod lifecycle management
+- `KubeJobStepBuilder` with fluent API for job configuration
+- `KubePodStepBuilder` with fluent API for pod configuration
+- Supporting types: `JobNameType` (DefinedName, GenerateName), `RestartPolicy` (Never, OnFailure, Always)
+- `ServiceConfig` for service configuration with port mapping and selector
+- `IngressConfig` for ingress configuration with path, TLS, and annotations
+- `ContainerLike` trait for polymorphic container handling
+- `MaestroContainer` with image, arguments, environment variables, and resource limits
+- `SidecarContainer` for sidecar containers with same capabilities
+- `MaestroK8sClient` wrapper around `kube::Client` for K8s API interactions
+- Trait implementations: `WorkFlowStep`, `KubeWorkFlowStep`, `WaitableWorkFlowStep`, `DeletableWorkFlowStep`, `LoggableWorkFlowStep`, `ServableWorkFlowStep`
+- Builder validation for required fields (name, namespace, containers)
+- Dry run support for all operations
+- Module structure in `src/steps/kubernetes/` with public re-exports
+- Client module in `src/clients/` for K8s client abstraction
+- Entity types in `src/entities/containers.rs` for container abstractions
+- Comprehensive unit tests for all supporting types
+- MVP implementation with essential functionality only
+
 #### Volume Builders (MVP)
 - `MaestroPVCMountVolumeBuilder` for Persistent Volume Claim volumes
 - `ConfigMapVolumeBuilder` for ConfigMap volumes with item-level control
