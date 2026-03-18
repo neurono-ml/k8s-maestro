@@ -25,7 +25,10 @@ pub async fn main() -> anyhow::Result<()> {
     // For new code, consider using MaestroClient with the workflow API
     // let maestro_client = MaestroK8sClient::new().await?;
 
-    println!("Building workflows: {} (will succeed) and {} (will fail)", succeed_name, failing_name);
+    println!(
+        "Building workflows: {} (will succeed) and {} (will fail)",
+        succeed_name, failing_name
+    );
     let test_job_input = make_sleep_job(succeed_name, &namespace);
     let failed_job_input = make_failing_job(failing_name, &namespace);
 
