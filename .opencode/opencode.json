@@ -1,0 +1,14 @@
+{
+    "$schema": "https://opencode.ai/tui.json",
+    "compaction": {
+        "auto": true,
+        "prune": true,
+        "reserved": 10000
+    },
+    "watcher": {
+        "ignore": ["target/**", "tmp/**", ".git/**", ".opencode/node_modules/**"]
+    },
+    "permission": {
+        "*": "allow"
+    }
+}
