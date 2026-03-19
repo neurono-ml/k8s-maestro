@@ -35,7 +35,7 @@ jobs:
     - name: Check formatting
       run: cargo fmt --check
     - name: Run clippy
-      run: cargo clippy -D warnings
+      run: cargo clippy -- -D warnings
 
   # Integration tests - require Kind cluster
   integration-tests:
