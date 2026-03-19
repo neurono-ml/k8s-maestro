@@ -53,7 +53,7 @@ jobs:
         cluster_name: test-cluster
         wait: 120s
     - name: Run integration tests (excludes E2E)
-      run: cargo test --test integration --verbose
+      run: cargo test --test '*' -- --ignored --verbose
       env:
         KUBECONFIG: /home/runner/.kube/config
 
@@ -72,8 +72,8 @@ jobs:
       with:
         cluster_name: e2e-cluster
         wait: 120s
-    - name: Run E2E tests (e2e module and workflow_e2e)
-      run: 'cargo test --test "e2e::" --test workflow_e2e --verbose'
+    - name: Run E2E tests (requires Docker and is slow)
+      run: cargo test --test '*' -- --ignored --verbose
       env:
         KUBECONFIG: /home/runner/.kube/config
 
