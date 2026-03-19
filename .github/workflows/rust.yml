@@ -20,7 +20,7 @@ jobs:
         toolchain: stable
         override: true
     - name: Run unit tests
-      run: cargo test --lib --verbose
+      run: cargo test --lib
 
   # Lint and format check
   lint:
@@ -35,7 +35,7 @@ jobs:
     - name: Check formatting
       run: cargo fmt --check
     - name: Run clippy
-      run: cargo clippy -- -D warnings
+      run: cargo clippy -D warnings
 
   # Integration tests - require Kind cluster
   integration-tests:
@@ -53,7 +53,7 @@ jobs:
         cluster_name: test-cluster
         wait: 120s
     - name: Run integration tests (excludes E2E)
-      run: cargo test --test '*' -- --ignored --verbose
+      run: cargo test --test '*' -- --ignored
       env:
         KUBECONFIG: /home/runner/.kube/config
 
@@ -73,7 +73,7 @@ jobs:
         cluster_name: e2e-cluster
         wait: 120s
     - name: Run E2E tests (requires Docker and is slow)
-      run: cargo test --test '*' -- --ignored --verbose
+      run: cargo test --test '*' -- --ignored
       env:
         KUBECONFIG: /home/runner/.kube/config
 
@@ -88,4 +88,4 @@ jobs:
         toolchain: stable
         override: true
     - name: Build Release
-      run: cargo build --release --verbose
+      run: cargo build --release
