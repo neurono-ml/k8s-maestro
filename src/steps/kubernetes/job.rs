@@ -1,5 +1,6 @@
 use crate::clients::MaestroK8sClient;
 use crate::entities::ContainerLike;
+use crate::entities::MaestroContainer;
 use crate::steps::kubernetes::types::{IngressConfig, JobNameType, RestartPolicy, ServiceConfig};
 use crate::steps::result::{StepResult, StepStatus};
 use crate::steps::traits::{
@@ -47,6 +48,31 @@ pub struct KubeJobStep {
 }
 
 impl KubeJobStep {
+    pub fn new(
+        name: impl Into<String>,
+        image: impl Into<String>,
+        client: MaestroK8sClient,
+    ) -> Self {
+        let container = MaestroContainer::new(image.into(), "main");
+        Self {
+            step_id: uuid::Uuid::new_v4().to_string(),
+            namespace: "default".to_string(),
+            name: JobNameType::DefinedName(name.into()),
+            containers: vec![Box::new(container)],
+            sidecars: vec![],
+            backoff_limit: None,
+            restart_policy: RestartPolicy::Never,
+            ttl_seconds: None,
+            completions: None,
+            parallelism: None,
+            resource_limits: None,
+            service_config: None,
+            ingress_config: None,
+            client,
+            dry_run: false,
+        }
+    }
+
     pub fn builder() -> KubeJobStepBuilder {
         KubeJobStepBuilder::new()
     }

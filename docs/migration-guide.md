@@ -1,13 +1,26 @@
-# API Migration Guide: v0.3.0 → v0.4.0
+# API Migration Guide: v0.x.x → v1.x.x
 
-This guide helps you migrate your code from the job-centric API (v0.3.x) to the new workflow-centric API (v0.4.0).
+This guide helps you migrate your code from the job-centric API (v0.3.x) to the new workflow-centric API (v1.0.0).
 
 **Last Updated:** March 18, 2026  
-**Target Version:** 0.4.0
+**Target Version:** 1.0.0
+
+## Version History Note
+
+**Important Notice**: Version 0.4.0 was planned but never released. The project went directly 
+from v0.3.x to v1.0.0. Any references to v0.4.0 in older documentation or 
+CHANGELOG drafts should be treated as referring to v1.0.0.
+
+### What Changed?
+
+- **v0.3.x**: Job-centric API with simple job management
+- **v1.0.0**: Workflow-centric API with multi-step orchestration, dependencies, and advanced features
+
+This migration guide covers the transition from any v0.x.x version to v1.0.0+.
 
 ## Overview
 
-k8s-maestro 0.4.0 introduces a major API evolution focused on **multi-step workflows** with advanced features like dependency management, conditional execution, and trait-based step composition.
+k8s-maestro v1.0.0 introduces a major API evolution focused on **multi-step workflows** with advanced features like dependency management, conditional execution, and trait-based step composition.
 
 ### Why the Change?
 
@@ -41,21 +54,30 @@ let job = JobBuilder::new()
     .build()?;
 ```
 
-**New API (v0.4.0):**
+**New API (v1.0.0):**
 ```rust
 use k8s_maestro::workflows::{Workflow, WorkflowBuilder};
+use k8s_maestro::steps::KubeJobStep;
+use k8s_maestro::clients::MaestroK8sClient;
 
-let workflow = WorkflowBuilder::new()
-    .with_name("my-workflow")
-    .add_step(JobStep::new("job-1", "nginx:latest"))
-    .build()?;
+#[tokio::main]
+async fn example() -> anyhow::Result<()> {
+    let k8s_client = MaestroK8sClient::new().await?;
+
+    let workflow = WorkflowBuilder::new()
+        .with_name("my-workflow")
+        .add_step(KubeJobStep::new("job-1", "nginx:latest", k8s_client.clone()))
+        .build()?;
+    Ok(())
+}
 ```
 
 **Migration Notes:**
 - `Job` is now `Workflow`
 - `JobBuilder` is now `WorkflowBuilder`
 - Workflows must contain at least one step
-- Use `JobStep` for Kubernetes Jobs or implement custom step types
+- Use `KubeJobStep::new()` for Kubernetes Jobs with a single container
+- Use `KubeJobStep::builder()` for advanced Kubernetes Job configuration or implement custom step types
 
 ### 2. MaestroK8sClient → MaestroClient Builder Pattern
 
@@ -67,16 +89,24 @@ let client = MaestroK8sClient::new().await?;
 client.create_job(&job, namespace, dry_run).await?;
 ```
 
-**New API (v0.4.0):**
+**New API (v1.0.0):**
 ```rust
 use k8s_maestro::{MaestroClientBuilder, MaestroClient};
+use k8s_maestro::clients::MaestroK8sClient;
 
-let client = MaestroClientBuilder::new()
-    .with_namespace("default")
-    .with_dry_run(false)
-    .build()?;
+#[tokio::main]
+async fn example() -> anyhow::Result<()> {
+    let k8s_client = MaestroK8sClient::new().await?;
 
-let created = client.create_workflow(workflow)?;
+    let client = MaestroClientBuilder::new()
+        .with_namespace("default")
+        .with_client(k8s_client)
+        .with_dry_run(false)
+        .build()?;
+
+    let created = client.create_workflow(workflow)?;
+    Ok(())
+}
 ```
 
 **Migration Notes:**
@@ -93,10 +123,13 @@ client.create_job(&job, namespace, false).await?;
 client.delete_job(&job_name, namespace, true).await?;
 ```
 
-**New API (v0.4.0):**
+**New API (v1.0.0):**
 ```rust
+let k8s_client = MaestroK8sClient::new().await?;
+
 let client = MaestroClientBuilder::new()
     .with_dry_run(false)
+    .with_client(k8s_client)
     .build()?;
 
 client.create_workflow(workflow)?;
@@ -117,7 +150,7 @@ result.wait().await?;
 result.delete_job(dry_run).await?;
 ```
 
-**New API (v0.4.0):**
+**New API (v1.0.0):**
 ```rust
 let created = client.create_workflow(workflow)?;
 
@@ -146,7 +179,7 @@ use k8s_maestro::entities::job::{Job, JobBuilder, JobConfig};
 use k8s_maestro::entities::job::JobExecutionMode;
 ```
 
-**New API (v0.4.0):**
+**New API (v1.0.0):**
 ```rust
 use k8s_maestro::workflows::{Workflow, WorkflowBuilder, ExecutionMode};
 use k8s_maestro::workflows::checkpointing::CheckpointConfig;
@@ -218,7 +251,7 @@ let job = JobBuilder::new()
     .build()?;
 ```
 
-**New API (v0.4.0):**
+**New API (v1.0.0):**
 ```rust
 use k8s_maestro::workflows::ExecutionMode;
 
@@ -230,7 +263,7 @@ let workflow = WorkflowBuilder::new()
 
 #### Checkpointing
 
-**New API (v0.4.0):**
+**New API (v1.0.0):**
 ```rust
 use k8s_maestro::workflows::{CheckpointConfig, CheckpointFrequency};
 
@@ -245,21 +278,29 @@ let workflow = WorkflowBuilder::new()
 
 #### Dependency Chains
 
-**New API (v0.4.0):**
+**New API (v1.0.0):**
 ```rust
 use k8s_maestro::workflows::{ConditionBuilder, DependencyChain};
+use k8s_maestro::steps::KubeJobStep;
+use k8s_maestro::clients::MaestroK8sClient;
 
-let mut chain = DependencyChain::new();
-chain.add_step("extract");
-chain.add_step("transform").with_dependency("extract");
-chain.add_step("load").with_dependency("transform", ConditionBuilder::all_success());
+#[tokio::main]
+async fn example() -> anyhow::Result<()> {
+    let k8s_client = MaestroK8sClient::new().await?;
 
-let workflow = WorkflowBuilder::new()
-    .with_name("etl-workflow")
-    .add_step(JobStep::new("extract", "python:3.11"))
-    .add_step(JobStep::new("transform", "python:3.11"))
-    .add_step(JobStep::new("load", "postgres:16"))
-    .build()?;
+    let mut chain = DependencyChain::new();
+    chain.add_step("extract");
+    chain.add_step("transform").with_dependency("extract");
+    chain.add_step("load").with_dependency("transform", ConditionBuilder::all_success());
+
+    let workflow = WorkflowBuilder::new()
+        .with_name("etl-workflow")
+        .add_step(KubeJobStep::new("extract", "python:3.11", k8s_client.clone()))
+        .add_step(KubeJobStep::new("transform", "python:3.11", k8s_client.clone()))
+        .add_step(KubeJobStep::new("load", "postgres:16", k8s_client.clone()))
+        .build()?;
+    Ok(())
+}
 ```
 
 ## Migration Guide
@@ -273,7 +314,8 @@ Replace old imports:
 - use k8s_maestro::entities::job::{Job, JobBuilder};
 + use k8s_maestro::{MaestroClientBuilder, MaestroClient};
 + use k8s_maestro::workflows::{Workflow, WorkflowBuilder};
-+ use k8s_maestro::steps::kubernetes::JobStep;
++ use k8s_maestro::steps::KubeJobStep;
++ use k8s_maestro::clients::MaestroK8sClient;
 ```
 
 ### Step 2: Update Client Creation
@@ -282,8 +324,10 @@ Replace client initialization:
 
 ```diff
 - let client = MaestroK8sClient::new().await?;
++ let k8s_client = MaestroK8sClient::new().await?;
 + let client = MaestroClientBuilder::new()
 +     .with_namespace("default")
++     .with_client(k8s_client)
 +     .with_dry_run(false)
 +     .build()?;
 ```
@@ -293,17 +337,17 @@ Replace client initialization:
 Replace job creation:
 
 ```diff
-- let job = JobBuilder::new()
--     .with_name("my-job")
--     .with_namespace("default")
--     .with_container(container)
--     .build()?;
+- client.create_job(&job, namespace, true).await?;
 + 
-+ let workflow = WorkflowBuilder::new()
-+     .with_name("my-workflow")
-+     .with_namespace("default")
-+     .add_step(JobStep::new("job-1", "nginx:latest")
-+         .with_container(container))
++ let prod_client = MaestroClientBuilder::new()
++     .with_namespace("production")
++     .with_client(k8s_client.clone())
++     .build()?;
++ 
++ let test_client = MaestroClientBuilder::new()
++     .with_namespace("production")
++     .with_client(k8s_client.clone())
++     .with_dry_run(true)
 +     .build()?;
 ```
 
@@ -361,7 +405,7 @@ Remove dry_run parameters from method calls:
 
 ## Module Structure Mapping
 
-| Old Location (v0.3.x) | New Location (v0.4.0) |
+| Old Location (v0.3.x) | New Location (v1.0.0) |
 |----------------------|------------------------|
 | `entities::job::Job` | `workflows::Workflow` |
 | `entities::job::JobBuilder` | `workflows::WorkflowBuilder` |
@@ -373,14 +417,14 @@ Remove dry_run parameters from method calls:
 | `entities::config` | `entities::config` (unchanged) |
 | `entities::volumes` | `entities::volumes` (unchanged) |
 
-**New Modules in v0.4.0:**
+**New Modules in v1.0.0:**
 - `workflows::checkpointing` - Checkpointing and recovery
 - `workflows::dependency` - Dependency management and DAG
 - `workflows::execution` - Workflow execution engine
 - `steps::kubernetes` - Kubernetes step types (Job, Pod)
 - `steps::exec` - Execution step types (Python)
 - `steps::observers` - File observer steps
-- `client` - Client builder and security client
+- `clients` - Client builder and Kubernetes client
 
 ## Code Examples
 
@@ -397,14 +441,18 @@ async fn main() -> anyhow::Result<()> {
 }
 ```
 
-**New API (v0.4.0):**
+**New API (v1.0.0):**
 ```rust
 use k8s_maestro::MaestroClientBuilder;
+use k8s_maestro::clients::MaestroK8sClient;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    let k8s_client = MaestroK8sClient::new().await?;
+
     let client = MaestroClientBuilder::new()
         .with_namespace("default")
+        .with_client(k8s_client)
         .build()?;
     Ok(())
 }
@@ -427,22 +475,22 @@ let job = JobBuilder::new()
     .build()?;
 ```
 
-**New API (v0.4.0):**
+**New API (v1.0.0):**
 ```rust
 use k8s_maestro::workflows::WorkflowBuilder;
-use k8s_maestro::steps::kubernetes::{JobStep, JobStepBuilder};
+use k8s_maestro::steps::kubernetes::KubeJobStep;
+use k8s_maestro::clients::MaestroK8sClient;
 
-let step = JobStepBuilder::new()
-    .with_name("job-1")
-    .with_image("nginx:latest")
-    .with_namespace("default")
-    .build()?;
+#[tokio::main]
+async fn example() -> anyhow::Result<()> {
+    let k8s_client = MaestroK8sClient::new().await?;
 
-let workflow = WorkflowBuilder::new()
-    .with_name("my-workflow")
-    .with_namespace("default")
-    .add_step(step)
-    .build()?;
+    let workflow = WorkflowBuilder::new()
+        .with_name("my-workflow")
+        .add_step(KubeJobStep::new("job-1", "nginx:latest", k8s_client.clone()))
+        .build()?;
+    Ok(())
+}
 ```
 
 ### Execution and Waiting
@@ -454,7 +502,7 @@ result.wait().await?;
 println!("Job completed: {:?}", result);
 ```
 
-**New API (v0.4.0):**
+**New API (v1.0.0):**
 ```rust
 let created = client.create_workflow(workflow)?;
 
@@ -476,7 +524,7 @@ match created {
 result.delete_job(dry_run).await?;
 ```
 
-**New API (v0.4.0):**
+**New API (v1.0.0):**
 ```rust
 match created {
     CreatedWorkflow::Runtime(runtime) => {
@@ -494,14 +542,18 @@ client.create_job(&job, namespace, false).await?;
 client.create_job(&test_job, namespace, true).await?;
 ```
 
-**New API (v0.4.0) - Client-level:**
+**New API (v1.0.0) - Client-level:**
 ```rust
+let k8s_client = MaestroK8sClient::new().await?;
+
 let prod_client = MaestroClientBuilder::new()
     .with_namespace("production")
+    .with_client(k8s_client.clone())
     .build()?;
 
 let dry_run_client = MaestroClientBuilder::new()
     .with_namespace("production")
+    .with_client(k8s_client.clone())
     .with_dry_run(true)
     .build()?;
 
@@ -511,9 +563,9 @@ dry_run_client.create_workflow(test_workflow)?;
 
 ### Container Configuration with Traits
 
-**New API (v0.4.0):**
+**New API (v1.0.0):**
 ```rust
-use k8s_maestro::steps::kubernetes::{JobStep, JobStepBuilder};
+use k8s_maestro::steps::kubernetes::KubeJobStepBuilder;
 use k8s_maestro::steps::traits::{ResourceLimits, ResourceLimitedStep};
 
 let limits = ResourceLimits::new()
@@ -522,9 +574,10 @@ let limits = ResourceLimits::new()
     .with_cpu_request("100m")
     .with_memory_request("256Mi");
 
-let step = JobStepBuilder::new()
+let step = KubeJobStepBuilder::new()
     .with_name("limited-job")
-    .with_image("python:3.11")
+    .with_namespace("default")
+    .add_container(Box::new(MaestroContainer::new("python:3.11", "main")))
     .with_resource_limits(limits)
     .build()?;
 ```
@@ -558,22 +611,25 @@ async fn main() -> anyhow::Result<()> {
 }
 ```
 
-**New API (v0.4.0):**
+**New API (v1.0.0):**
 ```rust
 use k8s_maestro::{MaestroClientBuilder, CreatedWorkflow};
 use k8s_maestro::workflows::WorkflowBuilder;
-use k8s_maestro::steps::kubernetes::JobStep;
+use k8s_maestro::steps::KubeJobStep;
+use k8s_maestro::clients::MaestroK8sClient;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    let k8s_client = MaestroK8sClient::new().await?;
+
     let client = MaestroClientBuilder::new()
         .with_namespace("default")
+        .with_client(k8s_client)
         .build()?;
     
     let workflow = WorkflowBuilder::new()
         .with_name("web-workflow")
-        .with_namespace("default")
-        .add_step(JobStep::new("web-server", "nginx:latest"))
+        .add_step(KubeJobStep::new("web-server", "nginx:latest", k8s_client.clone()))
         .build()?;
     
     let created = client.create_workflow(workflow)?;
@@ -598,6 +654,7 @@ async fn main() -> anyhow::Result<()> {
 
 **Problem:**
 ```rust
+let k8s_client = MaestroK8sClient::new().await?;
 let builder = MaestroClientBuilder::new()
     .with_namespace("production");
 client.create_workflow(workflow)?;  // Error: builder is not a client
@@ -605,8 +662,10 @@ client.create_workflow(workflow)?;  // Error: builder is not a client
 
 **Solution:**
 ```rust
+let k8s_client = MaestroK8sClient::new().await?;
 let client = MaestroClientBuilder::new()
     .with_namespace("production")
+    .with_client(k8s_client)
     .build()?;
 ```
 
@@ -614,14 +673,19 @@ let client = MaestroClientBuilder::new()
 
 **Problem:**
 ```rust
-let client = MaestroClientBuilder::new().build()?;
+let k8s_client = MaestroK8sClient::new().await?;
+let client = MaestroClientBuilder::new()
+    .with_client(k8s_client)
+    .build()?;
 client.create_workflow(workflow, "default")?;  // Error: no namespace parameter
 ```
 
 **Solution:**
 ```rust
+let k8s_client = MaestroK8sClient::new().await?;
 let client = MaestroClientBuilder::new()
     .with_namespace("default")
+    .with_client(k8s_client)
     .build()?;
 
 client.create_workflow(workflow)?;
@@ -633,16 +697,18 @@ client.create_workflow(workflow)?;
 
 **Problem:**
 ```rust
+let k8s_client = MaestroK8sClient::new().await?;
 let workflow = WorkflowBuilder::new()
-    .add_step(JobStep::new("job-1", "nginx:latest"))
+    .add_step(KubeJobStep::new("job-1", "nginx:latest", k8s_client))
     .build()?;  // Error: name is required
 ```
 
 **Solution:**
 ```rust
+let k8s_client = MaestroK8sClient::new().await?;
 let workflow = WorkflowBuilder::new()
     .with_name("my-workflow")
-    .add_step(JobStep::new("job-1", "nginx:latest"))
+    .add_step(KubeJobStep::new("job-1", "nginx:latest", k8s_client))
     .build()?;
 ```
 
@@ -689,14 +755,19 @@ impl WorkFlowStep for MyStep {
 
 **Problem:**
 ```rust
-let client = MaestroClientBuilder::new().build()?;
+let k8s_client = MaestroK8sClient::new().await?;
+let client = MaestroClientBuilder::new()
+    .with_client(k8s_client)
+    .build()?;
 client.create_workflow(workflow, true)?;  // Error: no dry_run parameter
 ```
 
 **Solution:**
 ```rust
+let k8s_client = MaestroK8sClient::new().await?;
 let client = MaestroClientBuilder::new()
     .with_dry_run(true)
+    .with_client(k8s_client)
     .build()?;
 
 client.create_workflow(workflow)?;
@@ -730,25 +801,33 @@ match created {
 
 ### Q: Do I need to migrate immediately?
 
-**A:** No, but we recommend migrating as soon as possible. The v0.3.x API will remain supported for at least 6 months, but new features will only be added to the v0.4.x workflow-centric API.
+**A:** No, but we recommend migrating as soon as possible. The v0.3.x API will remain supported for at least 6 months, but new features will only be added to the v1.x.x workflow-centric API.
 
 ### Q: Will my old code continue to work?
 
-**A:** If you're using v0.3.x, your code will continue to work. However, you cannot mix v0.3.x and v0.4.x APIs in the same project. Choose one version and stick with it.
+**A:** If you're using v0.3.x, your code will continue to work. However, you cannot mix v0.3.x and v1.x.x APIs in the same project. Choose one version and stick with it.
 
 ### Q: How do I handle multi-step workflows?
 
-**A:** In v0.4.0, multi-step workflows are first-class citizens:
+**A:** In v1.0.0, multi-step workflows are first-class citizens:
 
 ```rust
 use k8s_maestro::workflows::WorkflowBuilder;
+use k8s_maestro::steps::KubeJobStep;
+use k8s_maestro::clients::MaestroK8sClient;
 
-let workflow = WorkflowBuilder::new()
-    .with_name("multi-step")
-    .add_step(JobStep::new("build", "rust:latest"))
-    .add_step(JobStep::new("test", "rust:latest"))
-    .add_step(JobStep::new("deploy", "kubectl:latest"))
-    .build()?;
+#[tokio::main]
+async fn example() -> anyhow::Result<()> {
+    let k8s_client = MaestroK8sClient::new().await?;
+
+    let workflow = WorkflowBuilder::new()
+        .with_name("multi-step")
+        .add_step(KubeJobStep::new("build", "rust:latest", k8s_client.clone()))
+        .add_step(KubeJobStep::new("test", "rust:latest", k8s_client.clone()))
+        .add_step(KubeJobStep::new("deploy", "kubectl:latest", k8s_client.clone()))
+        .build()?;
+    Ok(())
+}
 ```
 
 You can also add dependencies between steps:
@@ -764,7 +843,7 @@ chain.add_step("deploy").with_dependency("test");
 
 ### Q: What about existing Kubernetes Job resources?
 
-**A:** The v0.4.0 API still creates Kubernetes Jobs under the hood when you use `JobStep`. The abstraction has changed, but the underlying Kubernetes resources are the same. Your existing jobs will work with the new API.
+**A:** The v1.0.0 API still creates Kubernetes Jobs under the hood when you use `KubeJobStep`. The abstraction has changed, but the underlying Kubernetes resources are the same. Your existing jobs will work with the new API.
 
 ### Q: How do I test the migration?
 
@@ -777,9 +856,11 @@ chain.add_step("deploy").with_dependency("test");
 
 Example:
 ```rust
+let k8s_client = MaestroK8sClient::new().await?;
 let test_client = MaestroClientBuilder::new()
     .with_namespace("development")
     .with_dry_run(true)  // Validate without executing
+    .with_client(k8s_client)
     .build()?;
 
 test_client.create_workflow(test_workflow)?;

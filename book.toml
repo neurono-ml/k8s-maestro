@@ -1,0 +1,20 @@
+[book]
+title = "k8s-maestro Documentation"
+authors = ["André Claudino", "Pedro Braga", "Romulo Tavares"]
+description = "Kubernetes workflow orchestrator for Rust with type-safe API"
+language = "en"
+src = "site-docs"
+
+[build]
+build-dir = "book"
+create-missing = false
+
+[output.html]
+no-section-label = false
+git-repository-url = "https://github.com/andreclaudino/k8s-maestro"
+edit-url-template = "edit/main/site-docs/{path}"
+
+[output.html.search]
+limit-results = 30
+use-boolean-and = true
+boost-title = 2

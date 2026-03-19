@@ -1,0 +1,86 @@
+name: Publish to crates.io
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      already_published: ${{ steps.check.outputs.already_published }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Check if already published
+        id: check
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          echo "Checking if version $VERSION is already published..."
+          
+          if curl -s -f "https://crates.io/api/v1/crates/k8s-maestro/$VERSION" > /dev/null 2>&1; then
+            echo "Version $VERSION already published on crates.io"
+            echo "already_published=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version $VERSION not published yet"
+            echo "already_published=false" >> $GITHUB_OUTPUT
+          fi
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: check-version
+    if: needs.check-version.outputs.already_published != 'true'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      
+      - name: Login to crates.io
+        run: |
+          cargo login --registry crates.io << 'EOF'
+          ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          EOF
+      
+      - name: Publish to crates.io
+        run: |
+          VERSION="${{ needs.check-version.outputs.version }}"
+          echo "Publishing version $VERSION..."
+          cargo publish --no-verify
+      
+      - name: Verify publish
+        run: |
+          VERSION="${{ needs.check-version.outputs.version }}"
+          echo "Verifying version $VERSION was published..."
+          sleep 10
+          
+          if curl -s -f "https://crates.io/api/v1/crates/k8s-maestro/$VERSION" > /dev/null 2>&1; then
+            echo "✓ Version $VERSION successfully published!"
+          else
+            echo "✗ Failed to verify publication"
+            exit 1
+          fi
+
+  notify-already-published:
+    runs-on: ubuntu-latest
+    needs: check-version
+    if: needs.check-version.outputs.already_published == 'true'
+    steps:
+      - name: Notify
+        run: |
+          echo "::warning::Version ${{ needs.check-version.outputs.version }} is already published on crates.io"
+          echo "Skipping publish step."

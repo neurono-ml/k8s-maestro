@@ -28,36 +28,40 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-k8s-maestro = "0.4"
+k8s-maestro = "1.0"
 ```
 
 Enable Kubernetes support with the appropriate version feature:
 
 ```toml
-k8s-maestro = { version = "0.4", features = ["k8s_v1_28"] }
+k8s-maestro = { version = "1.0", features = ["k8s_v1_28"] }
 ```
 
 Available features: `k8s_v1_28`, `k8s_v1_29`, `k8s_v1_30`, `k8s_v1_31`, `k8s_v1_32`
 
 ### Migrating from v0.3.0?
 
-If you're upgrading from v0.3.x to v0.4.0, check out our [Migration Guide](docs/migration-guide.md) for detailed instructions on updating your code to the new workflow-centric API.
+If you're upgrading from v0.3.x to v1.0.0, check out our [Migration Guide](docs/migration-guide.md) for detailed instructions on updating your code to the new workflow-centric API.
 
 ## Quick Start
 
 ```rust
 use k8s_maestro::{MaestroClientBuilder, WorkflowBuilder};
-use k8s_maestro::steps::kubernetes::JobStep;
+use k8s_maestro::steps::KubeJobStep;
+use k8s_maestro::clients::MaestroK8sClient;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    let k8s_client = MaestroK8sClient::new().await?;
+
     let client = MaestroClientBuilder::new()
         .with_namespace("default")
+        .with_client(k8s_client)
         .build()?;
 
     let workflow = WorkflowBuilder::new()
         .with_name("my-workflow")
-        .add_step(JobStep::new("my-job", "nginx:latest"))
+        .add_step(KubeJobStep::new("my-job", "nginx:latest", k8s_client.clone()))
         .build()?;
 
     let execution = client.execute_workflow(&workflow).await?;
@@ -73,16 +77,26 @@ async fn main() -> anyhow::Result<()> {
 
 ```rust
 use k8s_maestro::{WorkflowBuilder, MaestroClientBuilder};
-use k8s_maestro::steps::kubernetes::JobStep;
+use k8s_maestro::steps::KubeJobStep;
+use k8s_maestro::clients::MaestroK8sClient;
 
-let workflow = WorkflowBuilder::new()
-    .with_name("basic-workflow")
-    .with_namespace("production")
-    .add_step(JobStep::new("data-fetch", "python:3.11"))
-    .build()?;
+#[tokio::main]
+async fn example() -> anyhow::Result<()> {
+    let k8s_client = MaestroK8sClient::new().await?;
 
-let client = MaestroClientBuilder::new().build()?;
-client.execute_workflow(&workflow).await?;
+    let client = MaestroClientBuilder::new()
+        .with_namespace("production")
+        .with_client(k8s_client)
+        .build()?;
+
+    let workflow = WorkflowBuilder::new()
+        .with_name("basic-workflow")
+        .add_step(KubeJobStep::new("data-fetch", "python:3.11", k8s_client.clone()))
+        .build()?;
+
+    client.execute_workflow(&workflow).await?;
+    Ok(())
+}
 ```
 
 ### Workflow with Dependencies
@@ -90,50 +104,70 @@ client.execute_workflow(&workflow).await?;
 ```rust
 use k8s_maestro::{WorkflowBuilder, MaestroClientBuilder};
 use k8s_maestro::workflows::{ConditionBuilder, DependencyChain};
-use k8s_maestro::steps::kubernetes::JobStep;
+use k8s_maestro::steps::KubeJobStep;
+use k8s_maestro::clients::MaestroK8sClient;
 
-let mut chain = DependencyChain::new();
-chain.add_step("extract");
-chain.add_step("transform").with_dependency("extract");
-chain.add_step("load").with_dependency("transform");
+#[tokio::main]
+async fn example() -> anyhow::Result<()> {
+    let k8s_client = MaestroK8sClient::new().await?;
 
-let workflow = WorkflowBuilder::new()
-    .with_name("etl-workflow")
-    .add_step(JobStep::new("extract", "python:3.11"))
-    .add_step(JobStep::new("transform", "python:3.11"))
-    .add_step(JobStep::new("load", "postgres:16"))
-    .with_parallelism(2)
-    .build()?;
+    let client = MaestroClientBuilder::new()
+        .with_client(k8s_client)
+        .build()?;
 
-let client = MaestroClientBuilder::new().build()?;
-let execution = client.execute_workflow(&workflow).await?;
+    let mut chain = DependencyChain::new();
+    chain.add_step("extract");
+    chain.add_step("transform").with_dependency("extract");
+    chain.add_step("load").with_dependency("transform");
+
+    let workflow = WorkflowBuilder::new()
+        .with_name("etl-workflow")
+        .add_step(KubeJobStep::new("extract", "python:3.11", k8s_client.clone()))
+        .add_step(KubeJobStep::new("transform", "python:3.11", k8s_client.clone()))
+        .add_step(KubeJobStep::new("load", "postgres:16", k8s_client.clone()))
+        .with_parallelism(2)
+        .build()?;
+
+    let execution = client.execute_workflow(&workflow).await?;
+    Ok(())
+}
 ```
 
 ### Workflow with Services
 
 ```rust
 use k8s_maestro::{WorkflowBuilder, ServiceBuilder, ServiceType, MaestroClientBuilder};
-use k8s_maestro::steps::kubernetes::JobStep;
+use k8s_maestro::steps::KubeJobStep;
+use k8s_maestro::clients::MaestroK8sClient;
 use std::collections::BTreeMap;
 
-let mut selector = BTreeMap::new();
-selector.insert("app".to_string(), "my-app".to_string());
+#[tokio::main]
+async fn example() -> anyhow::Result<()> {
+    let k8s_client = MaestroK8sClient::new().await?;
 
-let service = ServiceBuilder::new()
-    .with_name("my-service")
-    .with_port(80, 8080, "TCP")
-    .with_selector(selector)
-    .with_type(ServiceType::ClusterIP)
-    .build()?;
+    let client = MaestroClientBuilder::new()
+        .with_client(k8s_client)
+        .build()?;
 
-let workflow = WorkflowBuilder::new()
-    .with_name("service-workflow")
-    .add_step(JobStep::new("web-app", "nginx:latest"))
-    .build()?;
+    let mut selector = BTreeMap::new();
+    selector.insert("app".to_string(), "my-app".to_string());
 
-let client = MaestroClientBuilder::new().build()?;
-client.create_service(&service).await?;
-client.execute_workflow(&workflow).await?;
+    let service = ServiceBuilder::new()
+        .with_name("my-service")
+        .with_port(80, 8080, "TCP")
+        .with_selector(selector)
+        .with_type(ServiceType::ClusterIP)
+        .build()?;
+
+    let workflow = WorkflowBuilder::new()
+        .with_name("service-workflow")
+        .add_step(KubeJobStep::new("web-app", "nginx:latest", k8s_client.clone()))
+        .build()?;
+
+    client.create_service(&service).await?;
+    client.execute_workflow(&workflow).await?;
+    Ok(())
+}
 ```
 
 ## API Documentation

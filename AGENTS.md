@@ -202,6 +202,80 @@ fn test_with_mock() {
 - Documentation updates → `site-docs/`
 - New features must update or create examples in `site-docs/`
 
+## Documentation Structure
+
+The project maintains two complementary documentation systems:
+
+### Reference Documentation (docs/)
+
+The `docs/` directory contains reference documentation for maintainers and contributors:
+
+- **docs/adrs/** - Architecture Decision Records
+  - `template.md` - ADR template with commit tracking
+  - `README.md` - Index of all ADRs
+  - ADRs capture significant technical decisions with context, rationale, and consequences
+  - Each ADR includes implementation tracking: commit hashes, code paths, and test locations
+
+- **docs/fdrs/** - Feature Description Records
+  - `template.md` - FDR template with phase-based implementation tracking
+  - `README.md` - Index of all FDRs
+  - FDRs document planned features with requirements, design, and implementation phases
+  - Each phase includes: commits, code paths, tests, and status
+
+- **docs/prd.md** - Product Description Record
+  - Executive summary, vision, and product goals
+  - Target audience and core features
+  - Technical requirements (performance, scalability, reliability, security)
+  - Quality standards and roadmap (v1.1.0, v1.2.0, v2.0.0)
+  - Version history note explaining v0.4.0 was never released
+
+**When to use reference documentation:**
+- Making significant architectural decisions (create ADR)
+- Planning new features or improvements (create FDR)
+- Reviewing historical decisions and rationale
+- Understanding product direction and requirements
+- Tracking implementation progress of features
+
+### User Documentation (site-docs/)
+
+The `site-docs/` directory contains user-facing documentation published via mdBook to GitHub Pages:
+
+- **site-docs/index.md** - Landing page with overview
+- **site-docs/getting-started/** - Installation, quick start, and concepts
+- **site-docs/guides/** - How-to guides and examples
+- **site-docs/reference/** - Configuration reference and troubleshooting
+- **site-docs/testing.md** - Testing guide (also referenced in AGENTS.md)
+
+**When to use user documentation:**
+- Adding or updating user guides and tutorials
+- Documenting new features for users
+- Updating configuration reference
+- Adding troubleshooting information
+- Creating usage examples
+
+## Documentation Updates
+
+When making changes to the codebase:
+
+1. **For Reference Documentation:**
+   - Create ADR when making architectural decisions
+   - Create FDR when planning significant features
+   - Update commit tracking sections with actual commit hashes
+   - Link code paths and test locations after implementation
+   - Update index READMEs when adding new records
+
+2. **For User Documentation:**
+   - Update site-docs/ when adding or modifying features
+   - Add examples to demonstrate new capabilities
+   - Update migration guides for breaking changes
+   - Keep configuration reference in sync with code changes
+
+3. **Documentation Quality:**
+   - All documentation must be well-formatted markdown
+   - Include code examples where appropriate
+   - Keep documentation up-to-date with code changes
+   - Use clear, concise language
+
 ## Change Management
 
 1. When adding features or changes:
@@ -230,3 +304,42 @@ This crate is a pipeline/workflow orchestrator for Kubernetes in Rust. It provid
 - Set `dry_run = false` for real execution
 - Use `job.wait().await?` to wait for completion
 - Clean up with `job.delete_job(dry_run).await?`
+
+## Crates.io Publishing
+
+### Troubleshooting
+
+If a package publish fails:
+
+1. **Check token**:
+   ```bash
+   # Verify CARGO_REGISTRY_TOKEN is set in GitHub repository secrets
+   # Go to: Settings > Secrets and variables > Actions
+   ```
+
+2. **Check version**:
+   ```bash
+   # Verify version not already published
+   cargo search k8s-maestro --limit 10
+   ```
+
+3. **Test locally**:
+   ```bash
+   # Dry-run to test without publishing
+   cargo publish --dry-run
+   ```
+
+4. **Check workflow logs**:
+   - Go to: Actions > Publish to crates.io
+   - Check the "Publish to crates.io" step logs
+
+5. **Common issues**:
+   - Version already published: See workflow logs, will skip if already exists
+   - Token invalid: Re-generate token at https://crates.io/settings/tokens
+   - Network timeout: May retry, crates.io API can be slow
+   - Invalid Cargo.toml: Check metadata (description, license, repository)
+
+6. **Verify Cargo.toml metadata**:
+   - Ensure `description` field is present
+   - Ensure `license` field is present
+   - Ensure `repository` link is correct (optional but recommended)
