@@ -66,14 +66,19 @@ jobs:
         run: |
           VERSION="${{ needs.check-version.outputs.version }}"
           echo "Verifying version $VERSION was published..."
-          sleep 10
           
-          if curl -s -f "https://crates.io/api/v1/crates/k8s-maestro/$VERSION" > /dev/null 2>&1; then
-            echo "✓ Version $VERSION successfully published!"
-          else
-            echo "✗ Failed to verify publication"
-            exit 1
-          fi
+          for i in {1..6}; do
+            echo "Attempt $i/6..."
+            sleep $((i * 10))
+            
+            if curl -s -f "https://crates.io/api/v1/crates/k8s-maestro/$VERSION" > /dev/null 2>&1; then
+              echo "✓ Version $VERSION successfully published!"
+              exit 0
+            fi
+          done
+          
+          echo "✗ Failed to verify publication after 6 attempts"
+          exit 1
 
   notify-already-published:
     runs-on: ubuntu-latest
