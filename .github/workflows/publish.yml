@@ -52,7 +52,7 @@ jobs:
       
       - name: Login to crates.io
         run: |
-          cargo login --registry crates.io << 'EOF'
+          cargo login << 'EOF'
           ${{ secrets.CARGO_REGISTRY_TOKEN }}
           EOF
       
