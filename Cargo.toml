@@ -1,11 +1,14 @@
 [package]
 name = "k8s-maestro"
-version = "1.0.1"
+version = "1.0.0"
 edition = "2021"
 
 description = "A Kubernetes job orchestrator tool library"
 license = "MIT OR Apache-2.0"
-categories = []
+categories = ["api-bindings", "config", "database"]
+documentation = "https://docs.rs/k8s-maestro"
+homepage = "https://github.com/neurono-ml/k8s-maestro"
+repository = "https://github.com/neurono-ml/k8s-maestro"
 
 [lib]
 name = "k8s_maestro"
