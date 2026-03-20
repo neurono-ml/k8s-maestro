@@ -1,6 +1,6 @@
 [package]
 name = "k8s-maestro"
-version = "1.0.0-beta2"
+version = "1.0.1"
 edition = "2021"
 
 description = "A Kubernetes job orchestrator tool library"
@@ -71,3 +71,8 @@ testcontainers = "0.27"
 mockall = "0.14"
 tokio-test = "0.4"
 base64 = "0.22"
+
+[package.metadata.docs.rs]
+features = ["k8s_v1_28"]
+no-default-features = true
+rustdoc-args = ["--cfg", "docsrs"]

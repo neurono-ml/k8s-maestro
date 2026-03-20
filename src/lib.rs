@@ -1,3 +1,4 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
 //! # k8s-maestro
 //!
 //! A Kubernetes job orchestrator library for managing workflows and steps in Kubernetes clusters.
