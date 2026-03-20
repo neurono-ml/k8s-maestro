@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 from v0.3.x to v1.0.0. Any historical references to v0.4.0 should be treated
 as v1.0.0.
 
+## [1.0.3] - 2026-03-20
+
+### Fixed
+
+- Fixed skill documentation in `skills/k8s-maestro-integrator/`:
+  - Corrected installation paths from `.agents/skills/` to `skills/`
+  - Updated GitHub URLs from `andreclaudino` to `neurono-ml` organization
+  - Updated documentation URLs from `andreclaudino.github.io` to `neurono-ml.github.io`
+  - Fixed code examples missing `.with_client()` in `MaestroClientBuilder`
+  - Fixed incorrect `client.get_client()` call in SKILL.md
+
 ## [1.0.2] - 2026-03-20
 
 ### Fixed
