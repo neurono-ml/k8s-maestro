@@ -22,7 +22,7 @@ The k8s-maestro-integrator skill provides:
 
 ### Option 1: Using skills.sh (Recommended)
 
-If you have the [skills.sh](https://github.com/anomalyco/skills) utility installed:
+If you have the [skills.sh](https://github.com/vercel-labs/skills) utility installed:
 
 ```bash
 # Install directly from this repository
