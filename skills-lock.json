@@ -10,6 +10,11 @@
       "source": "neurono-ml/kind-testcontainers-skill",
       "sourceType": "github",
       "computedHash": "977a922c768b9fe19a5116d19391ba9554ae3bbd17d7b26d16ad7519d2bee0ef"
+    },
+    "skill-creator": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "b122f4d1e91aa1d83027e050b5b37c3156203ee85458d7b1360bc48167c9e02a"
     }
   }
 }

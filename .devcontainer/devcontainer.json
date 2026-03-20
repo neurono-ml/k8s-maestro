@@ -9,7 +9,9 @@
 		"ghcr.io/stu-bell/devcontainer-features/node:0": {},
 		"ghcr.io/rio/features/k3d:1": {},
 		"ghcr.io/jsburckhardt/devcontainer-features/opencode:1": {},
-		"ghcr.io/va-h/devcontainers-features/uv:1": {}
+		"ghcr.io/va-h/devcontainers-features/uv:1": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/eitsupi/devcontainer-features/mdbook:1": {}
 	},
 	"customizations": {
 		"vscode": {

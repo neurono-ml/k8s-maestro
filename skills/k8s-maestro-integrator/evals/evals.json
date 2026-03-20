@@ -1,0 +1,35 @@
+{
+  "skill_name": "k8s-maestro-integrator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need to create a data processing pipeline that extracts data from an API, transforms it using Python, and loads it into PostgreSQL. The pipeline should run as a Kubernetes Job with resource limits and retry logic. Write the code to implement this.",
+      "expected_output": "A complete Rust implementation using k8s-maestro with WorkflowBuilder, KubeJobStep for the extract/transform/load steps, dependency chain, resource limits, and proper error handling",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Create a workflow that watches a file in a ConfigMap for changes and triggers a processing job when the file is modified. The workflow should include logging and monitoring sidecars.",
+      "expected_output": "Implementation using FileObserver, ConfigMapBuilder, WorkflowBuilder with KubeJobStep, sidecar containers for logging and monitoring, and proper event handling",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I want to deploy a web application with a service and ingress for external access. The application should have health checks, environment variables from secrets, and persistent storage for data.",
+      "expected_output": "Code using KubeJobStep or KubePodStep, ServiceBuilder, IngressBuilder, SecretBuilder, PVCVolume for storage, health check configuration, and proper namespace isolation",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Write integration tests for a workflow that processes CSV files. The tests should use a Kind cluster and verify the workflow executes successfully with mock data.",
+      "expected_output": "Test code using KindCluster, integration test patterns, workflow creation and execution, resource validation, and proper cleanup",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "I need to set up a multi-step ETL pipeline with conditional execution: validate data → if valid, transform → if transformed, load to database. Each step should have its own resource limits and the pipeline should support checkpointing.",
+      "expected_output": "Workflow with DependencyChain, conditional dependencies, ResourceLimits for each step, CheckpointConfig, and proper error handling with conditional logic",
+      "files": []
+    }
+  ]
+}
