@@ -26,28 +26,48 @@ jobs:
       - name: Generate release notes from CHANGELOG
         id: release_notes
         run: |
-          # Get the version without 'v' prefix
           VERSION="${{ steps.extract_version.outputs.version }}"
           
-          # Extract release notes from CHANGELOG.md
-          # Find the section for this version and extract content until next version or end of file
           if [ -f CHANGELOG.md ]; then
-            awk -v version="^## \\[$VERSION\\]" '
-              /^## \[/ { in_release=1 }
-              in_release && /^##/ { exit }
+            # Extract content between this version header and the next version header
+            # The pattern matches ## [VERSION] and captures everything until the next ## [ or end of file
+            awk -v version="$VERSION" '
+              BEGIN { in_release=0; found=0 }
+              
+              # When we find the version header
+              /^## \[/ {
+                if (index($0, "[v" version "]") > 0 || index($0, "[" version "]") > 0) {
+                  in_release=1
+                  found=1
+                  next  # Skip the version header line itself
+                } else if (in_release) {
+                  # We hit another version header, stop capturing
+                  in_release=0
+                  exit
+                }
+              }
+              
+              # Capture lines while in the release section
               in_release { print }
             ' CHANGELOG.md > release_notes.md
             
-            # If no release notes found for this version, use a default message
-            if [ ! -s release_notes.md ] || [ $(wc -l < release_notes.md) -eq 0 ]; then
-              echo "Release $VERSION - See CHANGELOG.md for details" > release_notes.md
-            fi
+            # Trim leading/trailing whitespace and check if empty
+            sed -i '/./,$!d' release_notes.md
+            sed -i ':a;/^[[:space:]]*$/{$d;N;ba}' release_notes.md 2>/dev/null || true
             
-            # Display release notes
-            echo "Release Notes:"
-            cat release_notes.md
+            # If no release notes found for this version, use a default message
+            if [ ! -s release_notes.md ]; then
+              echo "Release $VERSION - See [CHANGELOG.md](CHANGELOG.md) for details." > release_notes.md
+              echo "::warning::No release notes found for version $VERSION in CHANGELOG.md"
+            else
+              echo "::notice::Successfully extracted release notes for version $VERSION"
+              echo "=== Release Notes ==="
+              cat release_notes.md
+              echo "===================="
+            fi
           else
-            echo "No CHANGELOG.md found, using default release notes" > release_notes.md
+            echo "Release $VERSION" > release_notes.md
+            echo "::warning::CHANGELOG.md not found"
           fi
 
       - name: Create GitHub Release

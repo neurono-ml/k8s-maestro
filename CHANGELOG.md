@@ -11,6 +11,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 from v0.3.x to v1.0.0. Any historical references to v0.4.0 should be treated
 as v1.0.0.
 
+## [1.0.2] - 2026-03-20
+
+### Fixed
+
+- Fixed docs.rs build failure by adding `[package.metadata.docs.rs]` configuration
+  - Disabled default features on docs.rs to avoid git2 native dependency
+  - Added `#![cfg_attr(docsrs, feature(doc_cfg))]` for conditional documentation
+- Fixed GitHub release workflow to correctly extract release notes from CHANGELOG.md
+
+### Changed
+
+- Improved README.md structure:
+  - Reorganized to start with project purpose, not AI skill
+  - Added detailed feature flags documentation with usage guidance
+  - Moved AI Assistant Integration section to later in the document
+  - Fixed GitHub organization URL from `andreclaudino` to `neurono-ml`
+
 ## [1.0.1] - 2026-03-18
 
 ### Added
