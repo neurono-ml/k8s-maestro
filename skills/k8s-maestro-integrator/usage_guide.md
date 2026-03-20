@@ -104,6 +104,7 @@ async fn main() -> anyhow::Result<()> {
     // Build Maestro client
     let client = MaestroClientBuilder::new()
         .with_namespace("default")
+        .with_client(k8s_client.clone())
         .build()?;
 
     // Build workflow

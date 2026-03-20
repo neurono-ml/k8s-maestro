@@ -22,15 +22,11 @@ The k8s-maestro-integrator skill provides:
 
 ### Option 1: Using skills.sh (Recommended)
 
-If you have the [skills.sh](https://github.com/vercel-labs/skills) utility installed:
+If you have the [skills.sh](https://github.com/anomalyco/skills) utility installed:
 
 ```bash
 # Install directly from this repository
-skills.sh install andreclaudino/k8s-maestro .agents/skills/k8s-maestro-integrator
-
-# Or install from a local clone
-cd k8s-maestro
-skills.sh install .agents/skills/k8s-maestro-integrator
+npx skills add https://github.com/neurono-ml/k8s-maestro --skill k8s-maestro-integrator
 ```
 
 ### Option 2: Using Git Sparse Checkout
@@ -38,28 +34,28 @@ skills.sh install .agents/skills/k8s-maestro-integrator
 Clone only the skill folder to avoid downloading the entire repository:
 
 ```bash
-# Clone with sparse checkout to .agents/skills
+# Clone with sparse checkout to ~/.agents/skills
 git clone --filter=blob:none --sparse \
-  https://github.com/andreclaudino/k8s-maestro.git \
+  https://github.com/neurono-ml/k8s-maestro.git \
   ~/.agents/skills/k8s-maestro-integrator
 
 cd ~/.agents/skills/k8s-maestro-integrator
 git sparse-checkout init
-git sparse-checkout set .agents/skills/k8s-maestro-integrator
+git sparse-checkout set skills/k8s-maestro-integrator
 git sparse-checkout apply
 ```
 
-Or for `.claude/skills`:
+Or for `~/.claude/skills`:
 
 ```bash
-# Clone with sparse checkout to .claude/skills
+# Clone with sparse checkout to ~/.claude/skills
 git clone --filter=blob:none --sparse \
-  https://github.com/andreclaudino/k8s-maestro.git \
+  https://github.com/neurono-ml/k8s-maestro.git \
   ~/.claude/skills/k8s-maestro-integrator
 
 cd ~/.claude/skills/k8s-maestro-integrator
 git sparse-checkout init
-git sparse-checkout set .agents/skills/k8s-maestro-integrator
+git sparse-checkout set skills/k8s-maestro-integrator
 git sparse-checkout apply
 ```
 
@@ -68,11 +64,14 @@ git sparse-checkout apply
 Copy the skill folder manually:
 
 ```bash
-# Copy to .agents/skills (for Claude Code)
-cp -r k8s-maestro/.agents/skills/k8s-maestro-integrator ~/.agents/skills/
+# Clone the repository
+git clone https://github.com/neurono-ml/k8s-maestro.git
 
-# Or copy to .claude/skills (for Claude.ai)
-cp -r k8s-maestro/.agents/skills/k8s-maestro-integrator ~/.claude/skills/
+# Copy to ~/.agents/skills (for Claude Code)
+cp -r k8s-maestro/skills/k8s-maestro-integrator ~/.agents/skills/
+
+# Or copy to ~/.claude/skills (for Claude.ai)
+cp -r k8s-maestro/skills/k8s-maestro-integrator ~/.claude/skills/
 ```
 
 ### Option 4: Using the skill directory directly
@@ -80,7 +79,7 @@ cp -r k8s-maestro/.agents/skills/k8s-maestro-integrator ~/.claude/skills/
 If you're already in the k8s-maestro repository, you can reference the skill directly by its path. The skill is located at:
 
 ```
-/workspaces/k8s-maestro/.agents/skills/k8s-maestro-integrator
+skills/k8s-maestro-integrator/
 ```
 
 ## Verification
@@ -89,7 +88,7 @@ After installation, verify the skill is loaded:
 
 ```bash
 # For Claude Code with skills.sh
-skills.sh list
+npx skills list
 
 # Or check if the skill file exists
 ls ~/.agents/skills/k8s-maestro-integrator/SKILL.md
@@ -200,8 +199,8 @@ MIT License - See k8s-maestro repository for details.
 
 ## Links
 
-- [k8s-maestro Repository](https://github.com/andreclaudino/k8s-maestro)
-- [Documentation](https://andreclaudino.github.io/k8s-maestro/)
+- [k8s-maestro Repository](https://github.com/neurono-ml/k8s-maestro)
+- [Documentation](https://neurono-ml.github.io/k8s-maestro/)
 - [Usage Guide](usage_guide.md) - Start here for detailed examples and tutorials
 - [Crates.io](https://crates.io/crates/k8s-maestro)
-- [Issue Tracker](https://github.com/andreclaudino/k8s-maestro/issues)
+- [Issue Tracker](https://github.com/neurono-ml/k8s-maestro/issues)

@@ -101,13 +101,13 @@ async fn main() -> anyhow::Result<()> {
     // 2. Build Maestro client
     let client = MaestroClientBuilder::new()
         .with_namespace("production")
-        .with_client(k8s_client)
+        .with_client(k8s_client.clone())
         .build()?;
 
     // 3. Build workflow with fluent API
     let workflow = WorkflowBuilder::new()
         .with_name("my-workflow")
-        .add_step(KubeJobStep::new("data-fetch", "python:3.11", client.get_client()?))
+        .add_step(KubeJobStep::new("data-fetch", "python:3.11", k8s_client.clone()))
         .build()?;
 
     // 4. Execute workflow
