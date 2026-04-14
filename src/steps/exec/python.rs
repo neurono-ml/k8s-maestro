@@ -14,6 +14,7 @@ use kube::Api;
 use std::any::Any;
 use std::collections::BTreeMap;
 use std::pin::Pin;
+use std::sync::Arc;
 use std::time::Duration;
 
 pub struct PythonStep {
@@ -63,7 +64,7 @@ impl WaitableWorkFlowStep for PythonStep {
         let step_id = self.step_id.clone();
         let namespace = self.namespace.clone();
         let name = self.name.clone();
-        let client = self.client.inner().clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
 
         async move {
             let pods: Api<Pod> = Api::namespaced(client, &namespace);
@@ -94,7 +95,7 @@ impl DeletableWorkFlowStep for PythonStep {
         let step_id = self.step_id.clone();
         let namespace = self.namespace.clone();
         let name = self.name.clone();
-        let client = self.client.inner().clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
         let self_dry_run = self.dry_run;
 
         async move {
@@ -132,7 +133,7 @@ impl LoggableWorkFlowStep for PythonStep {
     ) -> Pin<Box<dyn Stream<Item = Result<String>> + Send + '_>> {
         let namespace = self.namespace.clone();
         let name = self.name.clone();
-        let client = self.client.inner().clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
 
         Box::pin(try_stream! {
             let pods: Api<Pod> = Api::namespaced(client, &namespace);
@@ -153,14 +154,14 @@ impl PythonStep {
 
         let pod = self.build_pod_spec()?;
 
-        let pods: Api<Pod> = Api::namespaced(self.client.inner().clone(), &self.namespace);
+        let pods: Api<Pod> = Api::namespaced(Arc::unwrap_or_clone(self.client.clone().into_inner()), &self.namespace);
         pods.create(&Default::default(), &pod).await?;
 
         Ok(StepResult::new(&self.step_id).with_status(StepStatus::Success))
     }
 
     async fn cancel_async(&self) -> Result<()> {
-        let pods: Api<Pod> = Api::namespaced(self.client.inner().clone(), &self.namespace);
+        let pods: Api<Pod> = Api::namespaced(Arc::unwrap_or_clone(self.client.clone().into_inner()), &self.namespace);
         pods.delete(&self.name, &Default::default()).await?;
         Ok(())
     }

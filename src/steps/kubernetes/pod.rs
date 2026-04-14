@@ -15,6 +15,7 @@ use kube::Api;
 use std::any::Any;
 use std::collections::BTreeMap;
 use std::pin::Pin;
+use std::sync::Arc;
 
 pub struct KubePodStep {
     step_id: String,
@@ -69,7 +70,7 @@ impl KubeWorkFlowStep for KubePodStep {
 
 impl WaitableWorkFlowStep for KubePodStep {
     fn wait(&self) -> impl std::future::Future<Output = Result<StepResult>> + Send {
-        let client = self.client.inner().clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
         let namespace = self.namespace.clone();
         let name = match &self.name {
             JobNameType::DefinedName(name) => name.clone(),
@@ -105,7 +106,7 @@ impl DeletableWorkFlowStep for KubePodStep {
         &self,
         dry_run: bool,
     ) -> impl std::future::Future<Output = Result<()>> + Send {
-        let client = self.client.inner().clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
         let namespace = self.namespace.clone();
         let name = match &self.name {
             JobNameType::DefinedName(name) => name.clone(),
@@ -149,7 +150,7 @@ impl LoggableWorkFlowStep for KubePodStep {
         &self,
         _options: crate::steps::traits::LogStreamOptions,
     ) -> Pin<Box<dyn Stream<Item = Result<String>> + Send + '_>> {
-        let client = self.client.inner().clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
         let namespace = self.namespace.clone();
         let name = match &self.name {
             JobNameType::DefinedName(name) => name.clone(),
@@ -170,7 +171,7 @@ impl ServableWorkFlowStep for KubePodStep {
         service_name: &str,
         port: u16,
     ) -> impl std::future::Future<Output = Result<String>> + Send {
-        let client = self.client.inner().clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
         let namespace = self.namespace.clone();
         let pod_name = match &self.name {
             JobNameType::DefinedName(name) => name.clone(),
@@ -208,7 +209,7 @@ impl ServableWorkFlowStep for KubePodStep {
         host: &str,
         service_port: u16,
     ) -> impl std::future::Future<Output = Result<String>> + Send {
-        let client = self.client.inner().clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
         let namespace = self.namespace.clone();
         let ingress_name = ingress_name.to_string();
         let host = host.to_string();

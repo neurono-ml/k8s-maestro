@@ -16,6 +16,7 @@ use kube::Api;
 use std::any::Any;
 use std::collections::BTreeMap;
 use std::pin::Pin;
+use std::sync::Arc;
 
 pub struct KubeJobStep {
     step_id: String,
@@ -103,7 +104,7 @@ impl KubeWorkFlowStep for KubeJobStep {
 
 impl WaitableWorkFlowStep for KubeJobStep {
     fn wait(&self) -> impl std::future::Future<Output = Result<StepResult>> + Send {
-        let client = self.client.inner().clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
         let namespace = self.namespace.clone();
         let name = match &self.name {
             JobNameType::DefinedName(name) => name.clone(),
@@ -140,7 +141,7 @@ impl DeletableWorkFlowStep for KubeJobStep {
         &self,
         dry_run: bool,
     ) -> impl std::future::Future<Output = Result<()>> + Send {
-        let client = self.client.inner().clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
         let namespace = self.namespace.clone();
         let name = match &self.name {
             JobNameType::DefinedName(name) => name.clone(),
@@ -168,7 +169,7 @@ impl DeletableWorkFlowStep for KubeJobStep {
         &self,
         dry_run: bool,
     ) -> impl std::future::Future<Output = Result<()>> + Send {
-        let client = self.client.inner().clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
         let namespace = self.namespace.clone();
         let job_name = match &self.name {
             JobNameType::DefinedName(name) => name.clone(),
@@ -216,7 +217,7 @@ impl LoggableWorkFlowStep for KubeJobStep {
         &self,
         _options: crate::steps::traits::LogStreamOptions,
     ) -> Pin<Box<dyn Stream<Item = Result<String>> + Send + '_>> {
-        let client = self.client.inner().clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
         let namespace = self.namespace.clone();
         let job_name = match &self.name {
             JobNameType::DefinedName(name) => name.clone(),
@@ -254,7 +255,7 @@ impl ServableWorkFlowStep for KubeJobStep {
         service_name: &str,
         port: u16,
     ) -> impl std::future::Future<Output = Result<String>> + Send {
-        let client = self.client.inner().clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
         let namespace = self.namespace.clone();
         let job_name = match &self.name {
             JobNameType::DefinedName(name) => name.clone(),
@@ -292,7 +293,7 @@ impl ServableWorkFlowStep for KubeJobStep {
         host: &str,
         service_port: u16,
     ) -> impl std::future::Future<Output = Result<String>> + Send {
-        let client = self.client.inner().clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
         let namespace = self.namespace.clone();
         let ingress_name = ingress_name.to_string();
         let host = host.to_string();
