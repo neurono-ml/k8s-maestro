@@ -1,58 +1,114 @@
 //! This example demonstrates proper cleanup of workflow resources.
 //!
 //! The example shows:
-//! - Creating and executing a workflow
+//! - Creating a workflow step using KubeJobStepBuilder
+//! - Executing the workflow step and waiting for completion
 //! - Deleting associated pods before deleting the job
 //! - Deleting the job resource itself
 //! - Proper cleanup order to ensure clean resource removal
+//! - Dry run mode for testing without actual resource creation
 
-use k8s_openapi::api::{
-    batch::v1::{Job, JobSpec},
-    core::v1::{Container, PodSpec, PodTemplateSpec},
+use k8s_maestro::{
+    clients::MaestroK8sClient,
+    entities::MaestroContainer,
+    steps::{KubeJobStepBuilder, RestartPolicy},
+    steps::traits::DeletableWorkFlowStep,
 };
+use kube::Api;
 
 #[tokio::main(flavor = "current_thread")]
 pub async fn main() -> anyhow::Result<()> {
     log::set_max_level(log::LevelFilter::Error);
 
-    let succeed_name = "succeed-job";
+    let job_name = "cleanup-test-job";
     let namespace = "staging";
-    let _dry_run = false;
+    let dry_run = false; // Set to true for testing without actual resource creation
+
+    println!("=== Workflow Cleanup Example ===\n");
 
     println!("Creating Maestro Kubernetes client...");
-    // Note: MaestroK8sClient is now a lightweight wrapper around kube::Client
-    // For new code, consider using MaestroClient with the workflow API
-    // let maestro_client = MaestroK8sClient::new().await?;
+    let maestro_client = MaestroK8sClient::new().await?;
 
-    println!("Creating workflow job: {}", succeed_name);
-    let _test_job_input = create_job(succeed_name, namespace);
+    println!("Creating workflow job step: {}", job_name);
+    let container = Box::new(MaestroContainer::new("docker.io/bash:5.2", "main")
+        .set_arguments(&[
+            "bash".to_owned(),
+            "-c".to_owned(),
+            "echo 'Testing pod'; sleep 3; echo 'Finalizado'; exit 137".to_owned(),
+        ]));
+
+    let job_step = KubeJobStepBuilder::new()
+        .with_name(job_name)
+        .with_namespace(namespace)
+        .add_container(container)
+        .with_backoff_limit(5)
+        .with_restart_policy(RestartPolicy::OnFailure)
+        .with_client(maestro_client.clone())
+        .with_dry_run(dry_run)
+        .build()?;
 
     println!("Applying job to Kubernetes cluster...");
-    // let succeed_job = maestro_client
-    //     .create_job(&test_job_input, namespace, dry_run)
-    //     .await?;
+    // Create the job using Kubernetes API directly
+    let jobs_api = Api::namespaced(maestro_client.inner().clone(), namespace);
 
-    println!("Waiting for job completion...");
-    // succeed_job.wait().await?;
+    if !dry_run {
+        // Build the Kubernetes Job specification
+        let k8s_job = build_kubernetes_job(job_name, namespace)?;
 
-    println!("Deleting associated pods first (best practice)...");
-    // succeed_job.delete_associated_pods().await?;
+        let created_job = jobs_api
+            .create(&Default::default(), &k8s_job)
+            .await?;
 
-    println!("Deleting the job resource...");
-    // succeed_job.delete_job(dry_run).await?;
+        let created_job_name = created_job.metadata.name.as_ref().unwrap();
+        println!("Job '{}' created successfully", created_job_name);
 
-    println!("Cleanup complete!");
+        // Wait for job execution
+        println!("Waiting for job completion...");
+        tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+
+        // Check job status
+        let job = jobs_api.get(created_job_name).await?;
+        if let Some(status) = job.status {
+            let succeeded = status.succeeded.unwrap_or(0);
+            let failed = status.failed.unwrap_or(0);
+            println!("Job status - Succeeded: {}, Failed: {}", succeeded, failed);
+        }
+
+        // Demonstrate cleanup using the step traits
+        println!("\n=== Cleanup Operations ===\n");
+
+        println!("Deleting associated pods first (best practice)...");
+        job_step.delete_associated_pods(dry_run).await?;
+        println!("Associated pods deleted");
+
+        println!("Deleting the job resource...");
+        job_step.delete_workflow(dry_run).await?;
+        println!("Job resource deleted");
+    } else {
+        println!("DRY RUN: Would create job '{}'", job_name);
+        println!("DRY RUN: Would wait for completion");
+        println!("DRY RUN: Would delete associated pods");
+        println!("DRY RUN: Would delete job resource");
+    }
+
+    println!("\n=== Cleanup complete! ===");
     Ok(())
 }
 
-/// Creates a job that sleeps and exits with error to demonstrate cleanup.
+/// Builds a Kubernetes Job specification for cleanup testing.
 ///
-/// This function demonstrates building a Kubernetes Job for cleanup testing:
-/// - A single container running bash
-/// - A sleep command to simulate work followed by an error
-/// - OnFailure restart policy to demonstrate pod cleanup needs
-fn create_job(name: &str, namespace: &str) -> Job {
-    println!("Building job '{}' for cleanup demonstration", name);
+/// This function demonstrates building a Kubernetes Job that:
+/// - Runs a bash container with a sleep command
+/// - Exits with error code 137 to demonstrate cleanup
+/// - Uses OnFailure restart policy with retry attempts
+fn build_kubernetes_job(name: &str, namespace: &str) -> anyhow::Result<k8s_openapi::api::batch::v1::Job> {
+    use k8s_openapi::{
+        api::{
+            batch::v1::{Job, JobSpec},
+            core::v1::{Container, PodSpec, PodTemplateSpec},
+        },
+        apimachinery::pkg::apis::meta::v1::ObjectMeta,
+    };
 
     let container = Container {
         name: "main".to_owned(),
@@ -65,7 +121,6 @@ fn create_job(name: &str, namespace: &str) -> Job {
         ..Default::default()
     };
 
-    println!("Setting restart policy to OnFailure");
     let pod_spec = PodSpec {
         containers: vec![container],
         restart_policy: Some("OnFailure".to_string()),
@@ -77,20 +132,19 @@ fn create_job(name: &str, namespace: &str) -> Job {
         ..Default::default()
     };
 
-    println!("Setting backoff limit to 5 retries");
     let job_spec = JobSpec {
         template: pod_template_spec,
         backoff_limit: Some(5),
         ..Default::default()
     };
 
-    Job {
-        metadata: k8s_openapi::apimachinery::pkg::apis::meta::v1::ObjectMeta {
+    Ok(Job {
+        metadata: ObjectMeta {
             name: Some(name.to_owned()),
             namespace: Some(namespace.to_owned()),
             ..Default::default()
         },
         spec: Some(job_spec),
         ..Default::default()
-    }
+    })
 }
