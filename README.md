@@ -26,6 +26,7 @@ k8s-maestro helps you:
 |---------|-------------|
 | **Workflow Engine** | Define multi-step workflows with dependencies, parallelism, and conditional execution |
 | **Step Types** | Kubernetes Jobs, exec steps, WASM modules, and custom step implementations |
+| **Clonable Client** | `MaestroK8sClient` implements `Clone` for easy sharing across multiple workflows and steps |
 | **Networking** | Built-in Service and Ingress builders with TLS support |
 | **Sidecars** | Add logging, metrics, or custom sidecar containers to any step |
 | **Checkpointing** | Automatic state persistence for long-running workflows |
@@ -92,6 +93,31 @@ k8s-maestro = { version = "1.0", default-features = false, features = ["k8s_v1_3
 
 See the [Migration Guide](docs/migration-guide.md) for updating to the new workflow-centric API.
 
+## Client Cloning
+
+`MaestroK8sClient` implements `Clone`, making it cheap and easy to share across multiple workflows:
+
+```rust
+let k8s_client = MaestroK8sClient::new().await?;
+
+// Clone is lightweight - just increments an Arc counter
+let workflow1 = WorkflowBuilder::new()
+    .add_step(KubeJobStep::new("job1", "nginx:latest", k8s_client.clone()))
+    .build();
+
+let workflow2 = WorkflowBuilder::new()
+    .add_step(KubeJobStep::new("job2", "postgres:16", k8s_client.clone()))
+    .build();
+
+// Get the underlying Client when needed
+let underlying_client = k8s_client.into_inner();
+```
+
+**Key benefits:**
+- **Zero-cost cloning** - Only increments an `Arc` reference counter
+- **Thread-safe** - Share across async tasks without synchronization
+- **Flexible** - Use `into_inner()` to extract the underlying `Client` when needed
+
 ## Quick Start
 
 ### Simple Job
@@ -103,13 +129,16 @@ use k8s_maestro::clients::MaestroK8sClient;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    // Create the Kubernetes client - handles cluster authentication
     let k8s_client = MaestroK8sClient::new().await?;
 
+    // Build the maestro client with a cloned k8s_client
     let client = MaestroClientBuilder::new()
         .with_namespace("default")
         .with_client(k8s_client.clone())
         .build()?;
 
+    // Create workflow using k8s_client (moved into the step)
     let workflow = WorkflowBuilder::new()
         .with_name("my-workflow")
         .add_step(KubeJobStep::new("my-job", "nginx:latest", k8s_client))
@@ -132,11 +161,15 @@ use k8s_maestro::clients::MaestroK8sClient;
 
 #[tokio::main]
 async fn example() -> anyhow::Result<()> {
+    // Create a single k8s_client to share across all steps
     let k8s_client = MaestroK8sClient::new().await?;
+
+    // Build maestro client with a clone
     let client = MaestroClientBuilder::new()
         .with_client(k8s_client.clone())
         .build()?;
 
+    // Clone k8s_client for each step - lightweight and efficient
     let workflow = WorkflowBuilder::new()
         .with_name("etl-pipeline")
         .add_step(KubeJobStep::new("extract", "python:3.11", k8s_client.clone()))
@@ -160,7 +193,9 @@ use std::collections::BTreeMap;
 
 #[tokio::main]
 async fn example() -> anyhow::Result<()> {
+    // Create and clone k8s_client for both service and workflow
     let k8s_client = MaestroK8sClient::new().await?;
+
     let client = MaestroClientBuilder::new()
         .with_client(k8s_client.clone())
         .build()?;
@@ -175,6 +210,7 @@ async fn example() -> anyhow::Result<()> {
         .with_type(ServiceType::ClusterIP)
         .build()?;
 
+    // Use k8s_client for the workflow step
     let workflow = WorkflowBuilder::new()
         .with_name("web-workflow")
         .add_step(KubeJobStep::new("web-app", "nginx:latest", k8s_client))

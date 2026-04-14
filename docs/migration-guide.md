@@ -303,6 +303,54 @@ async fn example() -> anyhow::Result<()> {
 }
 ```
 
+## 8. MaestroK8sClient Clone Support
+
+**New API (v1.0.2+):**
+
+`MaestroK8sClient` now implements the `Clone` trait, making it easy to share the client across multiple steps and workflows.
+
+```rust
+use k8s_maestro::clients::MaestroK8sClient;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let k8s_client = MaestroK8sClient::new().await?;
+    
+    // Clone is cheap - only increments an Arc reference counter
+    let client_clone = k8s_client.clone();
+    
+    // Use with different workflows or steps
+    let workflow1 = WorkflowBuilder::new()
+        .with_name("workflow1")
+        .add_step(KubeJobStep::new("job1", "nginx:latest", k8s_client.clone()))
+        .build()?;
+        
+    let workflow2 = WorkflowBuilder::new()
+        .with_name("workflow2")
+        .add_step(KubeJobStep::new("job2", "postgres:16", k8s_client.clone()))
+        .build()?;
+        
+    Ok(())
+}
+```
+
+**Extracting the Inner Client:**
+
+When you need the underlying `kube::Client`, use the `into_inner()` method:
+
+```rust
+let k8s_client = MaestroK8sClient::new().await?;
+
+// Extract Arc<kube::Client> for direct kube API usage
+let inner_client = k8s_client.clone().into_inner();
+let api = kube::Api::<Pod>::namespaced(inner_client, "default");
+```
+
+This makes it easy to:
+- Share the same Kubernetes connection across multiple workflows
+- Use k8s-maestro with existing kube::Client code
+- Avoid creating multiple Kubernetes client connections
+
 ## Migration Guide
 
 ### Step 1: Update Imports

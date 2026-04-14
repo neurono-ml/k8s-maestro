@@ -7,18 +7,21 @@ This guide teaches you how to build and execute basic workflows with k8s-maestro
 The simplest workflow consists of a single step that runs a container to completion.
 
 ```rust
-use k8s_maestro::{MaestroClientBuilder, WorkflowBuilder};
+use k8s_maestro::{MaestroClientBuilder, MaestroK8sClient, WorkflowBuilder};
 use k8s_maestro::steps::kubernetes::JobStep;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    let k8s_client = MaestroK8sClient::new().await?;
+    
     let client = MaestroClientBuilder::new()
         .with_namespace("default")
+        .with_client(k8s_client.clone())
         .build()?;
 
     let workflow = WorkflowBuilder::new()
         .with_name("simple-workflow")
-        .add_step(JobStep::new("hello-job", "nginx:latest"))
+        .add_step(JobStep::new("hello-job", "nginx:latest", k8s_client))
         .build()?;
 
     let created = client.create_workflow(workflow)?;
@@ -33,8 +36,12 @@ async fn main() -> anyhow::Result<()> {
 Customize the step's container with arguments, environment variables, and resource limits.
 
 ```rust
+use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
 use k8s_maestro::entities::MaestroContainer;
+use k8s_maestro::steps::kubernetes::JobStep;
 use std::collections::BTreeMap;
+
+let k8s_client = MaestroK8sClient::new().await?;
 
 let container = MaestroContainer::new("python:3.11", "data-processor")
     .set_arguments(&vec![
@@ -52,7 +59,7 @@ resource_limits.insert("memory".to_string(), "512Mi".to_string());
 
 let workflow = WorkflowBuilder::new()
     .with_name("configured-workflow")
-    .add_step(JobStep::new("process-job", "python:3.11")
+    .add_step(JobStep::new("process-job", "python:3.11", k8s_client.clone())
         .with_container(container)
         .with_resource_limits(resource_limits))
     .build()?;
@@ -63,12 +70,17 @@ let workflow = WorkflowBuilder::new()
 Create workflows with multiple independent steps that run in parallel.
 
 ```rust
+use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
 let workflow = WorkflowBuilder::new()
     .with_name("multi-step-workflow")
     .with_parallelism(3)
-    .add_step(JobStep::new("fetch-data", "curlimages/curl"))
-    .add_step(JobStep::new("process-a", "python:3.11"))
-    .add_step(JobStep::new("process-b", "python:3.11"))
+    .add_step(JobStep::new("fetch-data", "curlimages/curl", k8s_client.clone()))
+    .add_step(JobStep::new("process-a", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("process-b", "python:3.11", k8s_client))
     .build()?;
 ```
 
@@ -77,6 +89,11 @@ let workflow = WorkflowBuilder::new()
 Add labels and annotations for organization and tracking.
 
 ```rust
+use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
 let workflow = WorkflowBuilder::new()
     .with_name("labeled-workflow")
     .with_label("environment", "production")
@@ -84,7 +101,7 @@ let workflow = WorkflowBuilder::new()
     .with_label("cost-center", "engineering")
     .with_annotation("owner", "team-lead@example.com")
     .with_annotation("jira-ticket", "OPS-1234")
-    .add_step(JobStep::new("main-job", "python:3.11"))
+    .add_step(JobStep::new("main-job", "python:3.11", k8s_client))
     .build()?;
 ```
 
@@ -95,26 +112,36 @@ Control whether steps run sequentially or in parallel.
 ### Sequential Execution
 
 ```rust
+use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
 let workflow = WorkflowBuilder::new()
     .with_name("sequential-workflow")
     .with_execution_mode(ExecutionMode::Sequential)
-    .add_step(JobStep::new("step-1", "python:3.11"))
-    .add_step(JobStep::new("step-2", "python:3.11"))
-    .add_step(JobStep::new("step-3", "python:3.11"))
+    .add_step(JobStep::new("step-1", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("step-2", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("step-3", "python:3.11", k8s_client))
     .build()?;
 ```
 
 ### Parallel Execution
 
 ```rust
+use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
 let workflow = WorkflowBuilder::new()
     .with_name("parallel-workflow")
     .with_execution_mode(ExecutionMode::Parallel(5))
-    .add_step(JobStep::new("worker-1", "python:3.11"))
-    .add_step(JobStep::new("worker-2", "python:3.11"))
-    .add_step(JobStep::new("worker-3", "python:3.11"))
-    .add_step(JobStep::new("worker-4", "python:3.11"))
-    .add_step(JobStep::new("worker-5", "python:3.11"))
+    .add_step(JobStep::new("worker-1", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("worker-2", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("worker-3", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("worker-4", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("worker-5", "python:3.11", k8s_client))
     .build()?;
 ```
 
@@ -123,9 +150,14 @@ let workflow = WorkflowBuilder::new()
 ### Creating a Workflow
 
 ```rust
+use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
 let workflow = WorkflowBuilder::new()
     .with_name("my-workflow")
-    .add_step(JobStep::new("job-1", "nginx:latest"))
+    .add_step(JobStep::new("job-1", "nginx:latest", k8s_client))
     .build()?;
 
 let created = client.create_workflow(workflow)?;

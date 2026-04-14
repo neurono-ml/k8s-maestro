@@ -27,7 +27,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-k8s-maestro = { version = "0.3", features = ["k8s_v1_30"] }
+k8s-maestro = { version = "1.0", features = ["k8s_v1_30"] }
 tokio = { version = "1", features = ["full"] }
 anyhow = "1.0"
 ```
@@ -36,21 +36,27 @@ Update `src/main.rs`:
 
 ```rust
 use k8s_maestro::{MaestroClientBuilder, WorkflowBuilder};
-use k8s_maestro::steps::kubernetes::JobStep;
+use k8s_maestro::steps::KubeJobStep;
+use k8s_maestro::clients::MaestroK8sClient;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    println!("Creating Kubernetes client...");
+
+    let k8s_client = MaestroK8sClient::new().await?;
+
     println!("Creating k8s-maestro client...");
 
     let client = MaestroClientBuilder::new()
         .with_namespace("default")
+        .with_client(k8s_client)
         .build()?;
 
     println!("Building workflow...");
 
     let workflow = WorkflowBuilder::new()
         .with_name("hello-maestro")
-        .add_step(JobStep::new("hello-job", "nginx:latest"))
+        .add_step(KubeJobStep::new("hello-job", "nginx:latest", k8s_client.clone()))
         .build()?;
 
     println!("Executing workflow...");
