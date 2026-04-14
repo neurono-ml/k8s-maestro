@@ -3,7 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/k8s-maestro.svg)](https://crates.io/crates/k8s-maestro)
 [![License](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE)
 [![Docs.rs](https://docs.rs/k8s-maestro/badge.svg)](https://docs.rs/k8s-maestro)
-[![Build Status](https://github.com/neurono-ml/k8s-maestro/workflows/CI/badge.svg)](https://github.com/neurono-ml/k8s-maestro/actions)
+[![Build Status](https://github.com/neurono-ml/k8s-maestro/workflows/Rust/badge.svg)](https://github.com/neurono-ml/k8s-maestro/actions)
 
 **A Kubernetes workflow orchestrator for Rust with minimal requirements and full power.**
 
