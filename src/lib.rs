@@ -19,6 +19,7 @@ pub mod workflows;
 pub use client::{MaestroClient, MaestroClientBuilder};
 pub use clients::MaestroK8sClient;
 pub use entities::ComputeResource;
+pub use steps::{PythonStepBuilder, ResourceLimits};
 pub use networking::{
     headless_service_dns_pattern, pod_dns_name, service_dns_name, IngressBuilder, IngressPath,
     PathType, PluginInfo, PluginRegistry, ServiceBuilder, ServicePort, ServiceType, SidecarPlugin,
