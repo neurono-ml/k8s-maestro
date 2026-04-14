@@ -53,7 +53,7 @@ jobs:
           # Remove all files
           git rm -rf .
           
-          # Copy the built book to the gh-pages branch
+          # Copy the built book contents directly to root (not the book folder itself)
           cp -r book/* .
           
           # Add a .nojekyll file to prevent Jekyll processing
@@ -61,6 +61,9 @@ jobs:
           
           # Explicitly remove any CNAME file to use default GitHub Pages URL
           rm -f CNAME
+          
+          # Remove the book subdirectory if it exists (artifact from copy)
+          rm -rf book
           
           # Commit and push
           git add .
