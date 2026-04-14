@@ -11,6 +11,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 from v0.3.x to v1.0.0. Any historical references to v0.4.0 should be treated
 as v1.0.0.
 
+## [1.0.4] - 2026-04-14
+
+### Added
+
+- **MaestroK8sClient Clone implementation**: `MaestroK8sClient` now implements the `Clone` trait for easy sharing across multiple workflows and steps
+  - Clone is lightweight - only increments an Arc reference counter
+  - Added `into_inner()` method to extract the underlying `Arc<kube::Client>` for direct kube API usage
+  - Enables zero-cost client sharing in multi-step workflows
+- **Re-exported step types**: `PythonStep` and `PythonStepBuilder` are now re-exported from the library root for easier access
+
+### Changed
+
+- **Step implementations**: Updated all step types to use the new Clone pattern
+  - `KubeJobStep`, `KubePodStep`, `PythonStep` now use `client.clone().into_inner()` instead of `client.inner().clone()`
+  - More idiomatic Rust code leveraging the Clone trait
+- **Examples**: Completely rewrote aspirational examples with real API usage
+  - `python_step.rs`: Demonstrates `PythonStepBuilder` with dry_run mode
+  - `rust_step.rs`: Shows `KubeJobStep`/`KubePodStep` configurations for Rust workloads
+  - `wasm_step.rs`: Demonstrates WASM container configurations with WasmEdge/Wasmtime
+  - `delete_workflow.rs` and `apply_and_watch_workflow.rs`: Implemented with functional code
+- **Updated example patterns**: All examples now show proper client creation:
+  1. Create `MaestroK8sClient` first
+  2. Pass to `MaestroClientBuilder`
+  3. Clone client when creating multiple steps
+
+### Documentation
+
+- **README.md**: Added "Client Cloning" section with Clone trait documentation
+- **Migration guide**: Added section 8 on MaestroK8sClient Clone support
+- **Quick start guide**: Updated to v1.0, corrected client initialization pattern
+- **Basic workflow guide**: Updated all examples to show proper Clone usage
+- **Examples README**: Removed "Aspirational" label, updated template
+
+### Fixed
+
+- **Configuration files**:
+  - `.gitignore`: Added `sidecars/*/target/` to ignore build artifacts
+  - `.devcontainer`: Added `Swellaby.vscode-rust-test-adapter` extension
+  - `Makefile`: Updated `NAMESPACE` to `neurono-ml`
+
 ## [1.0.3] - 2026-03-20
 
 ### Fixed
