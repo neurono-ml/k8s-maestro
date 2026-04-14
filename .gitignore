@@ -1,6 +1,7 @@
 /target
 Cargo.lock
 /tmp
+sidecars/*/target/
 
 /book/
 /.agents/skills/

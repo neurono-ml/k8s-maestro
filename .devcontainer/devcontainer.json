@@ -15,12 +15,13 @@
 	},
 	"customizations": {
 		"vscode": {
-			"extensions": [			
+			"extensions": [
 				"tamasfe.even-better-toml",
 				"Anthropic.claude-code",
 				"mtxr.sqltools",
 				"sst-dev.opencode",
-				"Codder13.openspec"
+				"Codder13.openspec",
+				"Swellaby.vscode-rust-test-adapter"
 			],
 			"settings": {
 				"editor.formatOnSave": false,

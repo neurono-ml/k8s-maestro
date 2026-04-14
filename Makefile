@@ -3,7 +3,7 @@ PROJECT_VERSION := $$(cat Cargo.toml | grep version | head -n 1 | awk '{print $$
 GIT_REFERENCE := $$(git log -1 --pretty=%h)
 
 REGISTRY=ghcr.io
-NAMESPACE=kognitalab
+NAMESPACE=neurono-ml
 IMAGE_REPOSITORY=$(REGISTRY)/$(NAMESPACE)/$(BINARY_NAME)
 IMAGE_NAME=$(IMAGE_REPOSITORY):$(PROJECT_VERSION)
 
