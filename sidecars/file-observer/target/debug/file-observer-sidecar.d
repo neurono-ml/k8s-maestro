@@ -1,1 +1,0 @@
-/home/claudino/Projetos/OpenSource/Meus/K8sMaestro/k8s-maestro/sidecars/file-observer/target/debug/file-observer-sidecar: /home/claudino/Projetos/OpenSource/Meus/K8sMaestro/k8s-maestro/sidecars/file-observer/src/main.rs
