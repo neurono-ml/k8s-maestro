@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -19,11 +19,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Setup mdBook
         run: |
@@ -34,18 +36,30 @@ jobs:
       - name: Build Book
         run: ./mdbook build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./book
+      - name: Configure Git
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy to gh-pages branch
+        run: |
+          # Remove any existing gh-pages branch
+          git branch -D gh-pages || true
+          git push origin --delete gh-pages || true
+          
+          # Create and switch to gh-pages branch
+          git checkout --orphan gh-pages
+          
+          # Remove all files
+          git rm -rf .
+          
+          # Copy the built book to the gh-pages branch
+          cp -r book/* .
+          
+          # Add a .nojekyll file to prevent Jekyll processing
+          touch .nojekyll
+          
+          # Commit and push
+          git add .
+          git commit -m "Deploy documentation to gh-pages"
+          git push origin gh-pages --force
