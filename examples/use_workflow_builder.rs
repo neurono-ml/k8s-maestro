@@ -37,7 +37,10 @@ pub async fn main() -> anyhow::Result<()> {
     println!("Applying job to Kubernetes cluster...");
 
     // Create the job using Kubernetes API directly
-    let jobs_api = kube::Api::<Job>::namespaced(maestro_client.inner().clone(), namespace);
+    let jobs_api = kube::Api::<Job>::namespaced(
+        maestro_client.clone().into_inner().as_ref().clone(),
+        namespace
+    );
 
     if !dry_run {
         let created_job = jobs_api

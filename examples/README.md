@@ -30,13 +30,13 @@ This directory contains comprehensive examples demonstrating various features of
 
 - **[use_ingress_builder.rs](use_ingress_builder.rs)** - Demonstrates creating Ingress resources for external access to services, including TLS configuration.
 
-### Language-Specific Step Examples (Aspirational)
+### Language-Specific Step Examples
 
-- **[python_step.rs](python_step.rs)** - Example demonstrating Python step execution within workflows.
+- **[python_step.rs](python_step.rs)** - Demonstrates real Python step execution within workflows with the k8s-maestro API.
 
-- **[rust_step.rs](rust_step.rs)** - Example demonstrating Rust step execution within workflows.
+- **[rust_step.rs](rust_step.rs)** - Demonstrates real Rust step execution within workflows with the k8s-maestro API.
 
-- **[wasm_step.rs](wasm_step.rs)** - Example demonstrating WASM step execution for portable, lightweight step execution.
+- **[wasm_step.rs](wasm_step.rs)** - Demonstrates real WASM step execution for portable, lightweight step execution with the k8s-maestro API.
 
 ### Utility Examples
 
@@ -72,24 +72,28 @@ Most examples follow this pattern:
 ```rust
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // 1. Setup client
+    // 1. Setup Kubernetes client
+    let k8s_client = MaestroK8sClient::new().await?;
+    
+    // 2. Setup Maestro client
     let client = MaestroClientBuilder::new()
         .with_namespace("default")
+        .with_client(k8s_client)
         .build()?;
 
-    // 2. Build workflow
+    // 3. Build workflow
     let workflow = WorkflowBuilder::new()
         .with_name("example-workflow")
-        .add_step(JobStep::new("example-job", "nginx:latest"))
+        .add_step(KubeJobStep::new("example-job", "nginx:latest", k8s_client.clone()))
         .build()?;
 
-    // 3. Apply and execute
+    // 4. Apply and execute
     let execution = client.execute_workflow(&workflow).await?;
 
-    // 4. Monitor (optional)
+    // 5. Monitor (optional)
     client.watch_workflow(&execution.id).await?;
 
-    // 5. Cleanup (optional)
+    // 6. Cleanup (optional)
     client.delete_workflow(&execution.id).await?;
 
     Ok(())

@@ -33,7 +33,10 @@ pub async fn main() -> anyhow::Result<()> {
     println!("{}", serde_yml::to_string(&test_job_input)?);
 
     // Create the job using Kubernetes API directly
-    let jobs_api = kube::Api::<Job>::namespaced(maestro_client.inner().clone(), namespace);
+    let jobs_api = kube::Api::<Job>::namespaced(
+        maestro_client.clone().into_inner().as_ref().clone(),
+        namespace
+    );
 
     if !dry_run {
         let created_job = jobs_api
@@ -45,7 +48,7 @@ pub async fn main() -> anyhow::Result<()> {
 
         // Stream logs from the job
         let pods_api = kube::Api::<k8s_openapi::api::core::v1::Pod>::namespaced(
-            maestro_client.inner().clone(),
+            maestro_client.clone().into_inner().as_ref().clone(),
             namespace,
         );
 
