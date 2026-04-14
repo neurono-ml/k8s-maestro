@@ -1,0 +1,395 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Basic Workflow - k8s-maestro Documentation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Kubernetes workflow orchestrator for Rust with type-safe API">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">k8s-maestro Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/andreclaudino/k8s-maestro" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="edit/main/site-docs/site-docs/guides/basic-workflow.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="basic-workflows"><a class="header" href="#basic-workflows">Basic Workflows</a></h1>
+<p>This guide teaches you how to build and execute basic workflows with k8s-maestro.</p>
+<h2 id="creating-a-simple-workflow"><a class="header" href="#creating-a-simple-workflow">Creating a Simple Workflow</a></h2>
+<p>The simplest workflow consists of a single step that runs a container to completion.</p>
+<pre><pre class="playground"><code class="language-rust">use k8s_maestro::{MaestroClientBuilder, MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+#[tokio::main]
+async fn main() -&gt; anyhow::Result&lt;()&gt; {
+    let k8s_client = MaestroK8sClient::new().await?;
+    
+    let client = MaestroClientBuilder::new()
+        .with_namespace("default")
+        .with_client(k8s_client.clone())
+        .build()?;
+
+    let workflow = WorkflowBuilder::new()
+        .with_name("simple-workflow")
+        .add_step(JobStep::new("hello-job", "nginx:latest", k8s_client))
+        .build()?;
+
+    let created = client.create_workflow(workflow)?;
+    println!("Workflow created: {}", created.id());
+
+    Ok(())
+}</code></pre></pre>
+<h2 id="configuring-container-options"><a class="header" href="#configuring-container-options">Configuring Container Options</a></h2>
+<p>Customize the step's container with arguments, environment variables, and resource limits.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::entities::MaestroContainer;
+use k8s_maestro::steps::kubernetes::JobStep;
+use std::collections::BTreeMap;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
+let container = MaestroContainer::new("python:3.11", "data-processor")
+    .set_arguments(&amp;vec![
+        "python".to_string(),
+        "-c".to_string(),
+        "print('Processing data...')".to_string(),
+    ])
+    .set_environment_variables(vec![
+        ("LOG_LEVEL".to_string(), "info".to_string()),
+    ].into_iter().collect());
+
+let mut resource_limits = BTreeMap::new();
+resource_limits.insert("cpu".to_string(), "500m".to_string());
+resource_limits.insert("memory".to_string(), "512Mi".to_string());
+
+let workflow = WorkflowBuilder::new()
+    .with_name("configured-workflow")
+    .add_step(JobStep::new("process-job", "python:3.11", k8s_client.clone())
+        .with_container(container)
+        .with_resource_limits(resource_limits))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="adding-multiple-steps"><a class="header" href="#adding-multiple-steps">Adding Multiple Steps</a></h2>
+<p>Create workflows with multiple independent steps that run in parallel.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
+let workflow = WorkflowBuilder::new()
+    .with_name("multi-step-workflow")
+    .with_parallelism(3)
+    .add_step(JobStep::new("fetch-data", "curlimages/curl", k8s_client.clone()))
+    .add_step(JobStep::new("process-a", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("process-b", "python:3.11", k8s_client))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="setting-workflow-metadata"><a class="header" href="#setting-workflow-metadata">Setting Workflow Metadata</a></h2>
+<p>Add labels and annotations for organization and tracking.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
+let workflow = WorkflowBuilder::new()
+    .with_name("labeled-workflow")
+    .with_label("environment", "production")
+    .with_label("team", "data-science")
+    .with_label("cost-center", "engineering")
+    .with_annotation("owner", "team-lead@example.com")
+    .with_annotation("jira-ticket", "OPS-1234")
+    .add_step(JobStep::new("main-job", "python:3.11", k8s_client))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="configuring-execution-mode"><a class="header" href="#configuring-execution-mode">Configuring Execution Mode</a></h2>
+<p>Control whether steps run sequentially or in parallel.</p>
+<h3 id="sequential-execution"><a class="header" href="#sequential-execution">Sequential Execution</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
+let workflow = WorkflowBuilder::new()
+    .with_name("sequential-workflow")
+    .with_execution_mode(ExecutionMode::Sequential)
+    .add_step(JobStep::new("step-1", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("step-2", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("step-3", "python:3.11", k8s_client))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="parallel-execution"><a class="header" href="#parallel-execution">Parallel Execution</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
+let workflow = WorkflowBuilder::new()
+    .with_name("parallel-workflow")
+    .with_execution_mode(ExecutionMode::Parallel(5))
+    .add_step(JobStep::new("worker-1", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("worker-2", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("worker-3", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("worker-4", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("worker-5", "python:3.11", k8s_client))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="working-with-workflows"><a class="header" href="#working-with-workflows">Working with Workflows</a></h2>
+<h3 id="creating-a-workflow"><a class="header" href="#creating-a-workflow">Creating a Workflow</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
+let workflow = WorkflowBuilder::new()
+    .with_name("my-workflow")
+    .add_step(JobStep::new("job-1", "nginx:latest", k8s_client))
+    .build()?;
+
+let created = client.create_workflow(workflow)?;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="retrieving-a-workflow"><a class="header" href="#retrieving-a-workflow">Retrieving a Workflow</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>if let Some(workflow) = client.get_workflow(&amp;created.id())? {
+    println!("Workflow: {}", workflow.name());
+    println!("Status: {:?}", workflow.status());
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="listing-workflows"><a class="header" href="#listing-workflows">Listing Workflows</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let workflows = client.list_workflows()?;
+
+for workflow in workflows {
+    println!("{}: {} ({})", workflow.id(), workflow.name(), workflow.namespace());
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="deleting-a-workflow"><a class="header" href="#deleting-a-workflow">Deleting a Workflow</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>client.delete_workflow(&amp;workflow_id)?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>Use descriptive names</strong> for workflows and steps</li>
+<li><strong>Add labels</strong> for organization and filtering</li>
+<li><strong>Set appropriate resource limits</strong> to prevent resource exhaustion</li>
+<li><strong>Choose the right execution mode</strong> for your use case</li>
+<li><strong>Monitor workflow execution</strong> with kubectl</li>
+<li><strong>Use dry-run mode</strong> for testing without execution</li>
+</ol>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
+<ul>
+<li><a href="dependencies.html">Dependencies</a> - Configure step execution order</li>
+<li><a href="services-ingress.html">Services &amp; Ingress</a> - Expose workflow services</li>
+<li><a href="../examples/">Examples</a> - More workflow examples</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../guides/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../reference/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../guides/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../reference/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

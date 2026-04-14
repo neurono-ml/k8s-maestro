@@ -1,0 +1,425 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Configuration - k8s-maestro Documentation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Kubernetes workflow orchestrator for Rust with type-safe API">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">k8s-maestro Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/andreclaudino/k8s-maestro" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="edit/main/site-docs/site-docs/reference/configuration.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
+<p>This guide covers k8s-maestro configuration options and environment variables.</p>
+<h2 id="client-configuration"><a class="header" href="#client-configuration">Client Configuration</a></h2>
+<p>Configure the MaestroClient with various options for your use case.</p>
+<h3 id="namespace"><a class="header" href="#namespace">Namespace</a></h3>
+<p>Set the default namespace for workflow operations.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let client = MaestroClientBuilder::new()
+    .with_namespace("production")
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="dry-run"><a class="header" href="#dry-run">Dry Run</a></h3>
+<p>Enable dry run mode to validate workflows without execution.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let client = MaestroClientBuilder::new()
+    .with_dry_run(true)
+    .build()?;
+
+// Workflow will be validated but not executed
+let created = client.create_workflow(workflow)?;
+assert!(created.is_dry_run());
+<span class="boring">}</span></code></pre></pre>
+<h3 id="timeout"><a class="header" href="#timeout">Timeout</a></h3>
+<p>Set a default timeout for workflow operations.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::time::Duration;
+
+let client = MaestroClientBuilder::new()
+    .with_default_timeout(Duration::from_secs(300))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="logging"><a class="header" href="#logging">Logging</a></h3>
+<p>Configure the log level for client operations.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let client = MaestroClientBuilder::new()
+    .with_log_level("debug")
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<p>Available log levels:</p>
+<ul>
+<li><code>trace</code> - Most verbose</li>
+<li><code>debug</code> - Detailed debugging</li>
+<li><code>info</code> - Informational (default)</li>
+<li><code>warn</code> - Warnings</li>
+<li><code>error</code> - Errors only</li>
+</ul>
+<h3 id="resource-limits"><a class="header" href="#resource-limits">Resource Limits</a></h3>
+<p>Set default resource limits for all workflows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::steps::traits::ResourceLimits;
+
+let limits = ResourceLimits::new()
+    .with_cpu("500m")
+    .with_memory("512Mi")
+    .with_gpu("0"); // No GPU by default
+
+let client = MaestroClientBuilder::new()
+    .with_default_resource_limits(limits)
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="kubeconfig-path"><a class="header" href="#kubeconfig-path">Kubeconfig Path</a></h3>
+<p>Specify a custom kubeconfig file location.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::path::PathBuf;
+
+let client = MaestroClientBuilder::new()
+    .with_kube_config_path(PathBuf::from("/custom/path/to/kubeconfig"))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="environment-variables"><a class="header" href="#environment-variables">Environment Variables</a></h2>
+<p>k8s-maestro can be configured using environment variables.</p>
+<h3 id="kubeconfig"><a class="header" href="#kubeconfig">KUBECONFIG</a></h3>
+<p>Path to the kubeconfig file.</p>
+<pre><code class="language-bash">export KUBECONFIG=/path/to/kubeconfig
+</code></pre>
+<h3 id="maestro_namespace"><a class="header" href="#maestro_namespace">MAESTRO_NAMESPACE</a></h3>
+<p>Default namespace for workflows.</p>
+<pre><code class="language-bash">export MAESTRO_NAMESPACE=production
+</code></pre>
+<h3 id="maestro_log_level"><a class="header" href="#maestro_log_level">MAESTRO_LOG_LEVEL</a></h3>
+<p>Log level for k8s-maestro operations.</p>
+<pre><code class="language-bash">export MAESTRO_LOG_LEVEL=debug
+</code></pre>
+<h3 id="maestro_dry_run"><a class="header" href="#maestro_dry_run">MAESTRO_DRY_RUN</a></h3>
+<p>Enable dry run mode (1) or disable (0).</p>
+<pre><code class="language-bash">export MAESTRO_DRY_RUN=0
+</code></pre>
+<h3 id="maestro_timeout"><a class="header" href="#maestro_timeout">MAESTRO_TIMEOUT</a></h3>
+<p>Default timeout in seconds for operations.</p>
+<pre><code class="language-bash">export MAESTRO_TIMEOUT=300
+</code></pre>
+<h3 id="maestro_default_cpu"><a class="header" href="#maestro_default_cpu">MAESTRO_DEFAULT_CPU</a></h3>
+<p>Default CPU limit for workflows.</p>
+<pre><code class="language-bash">export MAESTRO_DEFAULT_CPU=500m
+</code></pre>
+<h3 id="maestro_default_memory"><a class="header" href="#maestro_default_memory">MAESTRO_DEFAULT_MEMORY</a></h3>
+<p>Default memory limit for workflows.</p>
+<pre><code class="language-bash">export MAESTRO_DEFAULT_MEMORY=512Mi
+</code></pre>
+<h3 id="maestro_default_gpu"><a class="header" href="#maestro_default_gpu">MAESTRO_DEFAULT_GPU</a></h3>
+<p>Default GPU limit for workflows.</p>
+<pre><code class="language-bash">export MAESTRO_DEFAULT_GPU=0
+</code></pre>
+<h2 id="workflow-configuration"><a class="header" href="#workflow-configuration">Workflow Configuration</a></h2>
+<p>Configure individual workflow settings.</p>
+<h3 id="checkpointing"><a class="header" href="#checkpointing">Checkpointing</a></h3>
+<p>Enable automatic checkpointing and recovery.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::workflows::LegacyCheckpointConfig;
+
+let checkpoint_config = LegacyCheckpointConfig::new()
+    .enabled(true)
+    .with_interval_secs(60)
+    .with_retention_count(10)
+    .with_storage_path("/checkpoints");
+
+let workflow = WorkflowBuilder::new()
+    .with_name("checkpointed-workflow")
+    .with_checkpointing(checkpoint_config)
+    .add_step(JobStep::new("long-running", "python:3.11"))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="parallelism"><a class="header" href="#parallelism">Parallelism</a></h3>
+<p>Set the maximum number of parallel steps.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let workflow = WorkflowBuilder::new()
+    .with_name("parallel-workflow")
+    .with_parallelism(5)
+    .add_step(JobStep::new("worker-1", "python:3.11"))
+    .add_step(JobStep::new("worker-2", "python:3.11"))
+    .add_step(JobStep::new("worker-3", "python:3.11"))
+    .add_step(JobStep::new("worker-4", "python:3.11"))
+    .add_step(JobStep::new("worker-5", "python:3.11"))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="execution-mode"><a class="header" href="#execution-mode">Execution Mode</a></h3>
+<p>Configure how steps execute (sequential or parallel).</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::workflows::ExecutionMode;
+
+let workflow = WorkflowBuilder::new()
+    .with_name("execution-workflow")
+    .with_execution_mode(ExecutionMode::Sequential)
+    .add_step(JobStep::new("step-1", "python:3.11"))
+    .add_step(JobStep::new("step-2", "python:3.11"))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="kubernetes-configuration"><a class="header" href="#kubernetes-configuration">Kubernetes Configuration</a></h2>
+<h3 id="context-selection"><a class="header" href="#context-selection">Context Selection</a></h3>
+<p>Select a specific Kubernetes context from kubeconfig.</p>
+<pre><code class="language-bash">kubectl config use-context production-cluster
+</code></pre>
+<h3 id="namespace-creation"><a class="header" href="#namespace-creation">Namespace Creation</a></h3>
+<p>Create a namespace if it doesn't exist.</p>
+<pre><code class="language-bash">kubectl create namespace production
+</code></pre>
+<h3 id="resource-quotas"><a class="header" href="#resource-quotas">Resource Quotas</a></h3>
+<p>Set resource quotas to limit resource usage.</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: maestro-quota
+  namespace: production
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 16Gi
+</code></pre>
+<h2 id="configuration-file-future"><a class="header" href="#configuration-file-future">Configuration File (Future)</a></h2>
+<p>k8s-maestro plans to support configuration files in the future:</p>
+<pre><code class="language-yaml"># maestro.yaml
+client:
+  namespace: production
+  dry_run: false
+  timeout: 300
+  log_level: info
+
+defaults:
+  resources:
+    cpu: 500m
+    memory: 512Mi
+
+checkpointing:
+  enabled: true
+  interval: 60
+  retention: 10
+  storage_path: /checkpoints
+</code></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>Use environment variables</strong> for sensitive data (API keys, passwords)</li>
+<li><strong>Set appropriate resource limits</strong> to prevent resource exhaustion</li>
+<li><strong>Enable checkpointing</strong> for long-running workflows</li>
+<li><strong>Use dry run mode</strong> for testing in production environments</li>
+<li><strong>Organize with namespaces</strong> for different environments</li>
+<li><strong>Monitor resource usage</strong> with Kubernetes metrics</li>
+</ol>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
+<ul>
+<li><a href="troubleshooting.html">Troubleshooting</a> - Common configuration issues</li>
+<li><a href="../api/">API Reference</a> - Detailed API documentation</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../reference/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../reference/troubleshooting.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../reference/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../reference/troubleshooting.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,1679 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>k8s-maestro Documentation</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Kubernetes workflow orchestrator for Rust with type-safe API">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">k8s-maestro Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/andreclaudino/k8s-maestro" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="k8s-maestro-documentation"><a class="header" href="#k8s-maestro-documentation">k8s-maestro Documentation</a></h1>
+<p>Welcome to the k8s-maestro documentation. k8s-maestro is a Kubernetes workflow orchestrator with minimal requirements and full power.</p>
+<h2 id="what-is-k8s-maestro"><a class="header" href="#what-is-k8s-maestro">What is k8s-maestro?</a></h2>
+<p>k8s-maestro provides a high-level, type-safe Rust API for orchestrating complex workflows on Kubernetes. Built with test-driven development principles, it offers a clean builder pattern for creating multi-step workflows with dependencies, conditional execution, and powerful networking capabilities.</p>
+<h3 id="key-features"><a class="header" href="#key-features">Key Features</a></h3>
+<ul>
+<li><strong>Multi-step Workflows</strong>: Define complex workflows with multiple steps and dependencies</li>
+<li><strong>Conditional Execution</strong>: Execute steps based on conditions (success, failure, output values)</li>
+<li><strong>Multiple Step Types</strong>: Support for Kubernetes jobs, exec steps, WASM, and custom step types</li>
+<li><strong>Services &amp; Ingress</strong>: Built-in support for exposing services and configuring ingress</li>
+<li><strong>Sidecar Containers</strong>: Easily add sidecar containers to workflow steps</li>
+<li><strong>File Observer</strong>: Monitor file changes and trigger workflow execution</li>
+<li><strong>Checkpointing</strong>: Automatic checkpointing and recovery for long-running workflows</li>
+<li><strong>Multi-tenant Security</strong>: Role-based access control and namespace isolation</li>
+<li><strong>Builder Pattern</strong>: Fluent API for easy workflow and resource construction</li>
+<li><strong>TDD Approach</strong>: Extensive test coverage with unit, integration, and E2E tests</li>
+</ul>
+<h2 id="quick-links"><a class="header" href="#quick-links">Quick Links</a></h2>
+<h3 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h3>
+<ul>
+<li><a href="getting-started/installation.html">Installation</a> - Install and configure k8s-maestro</li>
+<li><a href="getting-started/quick-start.html">Quick Start</a> - Run your first workflow in 5 minutes</li>
+<li><a href="getting-started/concepts.html">Concepts</a> - Understand workflows, steps, and dependencies</li>
+</ul>
+<h3 id="guides"><a class="header" href="#guides">Guides</a></h3>
+<ul>
+<li><a href="guides/basic-workflow.html">Basic Workflows</a> - Create your first workflow</li>
+<li><a href="guides/dependencies.html">Dependencies</a> - Configure step dependencies and execution order</li>
+<li><a href="guides/services-ingress.html">Services &amp; Ingress</a> - Expose services and configure ingress</li>
+<li><a href="guides/multi-language.html">Multi-language Steps</a> - Use Python, Rust, WASM in workflows</li>
+<li><a href="guides/checkpointing.html">Checkpointing</a> - Enable workflow checkpointing and recovery</li>
+<li><a href="guides/security.html">Security</a> - Configure multi-tenant security and RBAC</li>
+</ul>
+<h3 id="api-reference"><a class="header" href="#api-reference">API Reference</a></h3>
+<ul>
+<li><a href="api/client.html">Client API</a> - MaestroClient reference</li>
+<li><a href="api/workflow.html">Workflow API</a> - Workflow and WorkflowBuilder reference</li>
+<li><a href="api/steps.html">Steps API</a> - Available step types and APIs</li>
+<li><a href="api/networking.html">Networking API</a> - Services, Ingress, and DNS utilities</li>
+</ul>
+<h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
+<ul>
+<li><a href="examples/spark-cluster.html">Spark Cluster</a> - Orchestrate Apache Spark on Kubernetes</li>
+<li><a href="examples/ml-pipeline.html">ML Pipeline</a> - Build machine learning pipelines</li>
+<li><a href="examples/data-processing.html">Data Processing</a> - ETL and data transformation workflows</li>
+</ul>
+<h3 id="reference"><a class="header" href="#reference">Reference</a></h3>
+<ul>
+<li><a href="reference/configuration.html">Configuration</a> - Configuration options and environment variables</li>
+<li><a href="reference/troubleshooting.html">Troubleshooting</a> - Common issues and solutions</li>
+</ul>
+<h2 id="example-usage"><a class="header" href="#example-usage">Example Usage</a></h2>
+<pre><pre class="playground"><code class="language-rust">use k8s_maestro::{MaestroClientBuilder, WorkflowBuilder};
+
+#[tokio::main]
+async fn main() -&gt; anyhow::Result&lt;()&gt; {
+    let client = MaestroClientBuilder::new()
+        .with_namespace("default")
+        .build()?;
+
+    let workflow = WorkflowBuilder::new()
+        .with_name("my-workflow")
+        .add_step(JobStep::new("my-job", "nginx:latest"))
+        .build()?;
+
+    let execution = client.execute_workflow(&amp;workflow).await?;
+    println!("Workflow executed: {:?}", execution);
+
+    Ok(())
+}</code></pre></pre>
+<h2 id="community--support"><a class="header" href="#community--support">Community &amp; Support</a></h2>
+<ul>
+<li><strong>GitHub Repository</strong>: <a href="https://github.com/andreclaudino/k8s-maestro">https://github.com/andreclaudino/k8s-maestro</a></li>
+<li><strong>Issues</strong>: Report bugs and request features</li>
+<li><strong>Contributing</strong>: See the contributing guidelines in the main repository</li>
+</ul>
+<h2 id="license"><a class="header" href="#license">License</a></h2>
+<p>This project is dual-licensed under:</p>
+<ul>
+<li><a href="https://opensource.org/licenses/MIT">MIT License</a></li>
+<li><a href="https://opensource.org/licenses/Apache-2.0">Apache License 2.0</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started-1"><a class="header" href="#getting-started-1">Getting Started</a></h1>
+<p>Welcome to the k8s-maestro getting started guide. This section will help you install, configure, and start using k8s-maestro.</p>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>k8s-maestro is a Kubernetes workflow orchestrator for Rust with a type-safe, high-level API. It allows you to create complex workflows with multiple steps, dependencies, and conditional execution.</p>
+<h3 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h3>
+<ul>
+<li>Rust 1.70 or later</li>
+<li>Access to a Kubernetes cluster</li>
+<li>Basic knowledge of Kubernetes concepts</li>
+</ul>
+<h3 id="what-youll-learn"><a class="header" href="#what-youll-learn">What You'll Learn</a></h3>
+<ul>
+<li>How to install k8s-maestro</li>
+<li>Basic workflow concepts</li>
+<li>How to create your first workflow</li>
+<li>Common patterns and best practices</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
+<p>This guide will help you install and configure k8s-maestro.</p>
+<h2 id="prerequisites-1"><a class="header" href="#prerequisites-1">Prerequisites</a></h2>
+<p>Before installing k8s-maestro, ensure you have:</p>
+<ul>
+<li><strong>Rust</strong> 1.70 or later (<a href="https://www.rust-lang.org/tools/install">Install Rust</a>)</li>
+<li><strong>Cargo</strong> (comes with Rust)</li>
+<li><strong>Kubernetes</strong> cluster (local or remote)</li>
+<li><strong>kubectl</strong> configured to access your cluster</li>
+</ul>
+<h2 id="installing-k8s-maestro"><a class="header" href="#installing-k8s-maestro">Installing k8s-maestro</a></h2>
+<h3 id="using-cargo"><a class="header" href="#using-cargo">Using Cargo</a></h3>
+<p>Add k8s-maestro to your <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml">[dependencies]
+k8s-maestro = "0.3"
+</code></pre>
+<p>Run <code>cargo build</code> to download and compile the crate:</p>
+<pre><code class="language-bash">cargo build --release
+</code></pre>
+<h3 id="enabling-kubernetes-support"><a class="header" href="#enabling-kubernetes-support">Enabling Kubernetes Support</a></h3>
+<p>k8s-maestro supports multiple Kubernetes versions. Enable the appropriate feature flag:</p>
+<pre><code class="language-toml">k8s-maestro = { version = "0.3", features = ["k8s_v1_28"] }
+</code></pre>
+<p>Available features:</p>
+<ul>
+<li><code>k8s_v1_28</code> - Kubernetes 1.28 (default)</li>
+<li><code>k8s_v1_29</code> - Kubernetes 1.29</li>
+<li><code>k8s_v1_30</code> - Kubernetes 1.30</li>
+<li><code>k8s_v1_31</code> - Kubernetes 1.31</li>
+<li><code>k8s_v1_32</code> - Kubernetes 1.32</li>
+</ul>
+<h3 id="enabling-additional-features"><a class="header" href="#enabling-additional-features">Enabling Additional Features</a></h3>
+<p>k8s-maestro provides optional features for extended functionality:</p>
+<pre><code class="language-toml"># Enable exec steps (for running scripts directly)
+k8s-maestro = { version = "0.3", features = ["exec-steps"] }
+
+# Combine features
+k8s-maestro = { version = "0.3", features = ["k8s_v1_30", "exec-steps"] }
+</code></pre>
+<h2 id="kubernetes-cluster-setup"><a class="header" href="#kubernetes-cluster-setup">Kubernetes Cluster Setup</a></h2>
+<h3 id="using-kind-local-development"><a class="header" href="#using-kind-local-development">Using Kind (Local Development)</a></h3>
+<p>For local development and testing, use <a href="https://kind.sigs.k8s.io/">Kind</a> to create a local Kubernetes cluster:</p>
+<pre><code class="language-bash"># Install Kind (if not already installed)
+go install sigs.k8s.io/kind@v0.20.0
+
+# Create a Kind cluster
+kind create cluster --name maestro-test
+
+# Verify cluster is running
+kubectl cluster-info
+</code></pre>
+<h3 id="using-minikube"><a class="header" href="#using-minikube">Using Minikube</a></h3>
+<p>Alternatively, use <a href="https://minikube.sigs.k8s.io/">Minikube</a>:</p>
+<pre><code class="language-bash"># Install Minikube
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+# Start Minikube
+minikube start
+
+# Verify cluster is running
+kubectl cluster-info
+</code></pre>
+<h3 id="using-a-remote-cluster"><a class="header" href="#using-a-remote-cluster">Using a Remote Cluster</a></h3>
+<p>Configure <code>kubectl</code> to access your remote cluster:</p>
+<pre><code class="language-bash"># Update kubeconfig
+kubectl config use-context your-remote-cluster
+
+# Verify connection
+kubectl cluster-info
+</code></pre>
+<h2 id="verifying-installation"><a class="header" href="#verifying-installation">Verifying Installation</a></h2>
+<p>Create a test file <code>test_installation.rs</code>:</p>
+<pre><pre class="playground"><code class="language-rust">use k8s_maestro::MaestroClientBuilder;
+
+fn main() -&gt; anyhow::Result&lt;()&gt; {
+    let client = MaestroClientBuilder::new()
+        .with_namespace("default")
+        .build()?;
+
+    println!("k8s-maestro installed successfully!");
+    println!("Namespace: {}", client.namespace());
+
+    Ok(())
+}</code></pre></pre>
+<p>Run the test:</p>
+<pre><code class="language-bash">cargo run --bin test_installation
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="connection-issues"><a class="header" href="#connection-issues">Connection Issues</a></h3>
+<p>If you encounter connection errors to the Kubernetes cluster:</p>
+<ol>
+<li>
+<p>Verify <code>kubectl</code> is configured correctly:</p>
+<pre><code class="language-bash">kubectl cluster-info
+</code></pre>
+</li>
+<li>
+<p>Check your kubeconfig file:</p>
+<pre><code class="language-bash">kubectl config view
+</code></pre>
+</li>
+<li>
+<p>Ensure the kubeconfig file is in the default location:</p>
+<pre><code class="language-bash">echo $KUBECONFIG
+# Usually: ~/.kube/config
+</code></pre>
+</li>
+</ol>
+<h3 id="feature-conflicts"><a class="header" href="#feature-conflicts">Feature Conflicts</a></h3>
+<p>When using multiple features, ensure compatibility:</p>
+<pre><code class="language-toml"># Correct - compatible features
+k8s-maestro = { version = "0.3", features = ["k8s_v1_30", "exec-steps"] }
+
+# Incorrect - only one k8s version feature should be enabled
+k8s-maestro = { version = "0.3", features = ["k8s_v1_28", "k8s_v1_30"] }
+</code></pre>
+<h3 id="build-errors"><a class="header" href="#build-errors">Build Errors</a></h3>
+<p>If you encounter build errors, try:</p>
+<pre><code class="language-bash"># Clean and rebuild
+cargo clean
+cargo build --release
+
+# Update dependencies
+cargo update
+
+# Check Rust version
+rustc --version  # Should be 1.70 or later
+</code></pre>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
+<p>After installation, continue to <a href="getting-started/quick-start.html">Quick Start</a> to run your first workflow.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="quick-start"><a class="header" href="#quick-start">Quick Start</a></h1>
+<p>This guide will help you run your first workflow in just 5 minutes.</p>
+<h2 id="prerequisites-2"><a class="header" href="#prerequisites-2">Prerequisites</a></h2>
+<p>Ensure you have completed the <a href="getting-started/installation.html">Installation</a> guide and have:</p>
+<ul>
+<li>k8s-maestro installed</li>
+<li>A running Kubernetes cluster</li>
+<li>kubectl configured</li>
+</ul>
+<h2 id="your-first-workflow"><a class="header" href="#your-first-workflow">Your First Workflow</a></h2>
+<p>Create a new Rust project:</p>
+<pre><code class="language-bash">cargo new my-first-workflow
+cd my-first-workflow
+</code></pre>
+<p>Add k8s-maestro to <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml">[package]
+name = "my-first-workflow"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+k8s-maestro = { version = "1.0", features = ["k8s_v1_30"] }
+tokio = { version = "1", features = ["full"] }
+anyhow = "1.0"
+</code></pre>
+<p>Update <code>src/main.rs</code>:</p>
+<pre><pre class="playground"><code class="language-rust">use k8s_maestro::{MaestroClientBuilder, WorkflowBuilder};
+use k8s_maestro::steps::KubeJobStep;
+use k8s_maestro::clients::MaestroK8sClient;
+
+#[tokio::main]
+async fn main() -&gt; anyhow::Result&lt;()&gt; {
+    println!("Creating Kubernetes client...");
+
+    let k8s_client = MaestroK8sClient::new().await?;
+
+    println!("Creating k8s-maestro client...");
+
+    let client = MaestroClientBuilder::new()
+        .with_namespace("default")
+        .with_client(k8s_client)
+        .build()?;
+
+    println!("Building workflow...");
+
+    let workflow = WorkflowBuilder::new()
+        .with_name("hello-maestro")
+        .add_step(KubeJobStep::new("hello-job", "nginx:latest", k8s_client.clone()))
+        .build()?;
+
+    println!("Executing workflow...");
+
+    let created = client.create_workflow(workflow)?;
+    println!("Workflow created with ID: {}", created.id());
+    println!("Workflow name: {}", created.name());
+    println!("Namespace: {}", created.namespace());
+
+    Ok(())
+}</code></pre></pre>
+<p>Run the workflow:</p>
+<pre><code class="language-bash">cargo run
+</code></pre>
+<h2 id="verifying-execution"><a class="header" href="#verifying-execution">Verifying Execution</a></h2>
+<p>Check the workflow status with kubectl:</p>
+<pre><code class="language-bash"># List pods in the workflow
+kubectl get pods
+
+# View pod logs
+kubectl logs -l app=hello-maestro
+
+# Check workflow status
+kubectl describe jobs
+</code></pre>
+<h2 id="example-output"><a class="header" href="#example-output">Example Output</a></h2>
+<p>You should see output similar to:</p>
+<pre><code>Creating k8s-maestro client...
+Building workflow...
+Executing workflow...
+Workflow created with ID: 550e8400-e29b-41d4-a716-446655440000
+Workflow name: hello-maestro
+Namespace: default
+</code></pre>
+<h2 id="next-steps-1"><a class="header" href="#next-steps-1">Next Steps</a></h2>
+<p>Congratulations! You've successfully run your first workflow. Continue to:</p>
+<ul>
+<li><a href="getting-started/../guides/basic-workflow.html">Basic Workflows</a> - Learn workflow building patterns</li>
+<li><a href="getting-started/../guides/dependencies.html">Dependencies</a> - Configure step execution order</li>
+<li><a href="getting-started/../examples/">Examples</a> - Explore more workflow examples</li>
+</ul>
+<h2 id="troubleshooting-1"><a class="header" href="#troubleshooting-1">Troubleshooting</a></h2>
+<h3 id="namespace-not-found-error"><a class="header" href="#namespace-not-found-error">"Namespace not found" Error</a></h3>
+<p>Create the namespace if it doesn't exist:</p>
+<pre><code class="language-bash">kubectl create namespace default
+</code></pre>
+<h3 id="connection-refused-error"><a class="header" href="#connection-refused-error">"Connection refused" Error</a></h3>
+<p>Verify your Kubernetes cluster is running:</p>
+<pre><code class="language-bash">kubectl cluster-info
+</code></pre>
+<h3 id="workflow-stuck-in-pending-state"><a class="header" href="#workflow-stuck-in-pending-state">Workflow stuck in "Pending" state</a></h3>
+<p>Check the pod status for more details:</p>
+<pre><code class="language-bash">kubectl describe pod &lt;pod-name&gt;
+</code></pre>
+<p>Common issues:</p>
+<ul>
+<li>Insufficient resources: Increase cluster capacity</li>
+<li>Image pull errors: Check image availability</li>
+<li>Node affinity: Ensure nodes match the workflow requirements</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="concepts"><a class="header" href="#concepts">Concepts</a></h1>
+<p>This guide explains the core concepts of k8s-maestro.</p>
+<h2 id="workflows"><a class="header" href="#workflows">Workflows</a></h2>
+<p>A <strong>Workflow</strong> is a collection of steps that execute in a specific order or in parallel. Workflows represent a logical unit of work that can be scheduled, executed, monitored, and managed in Kubernetes.</p>
+<h3 id="workflow-properties"><a class="header" href="#workflow-properties">Workflow Properties</a></h3>
+<ul>
+<li><strong>Name</strong>: Unique identifier for the workflow</li>
+<li><strong>Namespace</strong>: Kubernetes namespace where the workflow runs</li>
+<li><strong>Steps</strong>: Individual tasks to execute</li>
+<li><strong>Metadata</strong>: Labels, annotations, and custom metadata</li>
+<li><strong>Execution Mode</strong>: Sequential or parallel execution</li>
+<li><strong>Parallelism</strong>: Maximum number of steps running simultaneously</li>
+<li><strong>Checkpointing</strong>: Automatic checkpoint and recovery configuration</li>
+</ul>
+<h2 id="steps"><a class="header" href="#steps">Steps</a></h2>
+<p>A <strong>Step</strong> is the smallest unit of work in a workflow. Each step represents a task that can be executed independently.</p>
+<h3 id="step-types"><a class="header" href="#step-types">Step Types</a></h3>
+<p>k8s-maestro supports multiple step types:</p>
+<ol>
+<li><strong>JobStep</strong>: Kubernetes Job - runs containers to completion</li>
+<li><strong>ExecStep</strong>: Execute commands directly (local execution)</li>
+<li><strong>WasmStep</strong>: WebAssembly module execution</li>
+<li><strong>PythonStep</strong>: Python script execution (aspirational)</li>
+<li><strong>RustStep</strong>: Rust code execution (aspirational)</li>
+</ol>
+<h3 id="step-properties"><a class="header" href="#step-properties">Step Properties</a></h3>
+<ul>
+<li><strong>Step ID</strong>: Unique identifier within the workflow</li>
+<li><strong>Container Image</strong>: Docker image to run</li>
+<li><strong>Command/Arguments</strong>: Command to execute in the container</li>
+<li><strong>Environment Variables</strong>: Configuration for the step</li>
+<li><strong>Resource Limits</strong>: CPU, memory, and GPU constraints</li>
+<li><strong>Volume Mounts</strong>: Storage attachments</li>
+<li><strong>Dependencies</strong>: Other steps that must complete first</li>
+</ul>
+<h2 id="dependencies"><a class="header" href="#dependencies">Dependencies</a></h2>
+<p>Dependencies define the execution order of steps. A step can depend on one or more other steps, creating a <strong>Directed Acyclic Graph (DAG)</strong>.</p>
+<h3 id="dependency-types"><a class="header" href="#dependency-types">Dependency Types</a></h3>
+<ol>
+<li><strong>Simple Dependency</strong>: Step B runs after Step A completes</li>
+<li><strong>Multiple Dependencies</strong>: Step C runs after Steps A and B complete</li>
+<li><strong>Any Dependency</strong>: Step D runs when ANY of A, B, or C completes</li>
+<li><strong>Conditional Dependency</strong>: Step E runs only if a condition is met</li>
+</ol>
+<h3 id="dependency-conditions"><a class="header" href="#dependency-conditions">Dependency Conditions</a></h3>
+<ul>
+<li><strong>All Success</strong>: Run only if all dependencies succeed</li>
+<li><strong>Any Success</strong>: Run if any dependency succeeds</li>
+<li><strong>Output Check</strong>: Run based on dependency output values</li>
+<li><strong>Custom Condition</strong>: User-defined condition logic</li>
+</ul>
+<h2 id="execution-modes"><a class="header" href="#execution-modes">Execution Modes</a></h2>
+<h3 id="sequential"><a class="header" href="#sequential">Sequential</a></h3>
+<p>Steps execute one after another:</p>
+<pre><code>Step A -&gt; Step B -&gt; Step C -&gt; Step D
+</code></pre>
+<h3 id="parallel"><a class="header" href="#parallel">Parallel</a></h3>
+<p>Multiple steps execute simultaneously:</p>
+<pre><code>Step A
+Step B
+Step C
+</code></pre>
+<h3 id="mixed"><a class="header" href="#mixed">Mixed</a></h3>
+<p>Combination of sequential and parallel:</p>
+<pre><code>    Step A
+   /      \
+Step B    Step C
+   \      /
+    Step D
+</code></pre>
+<h2 id="client"><a class="header" href="#client">Client</a></h2>
+<p>The <strong>MaestroClient</strong> is the main interface for interacting with Kubernetes workflows.</p>
+<h3 id="client-capabilities"><a class="header" href="#client-capabilities">Client Capabilities</a></h3>
+<ul>
+<li>Create workflows</li>
+<li>Retrieve workflow status</li>
+<li>List workflows</li>
+<li>Delete workflows</li>
+<li>Watch workflow execution</li>
+<li>Configure default settings (namespace, timeout, logging)</li>
+</ul>
+<h3 id="client-configuration"><a class="header" href="#client-configuration">Client Configuration</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let client = MaestroClientBuilder::new()
+    .with_namespace("production")
+    .with_default_timeout(Duration::from_secs(300))
+    .with_dry_run(false)
+    .with_log_level("info")
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="checkpointing"><a class="header" href="#checkpointing">Checkpointing</a></h2>
+<p>Checkpointing enables workflow recovery from failures. When enabled, k8s-maestro periodically saves the workflow state.</p>
+<h3 id="checkpoint-benefits"><a class="header" href="#checkpoint-benefits">Checkpoint Benefits</a></h3>
+<ul>
+<li>Resume from last checkpoint after failures</li>
+<li>Avoid re-executing completed steps</li>
+<li>Debug workflow execution</li>
+<li>Audit workflow history</li>
+</ul>
+<h3 id="checkpoint-configuration"><a class="header" href="#checkpoint-configuration">Checkpoint Configuration</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let checkpoint_config = LegacyCheckpointConfig::new()
+    .enabled(true)
+    .with_interval_secs(60)
+    .with_retention_count(10)
+    .with_storage_path("/checkpoints");
+
+let workflow = WorkflowBuilder::new()
+    .with_checkpointing(checkpoint_config)
+    // ...
+<span class="boring">}</span></code></pre></pre>
+<h2 id="services-and-ingress"><a class="header" href="#services-and-ingress">Services and Ingress</a></h2>
+<h3 id="services"><a class="header" href="#services">Services</a></h3>
+<p>A <strong>Service</strong> exposes a workflow step to network traffic within the cluster.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let service = ServiceBuilder::new()
+    .with_name("my-service")
+    .with_port(80, 8080, "TCP")
+    .with_type(ServiceType::ClusterIP)
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="service-types"><a class="header" href="#service-types">Service Types</a></h3>
+<ul>
+<li><strong>ClusterIP</strong>: Internal cluster access only</li>
+<li><strong>NodePort</strong>: Accessible via node IPs</li>
+<li><strong>LoadBalancer</strong>: External load balancer</li>
+<li><strong>Headless</strong>: DNS returns pod IPs directly</li>
+</ul>
+<h3 id="ingress"><a class="header" href="#ingress">Ingress</a></h3>
+<p><strong>Ingress</strong> provides external HTTP/HTTPS access to services.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let ingress = IngressBuilder::new()
+    .with_name("my-ingress")
+    .with_host("example.com")
+    .with_path("/", "my-service", 80)
+    .with_tls_secret("tls-secret")
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="sidecars"><a class="header" href="#sidecars">Sidecars</a></h2>
+<p>A <strong>Sidecar</strong> is an auxiliary container that runs alongside the main container in the same pod.</p>
+<h3 id="common-sidecar-use-cases"><a class="header" href="#common-sidecar-use-cases">Common Sidecar Use Cases</a></h3>
+<ul>
+<li><strong>Logging</strong>: Fluent Bit, log collectors</li>
+<li><strong>Monitoring</strong>: Prometheus exporters, statsd</li>
+<li><strong>Proxies</strong>: Envoy, NGINX sidecars</li>
+<li><strong>Debugging</strong>: Debug containers, network tools</li>
+</ul>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let logging_sidecar = SidecarContainer::new("fluent/fluent-bit:2.2", "log-collector")
+    .with_shared_volume("/var/log", "/var/log");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="next-steps-2"><a class="header" href="#next-steps-2">Next Steps</a></h2>
+<ul>
+<li><a href="getting-started/../guides/basic-workflow.html">Basic Workflows</a> - Create workflows step by step</li>
+<li><a href="getting-started/../guides/dependencies.html">Dependencies</a> - Configure complex execution flows</li>
+<li><a href="getting-started/../api/">API Reference</a> - Detailed API documentation</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="guides-1"><a class="header" href="#guides-1">Guides</a></h1>
+<p>This section contains step-by-step guides for common k8s-maestro workflows and patterns.</p>
+<h2 id="available-guides"><a class="header" href="#available-guides">Available Guides</a></h2>
+<h3 id="basic-workflow"><a class="header" href="#basic-workflow">Basic Workflow</a></h3>
+<p>Learn how to create and run a basic workflow with multiple steps.</p>
+<h3 id="advanced-patterns"><a class="header" href="#advanced-patterns">Advanced Patterns</a></h3>
+<ul>
+<li>Multi-workflow orchestration</li>
+<li>Service exposure and ingress configuration</li>
+<li>Sidecar containers</li>
+<li>Conditional execution</li>
+<li>File observer integration</li>
+</ul>
+<h3 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h3>
+<ul>
+<li>Workflow design patterns</li>
+<li>Error handling strategies</li>
+<li>Performance optimization</li>
+<li>Testing workflows</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="basic-workflows"><a class="header" href="#basic-workflows">Basic Workflows</a></h1>
+<p>This guide teaches you how to build and execute basic workflows with k8s-maestro.</p>
+<h2 id="creating-a-simple-workflow"><a class="header" href="#creating-a-simple-workflow">Creating a Simple Workflow</a></h2>
+<p>The simplest workflow consists of a single step that runs a container to completion.</p>
+<pre><pre class="playground"><code class="language-rust">use k8s_maestro::{MaestroClientBuilder, MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+#[tokio::main]
+async fn main() -&gt; anyhow::Result&lt;()&gt; {
+    let k8s_client = MaestroK8sClient::new().await?;
+    
+    let client = MaestroClientBuilder::new()
+        .with_namespace("default")
+        .with_client(k8s_client.clone())
+        .build()?;
+
+    let workflow = WorkflowBuilder::new()
+        .with_name("simple-workflow")
+        .add_step(JobStep::new("hello-job", "nginx:latest", k8s_client))
+        .build()?;
+
+    let created = client.create_workflow(workflow)?;
+    println!("Workflow created: {}", created.id());
+
+    Ok(())
+}</code></pre></pre>
+<h2 id="configuring-container-options"><a class="header" href="#configuring-container-options">Configuring Container Options</a></h2>
+<p>Customize the step's container with arguments, environment variables, and resource limits.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::entities::MaestroContainer;
+use k8s_maestro::steps::kubernetes::JobStep;
+use std::collections::BTreeMap;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
+let container = MaestroContainer::new("python:3.11", "data-processor")
+    .set_arguments(&amp;vec![
+        "python".to_string(),
+        "-c".to_string(),
+        "print('Processing data...')".to_string(),
+    ])
+    .set_environment_variables(vec![
+        ("LOG_LEVEL".to_string(), "info".to_string()),
+    ].into_iter().collect());
+
+let mut resource_limits = BTreeMap::new();
+resource_limits.insert("cpu".to_string(), "500m".to_string());
+resource_limits.insert("memory".to_string(), "512Mi".to_string());
+
+let workflow = WorkflowBuilder::new()
+    .with_name("configured-workflow")
+    .add_step(JobStep::new("process-job", "python:3.11", k8s_client.clone())
+        .with_container(container)
+        .with_resource_limits(resource_limits))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="adding-multiple-steps"><a class="header" href="#adding-multiple-steps">Adding Multiple Steps</a></h2>
+<p>Create workflows with multiple independent steps that run in parallel.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
+let workflow = WorkflowBuilder::new()
+    .with_name("multi-step-workflow")
+    .with_parallelism(3)
+    .add_step(JobStep::new("fetch-data", "curlimages/curl", k8s_client.clone()))
+    .add_step(JobStep::new("process-a", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("process-b", "python:3.11", k8s_client))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="setting-workflow-metadata"><a class="header" href="#setting-workflow-metadata">Setting Workflow Metadata</a></h2>
+<p>Add labels and annotations for organization and tracking.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
+let workflow = WorkflowBuilder::new()
+    .with_name("labeled-workflow")
+    .with_label("environment", "production")
+    .with_label("team", "data-science")
+    .with_label("cost-center", "engineering")
+    .with_annotation("owner", "team-lead@example.com")
+    .with_annotation("jira-ticket", "OPS-1234")
+    .add_step(JobStep::new("main-job", "python:3.11", k8s_client))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="configuring-execution-mode"><a class="header" href="#configuring-execution-mode">Configuring Execution Mode</a></h2>
+<p>Control whether steps run sequentially or in parallel.</p>
+<h3 id="sequential-execution"><a class="header" href="#sequential-execution">Sequential Execution</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
+let workflow = WorkflowBuilder::new()
+    .with_name("sequential-workflow")
+    .with_execution_mode(ExecutionMode::Sequential)
+    .add_step(JobStep::new("step-1", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("step-2", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("step-3", "python:3.11", k8s_client))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="parallel-execution"><a class="header" href="#parallel-execution">Parallel Execution</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
+let workflow = WorkflowBuilder::new()
+    .with_name("parallel-workflow")
+    .with_execution_mode(ExecutionMode::Parallel(5))
+    .add_step(JobStep::new("worker-1", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("worker-2", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("worker-3", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("worker-4", "python:3.11", k8s_client.clone()))
+    .add_step(JobStep::new("worker-5", "python:3.11", k8s_client))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="working-with-workflows"><a class="header" href="#working-with-workflows">Working with Workflows</a></h2>
+<h3 id="creating-a-workflow"><a class="header" href="#creating-a-workflow">Creating a Workflow</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::{MaestroK8sClient, WorkflowBuilder};
+use k8s_maestro::steps::kubernetes::JobStep;
+
+let k8s_client = MaestroK8sClient::new().await?;
+
+let workflow = WorkflowBuilder::new()
+    .with_name("my-workflow")
+    .add_step(JobStep::new("job-1", "nginx:latest", k8s_client))
+    .build()?;
+
+let created = client.create_workflow(workflow)?;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="retrieving-a-workflow"><a class="header" href="#retrieving-a-workflow">Retrieving a Workflow</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>if let Some(workflow) = client.get_workflow(&amp;created.id())? {
+    println!("Workflow: {}", workflow.name());
+    println!("Status: {:?}", workflow.status());
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="listing-workflows"><a class="header" href="#listing-workflows">Listing Workflows</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let workflows = client.list_workflows()?;
+
+for workflow in workflows {
+    println!("{}: {} ({})", workflow.id(), workflow.name(), workflow.namespace());
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="deleting-a-workflow"><a class="header" href="#deleting-a-workflow">Deleting a Workflow</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>client.delete_workflow(&amp;workflow_id)?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="best-practices-1"><a class="header" href="#best-practices-1">Best Practices</a></h2>
+<ol>
+<li><strong>Use descriptive names</strong> for workflows and steps</li>
+<li><strong>Add labels</strong> for organization and filtering</li>
+<li><strong>Set appropriate resource limits</strong> to prevent resource exhaustion</li>
+<li><strong>Choose the right execution mode</strong> for your use case</li>
+<li><strong>Monitor workflow execution</strong> with kubectl</li>
+<li><strong>Use dry-run mode</strong> for testing without execution</li>
+</ol>
+<h2 id="next-steps-3"><a class="header" href="#next-steps-3">Next Steps</a></h2>
+<ul>
+<li><a href="guides/dependencies.html">Dependencies</a> - Configure step execution order</li>
+<li><a href="guides/services-ingress.html">Services &amp; Ingress</a> - Expose workflow services</li>
+<li><a href="guides/../examples/">Examples</a> - More workflow examples</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="reference-1"><a class="header" href="#reference-1">Reference</a></h1>
+<p>This section provides detailed reference documentation for k8s-maestro configuration, API, and troubleshooting.</p>
+<h2 id="configuration"><a class="header" href="#configuration">Configuration</a></h2>
+<p>Complete reference for configuring k8s-maestro, including all configuration options and their default values.</p>
+<h2 id="troubleshooting-2"><a class="header" href="#troubleshooting-2">Troubleshooting</a></h2>
+<p>Common issues and solutions for using k8s-maestro with Kubernetes.</p>
+<h2 id="api-reference-1"><a class="header" href="#api-reference-1">API Reference</a></h2>
+<p>For detailed API documentation, see the generated Rust documentation:</p>
+<ul>
+<li><a href="https://docs.rs/k8s-maestro">k8s-maestro crate documentation</a></li>
+<li><a href="https://docs.rs/k8s-maestro-k8s">k8s-maestro-k8s crate documentation</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="configuration-1"><a class="header" href="#configuration-1">Configuration</a></h1>
+<p>This guide covers k8s-maestro configuration options and environment variables.</p>
+<h2 id="client-configuration-1"><a class="header" href="#client-configuration-1">Client Configuration</a></h2>
+<p>Configure the MaestroClient with various options for your use case.</p>
+<h3 id="namespace"><a class="header" href="#namespace">Namespace</a></h3>
+<p>Set the default namespace for workflow operations.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let client = MaestroClientBuilder::new()
+    .with_namespace("production")
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="dry-run"><a class="header" href="#dry-run">Dry Run</a></h3>
+<p>Enable dry run mode to validate workflows without execution.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let client = MaestroClientBuilder::new()
+    .with_dry_run(true)
+    .build()?;
+
+// Workflow will be validated but not executed
+let created = client.create_workflow(workflow)?;
+assert!(created.is_dry_run());
+<span class="boring">}</span></code></pre></pre>
+<h3 id="timeout"><a class="header" href="#timeout">Timeout</a></h3>
+<p>Set a default timeout for workflow operations.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::time::Duration;
+
+let client = MaestroClientBuilder::new()
+    .with_default_timeout(Duration::from_secs(300))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="logging"><a class="header" href="#logging">Logging</a></h3>
+<p>Configure the log level for client operations.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let client = MaestroClientBuilder::new()
+    .with_log_level("debug")
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<p>Available log levels:</p>
+<ul>
+<li><code>trace</code> - Most verbose</li>
+<li><code>debug</code> - Detailed debugging</li>
+<li><code>info</code> - Informational (default)</li>
+<li><code>warn</code> - Warnings</li>
+<li><code>error</code> - Errors only</li>
+</ul>
+<h3 id="resource-limits"><a class="header" href="#resource-limits">Resource Limits</a></h3>
+<p>Set default resource limits for all workflows.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::steps::traits::ResourceLimits;
+
+let limits = ResourceLimits::new()
+    .with_cpu("500m")
+    .with_memory("512Mi")
+    .with_gpu("0"); // No GPU by default
+
+let client = MaestroClientBuilder::new()
+    .with_default_resource_limits(limits)
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="kubeconfig-path"><a class="header" href="#kubeconfig-path">Kubeconfig Path</a></h3>
+<p>Specify a custom kubeconfig file location.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::path::PathBuf;
+
+let client = MaestroClientBuilder::new()
+    .with_kube_config_path(PathBuf::from("/custom/path/to/kubeconfig"))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="environment-variables"><a class="header" href="#environment-variables">Environment Variables</a></h2>
+<p>k8s-maestro can be configured using environment variables.</p>
+<h3 id="kubeconfig"><a class="header" href="#kubeconfig">KUBECONFIG</a></h3>
+<p>Path to the kubeconfig file.</p>
+<pre><code class="language-bash">export KUBECONFIG=/path/to/kubeconfig
+</code></pre>
+<h3 id="maestro_namespace"><a class="header" href="#maestro_namespace">MAESTRO_NAMESPACE</a></h3>
+<p>Default namespace for workflows.</p>
+<pre><code class="language-bash">export MAESTRO_NAMESPACE=production
+</code></pre>
+<h3 id="maestro_log_level"><a class="header" href="#maestro_log_level">MAESTRO_LOG_LEVEL</a></h3>
+<p>Log level for k8s-maestro operations.</p>
+<pre><code class="language-bash">export MAESTRO_LOG_LEVEL=debug
+</code></pre>
+<h3 id="maestro_dry_run"><a class="header" href="#maestro_dry_run">MAESTRO_DRY_RUN</a></h3>
+<p>Enable dry run mode (1) or disable (0).</p>
+<pre><code class="language-bash">export MAESTRO_DRY_RUN=0
+</code></pre>
+<h3 id="maestro_timeout"><a class="header" href="#maestro_timeout">MAESTRO_TIMEOUT</a></h3>
+<p>Default timeout in seconds for operations.</p>
+<pre><code class="language-bash">export MAESTRO_TIMEOUT=300
+</code></pre>
+<h3 id="maestro_default_cpu"><a class="header" href="#maestro_default_cpu">MAESTRO_DEFAULT_CPU</a></h3>
+<p>Default CPU limit for workflows.</p>
+<pre><code class="language-bash">export MAESTRO_DEFAULT_CPU=500m
+</code></pre>
+<h3 id="maestro_default_memory"><a class="header" href="#maestro_default_memory">MAESTRO_DEFAULT_MEMORY</a></h3>
+<p>Default memory limit for workflows.</p>
+<pre><code class="language-bash">export MAESTRO_DEFAULT_MEMORY=512Mi
+</code></pre>
+<h3 id="maestro_default_gpu"><a class="header" href="#maestro_default_gpu">MAESTRO_DEFAULT_GPU</a></h3>
+<p>Default GPU limit for workflows.</p>
+<pre><code class="language-bash">export MAESTRO_DEFAULT_GPU=0
+</code></pre>
+<h2 id="workflow-configuration"><a class="header" href="#workflow-configuration">Workflow Configuration</a></h2>
+<p>Configure individual workflow settings.</p>
+<h3 id="checkpointing-1"><a class="header" href="#checkpointing-1">Checkpointing</a></h3>
+<p>Enable automatic checkpointing and recovery.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::workflows::LegacyCheckpointConfig;
+
+let checkpoint_config = LegacyCheckpointConfig::new()
+    .enabled(true)
+    .with_interval_secs(60)
+    .with_retention_count(10)
+    .with_storage_path("/checkpoints");
+
+let workflow = WorkflowBuilder::new()
+    .with_name("checkpointed-workflow")
+    .with_checkpointing(checkpoint_config)
+    .add_step(JobStep::new("long-running", "python:3.11"))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="parallelism"><a class="header" href="#parallelism">Parallelism</a></h3>
+<p>Set the maximum number of parallel steps.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let workflow = WorkflowBuilder::new()
+    .with_name("parallel-workflow")
+    .with_parallelism(5)
+    .add_step(JobStep::new("worker-1", "python:3.11"))
+    .add_step(JobStep::new("worker-2", "python:3.11"))
+    .add_step(JobStep::new("worker-3", "python:3.11"))
+    .add_step(JobStep::new("worker-4", "python:3.11"))
+    .add_step(JobStep::new("worker-5", "python:3.11"))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="execution-mode"><a class="header" href="#execution-mode">Execution Mode</a></h3>
+<p>Configure how steps execute (sequential or parallel).</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::workflows::ExecutionMode;
+
+let workflow = WorkflowBuilder::new()
+    .with_name("execution-workflow")
+    .with_execution_mode(ExecutionMode::Sequential)
+    .add_step(JobStep::new("step-1", "python:3.11"))
+    .add_step(JobStep::new("step-2", "python:3.11"))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<h2 id="kubernetes-configuration"><a class="header" href="#kubernetes-configuration">Kubernetes Configuration</a></h2>
+<h3 id="context-selection"><a class="header" href="#context-selection">Context Selection</a></h3>
+<p>Select a specific Kubernetes context from kubeconfig.</p>
+<pre><code class="language-bash">kubectl config use-context production-cluster
+</code></pre>
+<h3 id="namespace-creation"><a class="header" href="#namespace-creation">Namespace Creation</a></h3>
+<p>Create a namespace if it doesn't exist.</p>
+<pre><code class="language-bash">kubectl create namespace production
+</code></pre>
+<h3 id="resource-quotas"><a class="header" href="#resource-quotas">Resource Quotas</a></h3>
+<p>Set resource quotas to limit resource usage.</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: maestro-quota
+  namespace: production
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 16Gi
+</code></pre>
+<h2 id="configuration-file-future"><a class="header" href="#configuration-file-future">Configuration File (Future)</a></h2>
+<p>k8s-maestro plans to support configuration files in the future:</p>
+<pre><code class="language-yaml"># maestro.yaml
+client:
+  namespace: production
+  dry_run: false
+  timeout: 300
+  log_level: info
+
+defaults:
+  resources:
+    cpu: 500m
+    memory: 512Mi
+
+checkpointing:
+  enabled: true
+  interval: 60
+  retention: 10
+  storage_path: /checkpoints
+</code></pre>
+<h2 id="best-practices-2"><a class="header" href="#best-practices-2">Best Practices</a></h2>
+<ol>
+<li><strong>Use environment variables</strong> for sensitive data (API keys, passwords)</li>
+<li><strong>Set appropriate resource limits</strong> to prevent resource exhaustion</li>
+<li><strong>Enable checkpointing</strong> for long-running workflows</li>
+<li><strong>Use dry run mode</strong> for testing in production environments</li>
+<li><strong>Organize with namespaces</strong> for different environments</li>
+<li><strong>Monitor resource usage</strong> with Kubernetes metrics</li>
+</ol>
+<h2 id="next-steps-4"><a class="header" href="#next-steps-4">Next Steps</a></h2>
+<ul>
+<li><a href="reference/troubleshooting.html">Troubleshooting</a> - Common configuration issues</li>
+<li><a href="reference/../api/">API Reference</a> - Detailed API documentation</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="troubleshooting-3"><a class="header" href="#troubleshooting-3">Troubleshooting</a></h1>
+<p>This guide helps you diagnose and fix common issues with k8s-maestro.</p>
+<h2 id="connection-issues-1"><a class="header" href="#connection-issues-1">Connection Issues</a></h2>
+<h3 id="connection-refused-or-no-route-to-host"><a class="header" href="#connection-refused-or-no-route-to-host">"Connection refused" or "No route to host"</a></h3>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Cannot connect to Kubernetes cluster</li>
+<li>Timeout errors during client creation</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>
+<p>Verify cluster is running:</p>
+<pre><code class="language-bash">kubectl cluster-info
+</code></pre>
+</li>
+<li>
+<p>Check kubeconfig:</p>
+<pre><code class="language-bash">kubectl config view
+</code></pre>
+</li>
+<li>
+<p>Test connection:</p>
+<pre><code class="language-bash">kubectl get nodes
+</code></pre>
+</li>
+<li>
+<p>Verify context:</p>
+<pre><code class="language-bash">kubectl config current-context
+kubectl config use-context correct-context
+</code></pre>
+</li>
+</ol>
+<h3 id="unauthorized-or-forbidden"><a class="header" href="#unauthorized-or-forbidden">"Unauthorized" or "Forbidden"</a></h3>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Authentication errors</li>
+<li>Permission denied errors</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>
+<p>Check current user:</p>
+<pre><code class="language-bash">kubectl auth whoami
+</code></pre>
+</li>
+<li>
+<p>Verify permissions:</p>
+<pre><code class="language-bash">kubectl auth can-i create jobs --namespace=default
+</code></pre>
+</li>
+<li>
+<p>Update credentials:</p>
+<pre><code class="language-bash">aws eks update-kubeconfig --name my-cluster  # EKS
+gcloud container clusters get-credentials my-cluster  # GKE
+az aks get-credentials --resource-group myRG --name myCluster  # AKS
+</code></pre>
+</li>
+</ol>
+<h2 id="workflow-execution-issues"><a class="header" href="#workflow-execution-issues">Workflow Execution Issues</a></h2>
+<h3 id="workflow-stuck-in-pending-state-1"><a class="header" href="#workflow-stuck-in-pending-state-1">Workflow stuck in "Pending" state</a></h3>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Workflow created but not executing</li>
+<li>Pods remain in Pending state</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>
+<p>Check pod status:</p>
+<pre><code class="language-bash">kubectl describe pod &lt;pod-name&gt;
+</code></pre>
+</li>
+<li>
+<p>Common causes:</p>
+<ul>
+<li><strong>Insufficient resources</strong>: Add more nodes or reduce resource limits</li>
+<li><strong>Image pull errors</strong>: Verify image name and registry access</li>
+<li><strong>Node affinity</strong>: Ensure nodes match the workflow requirements</li>
+<li><strong>Taints and tolerations</strong>: Check if nodes have taints blocking the pod</li>
+</ul>
+</li>
+<li>
+<p>Check resource usage:</p>
+<pre><code class="language-bash">kubectl top nodes
+kubectl describe nodes
+</code></pre>
+</li>
+</ol>
+<h3 id="workflow-failed-with-crashloopbackoff"><a class="header" href="#workflow-failed-with-crashloopbackoff">Workflow failed with "CrashLoopBackOff"</a></h3>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Pod repeatedly crashes</li>
+<li>Container exits immediately</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>
+<p>Check pod logs:</p>
+<pre><code class="language-bash">kubectl logs &lt;pod-name&gt; --previous
+</code></pre>
+</li>
+<li>
+<p>Common causes:</p>
+<ul>
+<li><strong>Application errors</strong>: Fix the application code</li>
+<li><strong>Missing dependencies</strong>: Ensure all required files/packages are present</li>
+<li><strong>Configuration errors</strong>: Verify environment variables and arguments</li>
+<li><strong>Health check failures</strong>: Adjust probe configurations</li>
+</ul>
+</li>
+<li>
+<p>Debug with interactive shell:</p>
+<pre><code class="language-bash">kubectl exec -it &lt;pod-name&gt; -- /bin/bash
+</code></pre>
+</li>
+</ol>
+<h3 id="workflow-execution-timeout"><a class="header" href="#workflow-execution-timeout">Workflow execution timeout</a></h3>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Workflow takes longer than expected</li>
+<li>Timeout errors</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>
+<p>Check pod logs for slow operations:</p>
+<pre><code class="language-bash">kubectl logs -f &lt;pod-name&gt;
+</code></pre>
+</li>
+<li>
+<p>Common causes:</p>
+<ul>
+<li><strong>Inefficient algorithms</strong>: Optimize the workflow logic</li>
+<li><strong>Insufficient resources</strong>: Increase CPU/memory limits</li>
+<li><strong>Network bottlenecks</strong>: Check network connectivity</li>
+<li><strong>Large data sets</strong>: Consider data partitioning</li>
+</ul>
+</li>
+<li>
+<p>Increase timeout:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let client = MaestroClientBuilder::new()
+    .with_default_timeout(Duration::from_secs(600))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+</li>
+</ol>
+<h2 id="resource-issues"><a class="header" href="#resource-issues">Resource Issues</a></h2>
+<h3 id="insufficient-cpu-or-insufficient-memory"><a class="header" href="#insufficient-cpu-or-insufficient-memory">"Insufficient cpu" or "Insufficient memory"</a></h3>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Pods not scheduled</li>
+<li>Resource quota exceeded errors</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>
+<p>Check cluster capacity:</p>
+<pre><code class="language-bash">kubectl describe nodes | grep -A 3 "Allocated resources"
+</code></pre>
+</li>
+<li>
+<p>Check resource quotas:</p>
+<pre><code class="language-bash">kubectl describe resourcequota -n &lt;namespace&gt;
+</code></pre>
+</li>
+<li>
+<p>Solutions:</p>
+<ul>
+<li><strong>Scale cluster</strong>: Add more nodes</li>
+<li><strong>Reduce limits</strong>: Lower resource requirements</li>
+<li><strong>Delete unused resources</strong>: Free up capacity</li>
+<li><strong>Request quota increase</strong>: If using managed quotas</li>
+</ul>
+</li>
+</ol>
+<h3 id="oomkilled-out-of-memory"><a class="header" href="#oomkilled-out-of-memory">"OOMKilled" (Out of Memory)</a></h3>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Pod killed due to memory exhaustion</li>
+<li>Container restarts</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>
+<p>Check pod events:</p>
+<pre><code class="language-bash">kubectl describe pod &lt;pod-name&gt;
+</code></pre>
+</li>
+<li>
+<p>Solutions:</p>
+<ul>
+<li><strong>Increase memory limit</strong>: Allocate more memory</li>
+<li><strong>Optimize memory usage</strong>: Reduce memory footprint</li>
+<li><strong>Enable swap</strong>: If supported by your runtime</li>
+</ul>
+</li>
+<li>
+<p>Update workflow:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let workflow = WorkflowBuilder::new()
+    .with_name("memory-workflow")
+    .add_step(JobStep::new("job-1", "python:3.11")
+        .with_resource_limits(ResourceLimits::new()
+            .with_memory("2Gi")))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+</li>
+</ol>
+<h2 id="image-issues"><a class="header" href="#image-issues">Image Issues</a></h2>
+<h3 id="imagepullbackoff-or-errimagepull"><a class="header" href="#imagepullbackoff-or-errimagepull">"ImagePullBackOff" or "ErrImagePull"</a></h3>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Cannot pull container image</li>
+<li>Image pull errors</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>
+<p>Check image name:</p>
+<pre><code class="language-bash"># Verify image exists
+docker pull &lt;image-name&gt;
+</code></pre>
+</li>
+<li>
+<p>Check registry access:</p>
+<pre><code class="language-bash"># Test registry authentication
+docker login &lt;registry-url&gt;
+</code></pre>
+</li>
+<li>
+<p>Solutions:</p>
+<ul>
+<li><strong>Fix image name</strong>: Ensure correct registry and tag</li>
+<li><strong>Configure image pull secret</strong>: Add secrets for private registries</li>
+<li><strong>Use public image</strong>: If registry issues persist</li>
+</ul>
+</li>
+<li>
+<p>Configure image pull secret:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let workflow = WorkflowBuilder::new()
+    .with_name("private-image-workflow")
+    .with_image_pull_secret("my-registry-secret")
+    .add_step(JobStep::new("job-1", "my-registry.com/my-image:latest"))
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+</li>
+</ol>
+<h2 id="dependency-issues"><a class="header" href="#dependency-issues">Dependency Issues</a></h2>
+<h3 id="cycle-detected-in-dependencies"><a class="header" href="#cycle-detected-in-dependencies">"Cycle detected" in dependencies</a></h3>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Workflow creation fails</li>
+<li>Cycle detection error</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>
+<p>Review dependency graph:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let graph = chain.build_dag();
+match graph.detect_cycles() {
+    Ok(()) =&gt; println!("No cycles"),
+    Err(e) =&gt; println!("Cycle: {}", e),
+}
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p>Common causes:</p>
+<ul>
+<li><strong>Circular references</strong>: A -&gt; B -&gt; C -&gt; A</li>
+<li><strong>Self-dependencies</strong>: Step depends on itself</li>
+</ul>
+</li>
+<li>
+<p>Fix by removing the cycle:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Incorrect (creates cycle)
+chain.add_step("A");
+chain.add_step("B").with_dependency("A");
+chain.add_step("C").with_dependency("B");
+chain.add_step("A").with_dependency("C"); // Cycle!
+
+// Correct
+chain.add_step("A");
+chain.add_step("B").with_dependency("A");
+chain.add_step("C").with_dependency("B");
+// Step A is the root, no self-dependency
+<span class="boring">}</span></code></pre></pre>
+</li>
+</ol>
+<h3 id="step-never-runs-stuck-waiting-for-dependencies"><a class="header" href="#step-never-runs-stuck-waiting-for-dependencies">Step never runs (stuck waiting for dependencies)</a></h3>
+<p><strong>Symptoms:</strong></p>
+<ul>
+<li>Step remains in pending state</li>
+<li>Dependencies never complete</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol>
+<li>
+<p>Check dependency status:</p>
+<pre><code class="language-bash">kubectl get pods -l workflow=&lt;workflow-id&gt;
+</code></pre>
+</li>
+<li>
+<p>Common causes:</p>
+<ul>
+<li><strong>Failed dependencies</strong>: Check if dependencies succeeded</li>
+<li><strong>Incorrect dependency names</strong>: Verify step IDs</li>
+<li><strong>Missing dependencies</strong>: Ensure all dependencies exist</li>
+</ul>
+</li>
+<li>
+<p>Use conditional dependencies:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>chain.add_step("validate");
+chain.add_step("process")
+    .with_conditional_dependency("validate", ConditionBuilder::all_success());
+chain.add_step("cleanup")
+    .with_conditional_dependency_any(vec!["validate", "process"], ConditionBuilder::any_failure());
+<span class="boring">}</span></code></pre></pre>
+</li>
+</ol>
+<h2 id="debugging-tips"><a class="header" href="#debugging-tips">Debugging Tips</a></h2>
+<h3 id="enable-verbose-logging"><a class="header" href="#enable-verbose-logging">Enable Verbose Logging</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let client = MaestroClientBuilder::new()
+    .with_log_level("trace")
+    .build()?;
+<span class="boring">}</span></code></pre></pre>
+<p>Or use environment variable:</p>
+<pre><code class="language-bash">export RUST_LOG=trace
+export MAESTRO_LOG_LEVEL=trace
+</code></pre>
+<h3 id="inspect-created-resources"><a class="header" href="#inspect-created-resources">Inspect Created Resources</a></h3>
+<pre><code class="language-bash"># List all resources created by the workflow
+kubectl get all -l app=&lt;workflow-name&gt;
+
+# Describe a specific resource
+kubectl describe pod &lt;pod-name&gt;
+
+# View events
+kubectl get events --sort-by='.lastTimestamp'
+</code></pre>
+<h3 id="test-with-dry-run"><a class="header" href="#test-with-dry-run">Test with Dry Run</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let client = MaestroClientBuilder::new()
+    .with_dry_run(true)
+    .build()?;
+
+let created = client.create_workflow(workflow)?;
+// No resources are actually created
+<span class="boring">}</span></code></pre></pre>
+<h3 id="use-kind-for-local-testing"><a class="header" href="#use-kind-for-local-testing">Use Kind for Local Testing</a></h3>
+<pre><code class="language-bash"># Create a local cluster
+kind create cluster --name test
+
+# Run your workflow
+cargo run
+
+# Debug with kubectl
+kubectl get pods
+kubectl logs -f &lt;pod-name&gt;
+</code></pre>
+<h2 id="getting-help"><a class="header" href="#getting-help">Getting Help</a></h2>
+<p>If you're still experiencing issues:</p>
+<ol>
+<li>Check the <a href="https://github.com/andreclaudino/k8s-maestro/issues">GitHub Issues</a></li>
+<li>Search for similar issues</li>
+<li>Create a new issue with:
+<ul>
+<li>k8s-maestro version</li>
+<li>Kubernetes version</li>
+<li>Full error message</li>
+<li>Steps to reproduce</li>
+<li>Relevant logs and configuration</li>
+</ul>
+</li>
+</ol>
+<h2 id="next-steps-5"><a class="header" href="#next-steps-5">Next Steps</a></h2>
+<ul>
+<li><a href="reference/configuration.html">Configuration</a> - Configuration options</li>
+<li><a href="reference/../api/">API Reference</a> - Detailed API documentation</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="testing-guide"><a class="header" href="#testing-guide">Testing Guide</a></h1>
+<p>This guide explains how to write and run tests for k8s-maestro.</p>
+<h2 id="test-categories"><a class="header" href="#test-categories">Test Categories</a></h2>
+<p>k8s-maestro uses a three-tier test organization:</p>
+<div class="table-wrapper"><table><thead><tr><th>Category</th><th>Purpose</th><th>Cluster Required</th><th>Speed</th></tr></thead><tbody>
+<tr><td>Unit</td><td>Test individual functions and logic</td><td>No</td><td>Fast (&lt; 10s)</td></tr>
+<tr><td>Integration</td><td>Test Kubernetes API interactions</td><td>Yes (Kind)</td><td>Medium (&lt; 5min)</td></tr>
+<tr><td>E2E</td><td>Test complete workflow scenarios</td><td>Yes (Kind)</td><td>Medium (&lt; 5min)</td></tr>
+</tbody></table>
+</div>
+<h2 id="running-tests"><a class="header" href="#running-tests">Running Tests</a></h2>
+<h3 id="unit-tests"><a class="header" href="#unit-tests">Unit Tests</a></h3>
+<pre><code class="language-bash"># Run unit tests only (no Docker needed)
+cargo test --lib
+
+# Run a specific unit test
+cargo test test_create_configmap
+</code></pre>
+<h3 id="integration-tests"><a class="header" href="#integration-tests">Integration Tests</a></h3>
+<pre><code class="language-bash"># Run integration tests (requires Docker)
+cargo test --test '*' -- --ignored
+
+# Run specific integration test
+cargo test --test kind_cluster_lifecycle -- --ignored
+</code></pre>
+<h3 id="all-tests"><a class="header" href="#all-tests">All Tests</a></h3>
+<pre><code class="language-bash"># Run all tests including ignored ones
+cargo test -- --include-ignored
+</code></pre>
+<h2 id="writing-tests"><a class="header" href="#writing-tests">Writing Tests</a></h2>
+<h3 id="unit-tests-with-mocking"><a class="header" href="#unit-tests-with-mocking">Unit Tests with Mocking</a></h3>
+<p>Use the mocking module for unit tests that don't need a real cluster:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::tests::common::mocking::{MockK8sClient, mock_error, mock_resource_response};
+
+#[test]
+fn test_create_resource_success() {
+    let mut client = MockK8sClient::new()
+        .add_create_response(Ok(mock_resource_response("ConfigMap", "test-cm", "default")));
+    
+    let response = client.next_create_response().unwrap();
+    assert_eq!(response["kind"], "ConfigMap");
+}
+
+#[test]
+fn test_create_resource_already_exists() {
+    let mut client = MockK8sClient::new()
+        .add_create_response(Err(mock_error("AlreadyExists", "resource exists")));
+    
+    let result = client.next_create_response();
+    assert!(result.is_err());
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="integration-tests-with-kind"><a class="header" href="#integration-tests-with-kind">Integration Tests with Kind</a></h3>
+<p>Use the Kind cluster module for integration tests:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::tests::common::kind_cluster::KindCluster;
+use k8s_maestro::tests::common::utilities::{
+    create_configmap, apply_resource, verify_resource_exists, delete_resource_by_name,
+};
+use k8s_openapi::api::core::v1::ConfigMap;
+
+#[tokio::test]
+#[ignore = "Requires Docker"]
+async fn test_configmap_lifecycle() {
+    // Setup cluster
+    let cluster = KindCluster::new().await.expect("Failed to create cluster");
+    
+    // Create and apply ConfigMap
+    let cm = create_configmap("test-cm", "default", std::collections::BTreeMap::new());
+    apply_resource(&amp;client, &amp;cm, "default").await.expect("Failed to apply");
+    
+    // Verify it exists
+    assert!(verify_resource_exists::&lt;ConfigMap&gt;(&amp;client, "test-cm", "default").await);
+    
+    // Cleanup
+    delete_resource_by_name::&lt;ConfigMap&gt;(&amp;client, "test-cm", "default").await.ok();
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="e2e-tests-for-workflows"><a class="header" href="#e2e-tests-for-workflows">E2E Tests for Workflows</a></h3>
+<p>Use the E2E helpers for complete workflow scenarios:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::tests::e2e::setup_e2e_test;
+use k8s_maestro::tests::common::fixtures::load_workflow_fixture;
+
+#[tokio::test]
+#[ignore = "Requires Docker"]
+async fn e2e_workflow_execution() {
+    let (client, _cluster) = setup_e2e_test().await.expect("Failed to setup");
+    
+    // Load and apply workflow
+    let workflow = load_workflow_fixture("simple-workflow").expect("Failed to load");
+    
+    // Verify workflow execution...
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="test-utilities"><a class="header" href="#test-utilities">Test Utilities</a></h2>
+<h3 id="fixtures"><a class="header" href="#fixtures">Fixtures</a></h3>
+<p>Load pre-defined YAML fixtures:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::tests::common::fixtures::{
+    load_configmap_fixture,
+    load_secret_fixture,
+    load_pvc_fixture,
+};
+
+let cm = load_configmap_fixture("test-configmap").unwrap();
+let secret = load_secret_fixture("test-secret").unwrap();
+<span class="boring">}</span></code></pre></pre>
+<h3 id="resource-helpers"><a class="header" href="#resource-helpers">Resource Helpers</a></h3>
+<p>Create resources programmatically:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::tests::common::utilities::{
+    create_configmap, create_secret, create_pvc, create_namespace,
+};
+use std::collections::BTreeMap;
+
+let cm = create_configmap("my-cm", "default", BTreeMap::new());
+let secret = create_secret("my-secret", "default", BTreeMap::new());
+let ns = create_namespace("test");
+<span class="boring">}</span></code></pre></pre>
+<h3 id="validation-helpers"><a class="header" href="#validation-helpers">Validation Helpers</a></h3>
+<p>Verify resource states:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::tests::common::utilities::{
+    verify_resource_exists,
+    verify_resource_state,
+    wait_for_resource_ready,
+};
+
+// Check if resource exists
+if verify_resource_exists::&lt;ConfigMap&gt;(&amp;client, "my-cm", "default").await {
+    println!("ConfigMap exists!");
+}
+
+// Wait for resource to be ready
+wait_for_resource_ready::&lt;Pod&gt;(&amp;client, "my-pod", "default", |pod| {
+    pod.status.as_ref().map(|s| s.phase.as_deref() == Some("Running")).unwrap_or(false)
+}).await.expect("Pod never became ready");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="best-practices-3"><a class="header" href="#best-practices-3">Best Practices</a></h2>
+<ol>
+<li><strong>Use the right test category</strong>: Unit tests for logic, integration for K8s API, E2E for workflows</li>
+<li><strong>Clean up resources</strong>: Always clean up created resources in tests</li>
+<li><strong>Use unique names</strong>: Create resources with unique names to avoid conflicts</li>
+<li><strong>Mark tests appropriately</strong>: Use <code>#[ignore]</code> for tests requiring Docker</li>
+<li><strong>Keep fixtures minimal</strong>: Only include necessary fields in fixtures</li>
+</ol>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>
