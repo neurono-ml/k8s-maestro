@@ -59,6 +59,9 @@ jobs:
           # Add a .nojekyll file to prevent Jekyll processing
           touch .nojekyll
           
+          # Explicitly remove any CNAME file to use default GitHub Pages URL
+          rm -f CNAME
+          
           # Commit and push
           git add .
           git commit -m "Deploy documentation to gh-pages"
