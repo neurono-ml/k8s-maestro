@@ -1,5 +1,5 @@
 use crate::clients::MaestroK8sClient;
-use crate::steps::exec::PackageSource;
+use crate::steps::exec::package_loader::{PackageCache, PackageLoader, PackageSource};
 use crate::steps::result::{StepResult, StepStatus};
 use crate::steps::traits::{
     DeletableWorkFlowStep, ExecutableWorkFlowStep, LoggableWorkFlowStep, WaitableWorkFlowStep,
@@ -8,7 +8,6 @@ use crate::steps::traits::{
 use crate::steps::ResourceLimits;
 use anyhow::Result;
 use async_stream::try_stream;
-use futures::Stream;
 use k8s_openapi::api::core::v1::{ConfigMap, Pod};
 use kube::Api;
 use std::any::Any;
@@ -16,6 +15,7 @@ use std::collections::BTreeMap;
 use std::pin::Pin;
 use std::sync::Arc;
 use std::time::Duration;
+use tokio::time::{timeout, Instant};
 
 pub struct PythonStep {
     step_id: String,
@@ -37,113 +37,7 @@ impl PythonStep {
     pub fn builder() -> PythonStepBuilder {
         PythonStepBuilder::new()
     }
-}
 
-impl WorkFlowStep for PythonStep {
-    fn step_id(&self) -> &str {
-        &self.step_id
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-}
-
-impl ExecutableWorkFlowStep for PythonStep {
-    fn execute(&self) -> Result<StepResult> {
-        tokio::runtime::Handle::current().block_on(self.execute_async())
-    }
-
-    fn cancel(&self) -> Result<()> {
-        tokio::runtime::Handle::current().block_on(self.cancel_async())
-    }
-}
-
-impl WaitableWorkFlowStep for PythonStep {
-    fn wait(&self) -> impl std::future::Future<Output = Result<StepResult>> + Send {
-        let step_id = self.step_id.clone();
-        let namespace = self.namespace.clone();
-        let name = self.name.clone();
-        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
-
-        async move {
-            let pods: Api<Pod> = Api::namespaced(client, &namespace);
-            let pod = pods.get(&name).await?;
-
-            let status = pod
-                .status
-                .as_ref()
-                .and_then(|s| s.phase.as_ref())
-                .ok_or_else(|| anyhow::anyhow!("Pod has no phase"))?;
-
-            let step_status = match status.as_str() {
-                "Succeeded" => StepStatus::Success,
-                "Failed" => StepStatus::Failure,
-                _ => StepStatus::Failure,
-            };
-
-            Ok(StepResult::new(&step_id).with_status(step_status))
-        }
-    }
-}
-
-impl DeletableWorkFlowStep for PythonStep {
-    fn delete_workflow(
-        &self,
-        dry_run: bool,
-    ) -> impl std::future::Future<Output = Result<()>> + Send {
-        let step_id = self.step_id.clone();
-        let namespace = self.namespace.clone();
-        let name = self.name.clone();
-        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
-        let self_dry_run = self.dry_run;
-
-        async move {
-            if dry_run || self_dry_run {
-                log::info!(
-                    "DRY RUN: Would delete resources for {}",
-                    step_id
-                );
-                return Ok(());
-            }
-
-            let pods: Api<Pod> = Api::namespaced(client.clone(), &namespace);
-            pods.delete(&name, &Default::default()).await?;
-
-            let configmaps: Api<ConfigMap> = Api::namespaced(client, &namespace);
-            let cm_name = format!("{}-code", name);
-            let _ = configmaps.delete(&cm_name, &Default::default()).await;
-
-            Ok(())
-        }
-    }
-
-    fn delete_associated_pods(
-        &self,
-        _dry_run: bool,
-    ) -> impl std::future::Future<Output = Result<()>> + Send {
-        async move { Ok(()) }
-    }
-}
-
-impl LoggableWorkFlowStep for PythonStep {
-    fn stream_logs(
-        &self,
-        _options: crate::steps::traits::LogStreamOptions,
-    ) -> Pin<Box<dyn Stream<Item = Result<String>> + Send + '_>> {
-        let namespace = self.namespace.clone();
-        let name = self.name.clone();
-        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
-
-        Box::pin(try_stream! {
-            let pods: Api<Pod> = Api::namespaced(client, &namespace);
-            let logs = pods.logs(&name, &Default::default()).await?;
-            yield logs;
-        })
-    }
-}
-
-impl PythonStep {
     async fn execute_async(&self) -> Result<StepResult> {
         if self.dry_run {
             log::info!("DRY RUN: Would execute Python step {}", self.step_id);
@@ -152,12 +46,66 @@ impl PythonStep {
                 .with_exit_code(0));
         }
 
-        let pod = self.build_pod_spec()?;
+        // Load package if package_source is provided
+        if let Some(ref source) = self.package_source {
+            let cache = PackageCache::new()?;
+            let package_path = cache.get_cache_path(source);
+            if !package_path.exists() {
+                let loader = PackageLoader::new()?;
+                let _loaded_path = loader.load(source)?;
+            }
+        }
 
-        let pods: Api<Pod> = Api::namespaced(Arc::unwrap_or_clone(self.client.clone().into_inner()), &self.namespace);
+        // Create ConfigMap with code and requirements before creating the Pod
+        let configmap = self.build_config_map()?;
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
+        let configmaps: Api<ConfigMap> = Api::namespaced(client.clone(), &self.namespace);
+        configmaps.create(&Default::default(), &configmap).await?;
+
+        let pod = self.build_pod_spec()?;
+        let pods: Api<Pod> = Api::namespaced(client, &self.namespace);
+        
+        // Watch for pod completion with timeout
+        let deadline = Instant::now() + self.timeout;
         pods.create(&Default::default(), &pod).await?;
 
-        Ok(StepResult::new(&self.step_id).with_status(StepStatus::Success))
+        loop {
+            let remaining = deadline.saturating_duration_since(Instant::now());
+            if remaining.is_zero() {
+                return Ok(StepResult::new(&self.step_id)
+                    .with_status(StepStatus::Failure)
+                    .with_exit_code(124));
+            }
+
+            match timeout(remaining, pods.get(&self.name)).await {
+                Ok(Ok(pod)) => {
+                    let phase = pod.status.as_ref()
+                        .and_then(|s| s.phase.as_ref());
+                    match phase.map(|p| p.as_str()) {
+                        Some("Succeeded") => {
+                            return Ok(StepResult::new(&self.step_id)
+                                .with_status(StepStatus::Success)
+                                .with_exit_code(0));
+                        }
+                        Some("Failed") | Some("Unknown") => {
+                            return Ok(StepResult::new(&self.step_id)
+                                .with_status(StepStatus::Failure)
+                                .with_exit_code(1));
+                        }
+                        _ => {} 
+                    }
+                }
+                Ok(Err(_)) => {
+                    return Ok(StepResult::new(&self.step_id)
+                        .with_status(StepStatus::Failure)
+                        .with_exit_code(1));
+                }
+                Err(_) => {
+                    // Timeout on get - continue loop
+                }
+            }
+            tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+        }
     }
 
     async fn cancel_async(&self) -> Result<()> {
@@ -166,7 +114,7 @@ impl PythonStep {
         Ok(())
     }
 
-    fn build_pod_spec(&self) -> Result<Pod> {
+    pub(crate) fn build_pod_spec(&self) -> Result<Pod> {
         use k8s_openapi::api::core::v1::{
             Container, PodSpec, PodStatus, Volume, VolumeMount,
         };
@@ -307,6 +255,110 @@ impl PythonStep {
             },
             data: Some(data),
             ..Default::default()
+        })
+    }
+}
+
+impl WorkFlowStep for PythonStep {
+    fn step_id(&self) -> &str {
+        &self.step_id
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
+impl ExecutableWorkFlowStep for PythonStep {
+    fn execute(&self) -> Result<StepResult> {
+        tokio::runtime::Handle::current().block_on(self.execute_async())
+    }
+
+    fn cancel(&self) -> Result<()> {
+        tokio::runtime::Handle::current().block_on(self.cancel_async())
+    }
+}
+
+impl WaitableWorkFlowStep for PythonStep {
+    fn wait(&self) -> impl std::future::Future<Output = Result<StepResult>> + Send {
+        let step_id = self.step_id.clone();
+        let namespace = self.namespace.clone();
+        let name = self.name.clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
+
+        async move {
+            let pods: Api<Pod> = Api::namespaced(client, &namespace);
+            let pod = pods.get(&name).await?;
+
+            let status = pod
+                .status
+                .as_ref()
+                .and_then(|s| s.phase.as_ref())
+                .ok_or_else(|| anyhow::anyhow!("Pod has no phase"))?;
+
+            let step_status = match status.as_str() {
+                "Succeeded" => StepStatus::Success,
+                "Failed" => StepStatus::Failure,
+                _ => StepStatus::Failure,
+            };
+
+            Ok(StepResult::new(&step_id).with_status(step_status))
+        }
+    }
+}
+
+impl DeletableWorkFlowStep for PythonStep {
+    fn delete_workflow(
+        &self,
+        dry_run: bool,
+    ) -> impl std::future::Future<Output = Result<()>> + Send {
+        let step_id = self.step_id.clone();
+        let namespace = self.namespace.clone();
+        let name = self.name.clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
+        let self_dry_run = self.dry_run;
+
+        async move {
+            if dry_run || self_dry_run {
+                log::info!(
+                    "DRY RUN: Would delete resources for {}",
+                    step_id
+                );
+                return Ok(());
+            }
+
+            let pods: Api<Pod> = Api::namespaced(client.clone(), &namespace);
+            pods.delete(&name, &Default::default()).await?;
+
+            let configmaps: Api<ConfigMap> = Api::namespaced(client, &namespace);
+            let cm_name = format!("{}-code", name);
+            let _ = configmaps.delete(&cm_name, &Default::default()).await;
+
+            Ok(())
+        }
+    }
+
+    fn delete_associated_pods(
+        &self,
+        dry_run: bool,
+    ) -> impl std::future::Future<Output = Result<()>> + Send {
+        self.delete_workflow(dry_run)
+    }
+}
+
+impl LoggableWorkFlowStep for PythonStep {
+    fn stream_logs(
+        &self,
+        _options: crate::steps::traits::LogStreamOptions,
+    ) -> Pin<Box<dyn futures::Stream<Item = Result<String>> + Send + '_>> {
+        let namespace = self.namespace.clone();
+        let name = self.name.clone();
+        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
+
+        Box::pin(try_stream! {
+            let pods: Api<Pod> = Api::namespaced(client, &namespace);
+            let logs = pods.logs(&name, &Default::default()).await?;
+            yield logs;
         })
     }
 }

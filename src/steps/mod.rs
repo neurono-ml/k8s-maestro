@@ -6,7 +6,7 @@ pub mod traits;
 pub use exec::{PythonStep, PythonStepBuilder};
 pub use kubernetes::{
     IngressConfig, JobNameType, KubeJobStep, KubeJobStepBuilder, KubePodStep, KubePodStepBuilder,
-    RestartPolicy, ServiceConfig,
+    RestartPolicy, ServiceConfig, SidecarBuilder, SidecarConfig, SidecarContainer,
 };
 pub use result::{StepResult, StepStatus};
 pub use traits::*;

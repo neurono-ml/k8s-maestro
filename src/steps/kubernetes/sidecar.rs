@@ -4,13 +4,46 @@ use k8s_openapi::api::core::v1::Container;
 use serde_json::Value;
 use std::collections::BTreeMap;
 
+/// Configuration type for sidecar containers using a flexible key-value store.
+///
+/// This is a BTreeMap with JSON Values, allowing for arbitrary configuration
+/// options to be passed to sidecar containers.
+///
+/// # Example
+///
+/// ```rust
+/// use k8s_maestro::steps::SidecarConfig;
+/// use serde_json::json;
+///
+/// let mut config = SidecarConfig::new();
+/// config.insert("buffer_size".to_string(), json!(1024));
+/// config.insert("log_level".to_string(), json!("debug"));
+/// ```
 pub type SidecarConfig = BTreeMap<String, Value>;
 
+/// Represents a port configuration for a sidecar container.
+///
+/// This struct defines how a container port is exposed, including optional
+/// host port mapping, protocol specification, and port naming.
+///
+/// # Example
+///
+/// ```ignore
+/// use k8s_maestro::steps::SidecarBuilder;
+///
+/// // Builder uses port method internally
+/// let builder = SidecarBuilder::new("nginx:latest")
+///     .with_port(8080);
+/// ```
 #[derive(Debug, Clone)]
 pub struct ContainerPort {
+    /// The port number exposed inside the container.
     pub container_port: u16,
+    /// Optional host port to map to the container port.
     pub host_port: Option<u16>,
+    /// Network protocol (typically TCP or UDP).
     pub protocol: Option<String>,
+    /// Optional name for the port (useful for service discovery).
     pub name: Option<String>,
 }
 
@@ -40,18 +73,53 @@ impl ContainerPort {
     }
 }
 
+/// A sidecar container that runs alongside the main container in a Kubernetes pod.
+///
+/// Sidecar containers extend the functionality of the main container by providing
+/// supporting services like logging, monitoring, or proxying.
+///
+/// # Example
+///
+/// ```rust
+/// use k8s_maestro::SidecarContainer;
+/// use serde_json::json;
+///
+/// let sidecar = SidecarContainer::new("nginx:1.21", "nginx-sidecar")
+///     .with_config("proxy_timeout", json!(60))
+///     .with_env("LOG_LEVEL", "info");
+/// ```
 #[derive(Debug)]
 pub struct SidecarContainer {
+    /// The name of the sidecar container.
     pub name: String,
+    /// The container image to use.
     pub image: String,
+    /// Additional configuration options as key-value pairs.
     pub config: SidecarConfig,
+    /// Ports to expose on the sidecar container.
     pub ports: Vec<ContainerPort>,
+    /// Environment variables to set in the container.
     pub env: BTreeMap<String, String>,
+    /// Volume mounts for the container.
     pub volume_mounts: Vec<String>,
+    /// Optional resource limits (CPU, memory) for the container.
     pub resource_limits: Option<ResourceLimits>,
 }
 
 impl SidecarContainer {
+    /// Creates a new sidecar container with the specified image and name.
+    ///
+    /// # Arguments
+    ///
+    /// * `image` - The container image (e.g., "nginx:1.21")
+    /// * `name` - The name for the sidecar container
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use k8s_maestro::SidecarContainer;
+    /// let sidecar = SidecarContainer::new("nginx:latest", "my-sidecar");
+    /// ```
     pub fn new(image: impl Into<String>, name: impl Into<String>) -> Self {
         Self {
             image: image.into(),
@@ -64,16 +132,61 @@ impl SidecarContainer {
         }
     }
 
+    /// Adds a configuration key-value pair to the sidecar.
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - The configuration key
+    /// * `value` - The configuration value (JSON)
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use k8s_maestro::SidecarContainer;
+    /// use serde_json::json;
+    /// let sidecar = SidecarContainer::new("nginx:latest", "my-sidecar")
+    ///     .with_config("timeout", json!(30));
+    /// ```
     pub fn with_config(mut self, key: &str, value: Value) -> Self {
         self.config.insert(key.to_string(), value);
         self
     }
 
+    /// Adds an environment variable to the sidecar container.
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - The environment variable name
+    /// * `value` - The environment variable value
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use k8s_maestro::SidecarContainer;
+    /// let sidecar = SidecarContainer::new("nginx:latest", "my-sidecar")
+    ///     .with_env("LOG_LEVEL", "debug");
+    /// ```
     pub fn with_env(mut self, key: &str, value: &str) -> Self {
         self.env.insert(key.to_string(), value.to_string());
         self
     }
 
+    /// Sets resource limits for the sidecar container.
+    ///
+    /// # Arguments
+    ///
+    /// * `limits` - The resource limits to apply
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use k8s_maestro::{SidecarContainer, ResourceLimits};
+    /// let limits = ResourceLimits::new()
+    ///     .with_cpu("500m")
+    ///     .with_memory("256Mi");
+    /// let sidecar = SidecarContainer::new("nginx:latest", "my-sidecar")
+    ///     .with_resource_limits(limits);
+    /// ```
     pub fn with_resource_limits(mut self, limits: ResourceLimits) -> Self {
         self.resource_limits = Some(limits);
         self
@@ -171,6 +284,25 @@ impl ContainerLike for SidecarContainer {
     }
 }
 
+/// Builder for creating [`SidecarContainer`] instances.
+///
+/// This builder provides a fluent interface for constructing sidecar containers
+/// with validation at build time.
+///
+/// # Example
+///
+/// ```rust
+/// use k8s_maestro::steps::SidecarBuilder;
+/// use serde_json::json;
+///
+/// let sidecar = SidecarBuilder::new("nginx:1.21")
+///     .with_name("proxy")
+///     .with_port(8080)
+///     .with_env("PROXY_MODE", "reverse")
+///     .with_config("timeout", json!(60))
+///     .build()
+///     .expect("Failed to build sidecar");
+/// ```
 pub struct SidecarBuilder {
     image: Option<String>,
     name: Option<String>,
@@ -181,6 +313,18 @@ pub struct SidecarBuilder {
 }
 
 impl SidecarBuilder {
+    /// Creates a new builder with the required image.
+    ///
+    /// # Arguments
+    ///
+    /// * `image` - The container image (e.g., "nginx:1.21")
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use k8s_maestro::steps::SidecarBuilder;
+    /// let builder = SidecarBuilder::new("nginx:latest");
+    /// ```
     pub fn new(image: &str) -> Self {
         Self {
             image: Some(image.to_string()),
@@ -192,31 +336,114 @@ impl SidecarBuilder {
         }
     }
 
+    /// Sets the name of the sidecar container.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The container name
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use k8s_maestro::steps::SidecarBuilder;
+    /// let builder = SidecarBuilder::new("nginx:latest")
+    ///     .with_name("my-proxy");
+    /// ```
     pub fn with_name(mut self, name: &str) -> Self {
         self.name = Some(name.to_string());
         self
     }
 
+    /// Adds a port to expose on the sidecar container.
+    ///
+    /// # Arguments
+    ///
+    /// * `port` - The port number inside the container
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use k8s_maestro::steps::SidecarBuilder;
+    /// let builder = SidecarBuilder::new("nginx:latest")
+    ///     .with_port(8080);
+    /// ```
     pub fn with_port(mut self, port: u16) -> Self {
         self.ports.push(ContainerPort::new(port));
         self
     }
 
+    /// Adds a configuration key-value pair.
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - The configuration key
+    /// * `value` - The configuration value (JSON)
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use k8s_maestro::steps::SidecarBuilder;
+    /// use serde_json::json;
+    /// let builder = SidecarBuilder::new("nginx:latest")
+    ///     .with_config("timeout", json!(30));
+    /// ```
     pub fn with_config(mut self, key: &str, value: Value) -> Self {
         self.config.insert(key.to_string(), value);
         self
     }
 
+    /// Adds an environment variable.
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - The environment variable name
+    /// * `value` - The environment variable value
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use k8s_maestro::steps::SidecarBuilder;
+    /// let builder = SidecarBuilder::new("nginx:latest")
+    ///     .with_env("LOG_LEVEL", "debug");
+    /// ```
     pub fn with_env(mut self, key: &str, value: &str) -> Self {
         self.env.insert(key.to_string(), value.to_string());
         self
     }
 
+    /// Sets resource limits for the sidecar.
+    ///
+    /// # Arguments
+    ///
+    /// * `limits` - The resource limits to apply
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use k8s_maestro::steps::{SidecarBuilder, ResourceLimits};
+    /// let limits = ResourceLimits::new().with_cpu("500m");
+    /// let builder = SidecarBuilder::new("nginx:latest")
+    ///     .with_resource_limits(limits);
+    /// ```
     pub fn with_resource_limits(mut self, limits: ResourceLimits) -> Self {
         self.resource_limits = Some(limits);
         self
     }
 
+    /// Builds the [`SidecarContainer`].
+    ///
+    /// Returns an error if image or name is not set.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use k8s_maestro::steps::SidecarBuilder;
+    ///
+    /// let sidecar = SidecarBuilder::new("nginx:latest")
+    ///     .with_name("proxy")
+    ///     .build()
+    ///     .expect("Failed to build sidecar");
+    /// ```
     pub fn build(self) -> anyhow::Result<SidecarContainer> {
         let image = self
             .image
