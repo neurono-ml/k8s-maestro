@@ -171,7 +171,7 @@ impl PythonStep {
 
         if let Some(entry) = &self.entry_point {
             command.push("/workspace/".to_string() + entry);
-        } else if let Some(_) = &self.code {
+        } else if self.code.is_some() {
             command.push("/workspace/script.py".to_string());
         }
 
@@ -499,6 +499,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
+    #[ignore = "Requires Kubernetes cluster"]
     async fn test_python_step_builder() {
         let client = MaestroK8sClient::new().await.unwrap();
 
@@ -516,6 +517,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore = "Requires Kubernetes cluster"]
     async fn test_python_step_builder_with_requirements() {
         let client = MaestroK8sClient::new().await.unwrap();
 
@@ -534,6 +536,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore = "Requires Kubernetes cluster"]
     async fn test_python_step_builder_with_resource_limits() {
         let client = MaestroK8sClient::new().await.unwrap();
 
