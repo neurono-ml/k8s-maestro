@@ -7,7 +7,7 @@ description = "A Kubernetes job orchestrator tool library"
 license = "MIT OR Apache-2.0"
 categories = ["api-bindings", "config", "database"]
 documentation = "https://docs.rs/k8s-maestro"
-homepage = "https://github.com/neurono-ml/k8s-maestro"
+homepage = "https://neurono-ml.github.io/k8s-maestro/index.html"
 repository = "https://github.com/neurono-ml/k8s-maestro"
 
 [lib]
@@ -73,6 +73,6 @@ tokio-test = "0.4"
 base64 = "0.22"
 
 [package.metadata.docs.rs]
-features = ["k8s_v1_28"]
+features = ["k8s_v1_28", "exec-steps"]
 no-default-features = true
 rustdoc-args = ["--cfg", "docsrs"]

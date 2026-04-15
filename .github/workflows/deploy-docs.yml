@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'site-docs/**'
-      - 'book.toml'
   workflow_dispatch:
 
 permissions:
@@ -34,7 +33,7 @@ jobs:
           chmod +x mdbook
 
       - name: Build Book
-        run: ./mdbook build
+        run: ./mdbook build site-docs/
 
       - name: Configure Git
         run: |
@@ -54,7 +53,7 @@ jobs:
           git rm -rf .
           
           # Copy the built book contents directly to root (not the book folder itself)
-          cp -r book/* .
+          cp -r site-docs/book/* .
           
           # Add a .nojekyll file to prevent Jekyll processing
           touch .nojekyll
