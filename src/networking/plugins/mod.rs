@@ -1,22 +1,61 @@
+mod loader;
 mod plugin_registry;
 
 use crate::entities::SidecarContainer;
 use serde_json::Value;
 use std::collections::BTreeMap;
 
+pub use loader::{
+    discover_plugins, get_default_plugin_dir, parse_plugin_metadata, DynamicPluginLoader,
+    PluginMetadata,
+};
 pub use plugin_registry::{PluginInfo, PluginRegistry};
 
+/// A plugin trait for creating sidecar containers.
+///
+/// Implement this trait to create custom sidecar plugins that can be
+/// dynamically loaded and used to extend job functionality.
+///
+/// # Example
+///
+/// ```ignore
+/// // Implementation requires returning a concrete SidecarContainer from steps module
+/// use k8s_maestro::{SidecarPlugin, SidecarContainer};
+///
+/// struct MyPlugin;
+///
+/// impl SidecarPlugin for MyPlugin {
+///     fn name(&self) -> &str { "my-plugin" }
+///     fn image(&self) -> &str { "nginx:latest" }
+///     fn create_sidecar(&self) -> anyhow::Result<SidecarContainer> {
+///         Ok(SidecarContainer::new(self.image(), self.name()))
+///     }
+/// }
+/// ```
 pub trait SidecarPlugin: Send + Sync {
+    /// Returns the unique name of the plugin.
     fn name(&self) -> &str;
 
+    /// Returns the container image used by this plugin.
     fn image(&self) -> &str;
 
+    /// Returns the default configuration for the plugin.
+    ///
+    /// Override this to provide default configuration values.
     fn default_config(&self) -> BTreeMap<String, Value> {
         BTreeMap::new()
     }
 
+    /// Creates a [`SidecarContainer`] instance from this plugin.
+    ///
+    /// This method should construct a sidecar container with the appropriate
+    /// configuration based on the plugin's settings.
     fn create_sidecar(&self) -> anyhow::Result<SidecarContainer>;
 
+    /// Validates the given configuration.
+    ///
+    /// Override this to implement custom validation logic.
+    /// Returns `Ok(())` if valid, or an error describing the validation failure.
     fn validate_config(&self, config: &BTreeMap<String, Value>) -> anyhow::Result<()> {
         let _ = config;
         Ok(())

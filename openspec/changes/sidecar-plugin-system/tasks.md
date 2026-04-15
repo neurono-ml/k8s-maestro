@@ -69,26 +69,26 @@ Implement sidecar container and plugin system for workflow step extensibility.
 ## Phase 4: Dynamic Plugin Loading (MVP: Out of Scope)
 
 ### 4.1 DynamicLoader Implementation
-- [ ] Create `DynamicPluginLoader` struct
-- [ ] Implement `new()` constructor
-- [ ] Implement `load_plugin(path: &str) -> Result<Box<dyn SidecarPlugin>>`
-- [ ] Implement `unload_plugin(name: &str) -> Result<()>`
-- [ ] Implement `list_loaded_plugins() -> Vec<PluginInfo>`
-- [ ] Handle libloading errors gracefully
-- [ ] Implement Drop for proper cleanup
+- [x] Create `DynamicPluginLoader` struct
+- [x] Implement `new()` constructor
+- [x] Implement `load_plugin(path: &str) -> Result<Box<dyn SidecarPlugin>>`
+- [x] Implement `unload_plugin(name: &str) -> Result<()>`
+- [x] Implement `list_loaded_plugins() -> Vec<PluginInfo>`
+- [x] Handle libloading errors gracefully
+- [x] Implement Drop for proper cleanup
 
 ### 4.2 Plugin Discovery
-- [ ] Implement plugin directory resolution (`~/.maestro/plugins/`)
-- [ ] Implement `discover_plugins(dir: &Path) -> Result<Vec<PathBuf>>`
-- [ ] Parse `plugin.toml` metadata files
-- [ ] Validate plugin metadata
+- [x] Implement plugin directory resolution (`~/.maestro/plugins/`)
+- [x] Implement `discover_plugins(dir: &Path) -> Result<Vec<PathBuf>>`
+- [x] Parse `plugin.toml` metadata files
+- [x] Validate plugin metadata
 
 ### 4.3 Loading Tests
-- [ ] Test plugin loading from valid library
-- [ ] Test error handling for invalid library
-- [ ] Test plugin unloading
-- [ ] Test plugin discovery from directory
-- [ ] Test metadata parsing
+- [x] Test plugin loading from valid library
+- [x] Test error handling for invalid library
+- [x] Test plugin unloading
+- [x] Test plugin discovery from directory
+- [x] Test metadata parsing
 
 ---
 
@@ -167,17 +167,17 @@ Implement sidecar container and plugin system for workflow step extensibility.
 
 ## MVP Summary
 
-**Completed Tasks:** 38/88
-**Scope:** Phases 1, 2, 3, and 5 (essential plugin system functionality)
+**Completed Tasks:** 49/88
+**Scope:** Phases 1, 2, 3, 4, and 5 (essential plugin system functionality)
 
 The MVP implements:
 - SidecarContainer with builder pattern
 - SidecarPlugin trait with trait-safe interface
+- DynamicPluginLoader for runtime plugin loading
 - PluginRegistry for plugin management
 - Comprehensive unit tests
 
 **Not Implemented (MVP scope):**
-- Dynamic plugin loading (Phase 4)
 - Integration with KubeJobStep/KubePodStep (Phase 6)
 - Documentation (Phase 7)
 - Verification/Integration tests (Phase 8)
