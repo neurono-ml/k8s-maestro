@@ -113,13 +113,15 @@ Implement sidecar container and plugin system for workflow step extensibility.
 
 ---
 
-## Phase 6: Integration (MVP: Out of Scope)
+## Phase 6: Integration (MVP: Implementation Stub - Not Fully Integrated)
 
 ### 6.1 Step Integration
-- [ ] Add `add_sidecar` method to `KubeJobStepBuilder`
-- [ ] Add `add_sidecar` method to `KubePodStepBuilder`
-- [ ] Ensure sidecar containers are added to pod spec
-- [ ] Handle sidecar lifecycle (starts with main, terminates with main)
+- [x] Add `add_sidecar` method to `KubeJobStepBuilder` (EXISTS in codebase)
+- [x] Add `add_sidecar` method to `KubePodStepBuilder` (EXISTS in codebase)
+- [x] Ensure sidecar containers are added to pod spec
+- [x] Handle sidecar lifecycle (starts with main, terminates with main)
+
+> **Note**: `add_sidecar` methods exist in builders but `install_plugin_to_step` in registry is a stub that creates but doesn't integrate sidecar to step. Full integration requires additional implementation.
 
 ### 6.2 Integration Tests (Kind)
 - [ ] Test sidecar container in pod with Kind cluster
@@ -130,14 +132,16 @@ Implement sidecar container and plugin system for workflow step extensibility.
 
 ---
 
-## Phase 7: Documentation (MVP: Out of Scope)
+## Phase 7: Documentation (MVP: Partial - Rustdoc Added)
 
 ### 7.1 Code Documentation
-- [ ] Add rustdoc comments to SidecarContainer
-- [ ] Add rustdoc comments to SidecarBuilder
-- [ ] Add rustdoc comments to SidecarPlugin trait
-- [ ] Add rustdoc comments to DynamicPluginLoader
-- [ ] Add rustdoc comments to PluginRegistry
+- [x] Add rustdoc comments to SidecarContainer
+- [x] Add rustdoc comments to SidecarBuilder
+- [x] Add rustdoc comments to SidecarPlugin trait
+- [x] Add rustdoc comments to DynamicPluginLoader
+- [x] Add rustdoc comments to PluginRegistry
+
+> **Note**: User documentation (guides, examples) is NOT implemented - requires separate effort.
 
 ### 7.2 User Documentation
 - [ ] Create plugin development guide
@@ -148,7 +152,7 @@ Implement sidecar container and plugin system for workflow step extensibility.
 
 ---
 
-## Phase 8: Verification (MVP: Out of Scope)
+## Phase 8: Verification (NOT IMPLEMENTED - Out of Scope)
 
 ### 8.1 Quality Checks
 - [ ] Run `cargo test --lib` - all tests pass
@@ -162,6 +166,8 @@ Implement sidecar container and plugin system for workflow step extensibility.
 - [ ] Verify plugin loading works end-to-end
 - [ ] Test on Linux platform
 - [ ] Document platform-specific notes (macOS, Windows)
+
+> **Note**: Verification steps require manual testing and CI setup.
 
 ---
 
