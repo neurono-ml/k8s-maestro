@@ -183,7 +183,7 @@ This guide helps you diagnose and fix common issues with k8s-maestro.
    ```rust
    let workflow = WorkflowBuilder::new()
        .with_name("memory-workflow")
-       .add_step(JobStep::new("job-1", "python:3.11")
+       .add_step(KubeJobStep::new("job-1", "python:3.11")
            .with_resource_limits(ResourceLimits::new()
                .with_memory("2Gi")))
        .build()?;
@@ -221,7 +221,7 @@ This guide helps you diagnose and fix common issues with k8s-maestro.
    let workflow = WorkflowBuilder::new()
        .with_name("private-image-workflow")
        .with_image_pull_secret("my-registry-secret")
-       .add_step(JobStep::new("job-1", "my-registry.com/my-image:latest"))
+       .add_step(KubeJobStep::new("job-1", "my-registry.com/my-image:latest"))
        .build()?;
    ```
 
@@ -349,7 +349,7 @@ kubectl logs -f <pod-name>
 
 If you're still experiencing issues:
 
-1. Check the [GitHub Issues](https://github.com/andreclaudino/k8s-maestro/issues)
+1. Check the [GitHub Issues](https://github.com/neurono-ml/k8s-maestro/issues)
 2. Search for similar issues
 3. Create a new issue with:
    - k8s-maestro version

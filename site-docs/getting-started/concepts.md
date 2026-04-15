@@ -24,7 +24,7 @@ A **Step** is the smallest unit of work in a workflow. Each step represents a ta
 
 k8s-maestro supports multiple step types:
 
-1. **JobStep**: Kubernetes Job - runs containers to completion
+1. **KubeJobStep**: Kubernetes Job - runs containers to completion
 2. **ExecStep**: Execute commands directly (local execution)
 3. **WasmStep**: WebAssembly module execution
 4. **PythonStep**: Python script execution (aspirational)

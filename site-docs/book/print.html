@@ -1,0 +1,459 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>k8s-maestro Documentation</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Kubernetes workflow orchestrator for Rust with type-safe API">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">k8s-maestro Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/neurono-ml/k8s-maestro" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="k8s-maestro-documentation"><a class="header" href="#k8s-maestro-documentation">k8s-maestro Documentation</a></h1>
+<p>Welcome to the k8s-maestro documentation. k8s-maestro is a Kubernetes workflow orchestrator with minimal requirements and full power.</p>
+<h2 id="what-is-k8s-maestro"><a class="header" href="#what-is-k8s-maestro">What is k8s-maestro?</a></h2>
+<p>k8s-maestro provides a high-level, type-safe Rust API for orchestrating complex workflows on Kubernetes. Built with test-driven development principles, it offers a clean builder pattern for creating multi-step workflows with dependencies, conditional execution, and powerful networking capabilities.</p>
+<h3 id="key-features"><a class="header" href="#key-features">Key Features</a></h3>
+<ul>
+<li><strong>Multi-step Workflows</strong>: Define complex workflows with multiple steps and dependencies</li>
+<li><strong>Conditional Execution</strong>: Execute steps based on conditions (success, failure, output values)</li>
+<li><strong>Multiple Step Types</strong>: Support for Kubernetes jobs, exec steps, WASM, and custom step types</li>
+<li><strong>Services &amp; Ingress</strong>: Built-in support for exposing services and configuring ingress</li>
+<li><strong>Sidecar Containers</strong>: Easily add sidecar containers to workflow steps</li>
+<li><strong>File Observer</strong>: Monitor file changes and trigger workflow execution</li>
+<li><strong>Checkpointing</strong>: Automatic checkpointing and recovery for long-running workflows</li>
+<li><strong>Multi-tenant Security</strong>: Role-based access control and namespace isolation</li>
+<li><strong>Builder Pattern</strong>: Fluent API for easy workflow and resource construction</li>
+<li><strong>TDD Approach</strong>: Extensive test coverage with unit, integration, and E2E tests</li>
+</ul>
+<h2 id="quick-links"><a class="header" href="#quick-links">Quick Links</a></h2>
+<h3 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h3>
+<ul>
+<li><a href="getting-started/installation.html">Installation</a> - Install and configure k8s-maestro</li>
+<li><a href="getting-started/quick-start.html">Quick Start</a> - Run your first workflow in 5 minutes</li>
+<li><a href="getting-started/concepts.html">Concepts</a> - Understand workflows, steps, and dependencies</li>
+</ul>
+<h3 id="guides"><a class="header" href="#guides">Guides</a></h3>
+<ul>
+<li><a href="guides/basic-workflow.html">Basic Workflows</a> - Create your first workflow</li>
+<li><a href="guides/dependencies.html">Dependencies</a> - Configure step dependencies and execution order</li>
+<li><a href="guides/services-ingress.html">Services &amp; Ingress</a> - Expose services and configure ingress</li>
+<li><a href="guides/multi-language.html">Multi-language Steps</a> - Use Python, Rust, WASM in workflows</li>
+<li><a href="guides/checkpointing.html">Checkpointing</a> - Enable workflow checkpointing and recovery</li>
+<li><a href="guides/security.html">Security</a> - Configure multi-tenant security and RBAC</li>
+</ul>
+<h3 id="api-reference"><a class="header" href="#api-reference">API Reference</a></h3>
+<ul>
+<li><a href="api/client.html">Client API</a> - MaestroClient reference</li>
+<li><a href="api/workflow.html">Workflow API</a> - Workflow and WorkflowBuilder reference</li>
+<li><a href="api/steps.html">Steps API</a> - Available step types and APIs</li>
+<li><a href="api/networking.html">Networking API</a> - Services, Ingress, and DNS utilities</li>
+</ul>
+<h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
+<ul>
+<li><a href="examples/spark-cluster.html">Spark Cluster</a> - Orchestrate Apache Spark on Kubernetes</li>
+<li><a href="examples/ml-pipeline.html">ML Pipeline</a> - Build machine learning pipelines</li>
+<li><a href="examples/data-processing.html">Data Processing</a> - ETL and data transformation workflows</li>
+</ul>
+<h3 id="reference"><a class="header" href="#reference">Reference</a></h3>
+<ul>
+<li><a href="reference/configuration.html">Configuration</a> - Configuration options and environment variables</li>
+<li><a href="reference/troubleshooting.html">Troubleshooting</a> - Common issues and solutions</li>
+</ul>
+<h2 id="example-usage"><a class="header" href="#example-usage">Example Usage</a></h2>
+<pre><pre class="playground"><code class="language-rust">use k8s_maestro::{MaestroClientBuilder, WorkflowBuilder};
+
+#[tokio::main]
+async fn main() -&gt; anyhow::Result&lt;()&gt; {
+    let client = MaestroClientBuilder::new()
+        .with_namespace("default")
+        .build()?;
+
+    let workflow = WorkflowBuilder::new()
+        .with_name("my-workflow")
+        .add_step(KubeJobStep::new("my-job", "nginx:latest"))
+        .build()?;
+
+    let execution = client.execute_workflow(&amp;workflow).await?;
+    println!("Workflow executed: {:?}", execution);
+
+    Ok(())
+}</code></pre></pre>
+<h2 id="community--support"><a class="header" href="#community--support">Community &amp; Support</a></h2>
+<ul>
+<li><strong>GitHub Repository</strong>: <a href="https://github.com/neurono-ml/k8s-maestro">https://github.com/neurono-ml/k8s-maestro</a></li>
+<li><strong>Issues</strong>: Report bugs and request features</li>
+<li><strong>Contributing</strong>: See the contributing guidelines in the main repository</li>
+</ul>
+<h2 id="license"><a class="header" href="#license">License</a></h2>
+<p>This project is dual-licensed under:</p>
+<ul>
+<li><a href="https://opensource.org/licenses/MIT">MIT License</a></li>
+<li><a href="https://opensource.org/licenses/Apache-2.0">Apache License 2.0</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started-1"><a class="header" href="#getting-started-1">Getting Started</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="quick-start"><a class="header" href="#quick-start">Quick Start</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="concepts"><a class="header" href="#concepts">Concepts</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="guides-1"><a class="header" href="#guides-1">Guides</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="basic-workflow"><a class="header" href="#basic-workflow">Basic Workflow</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="kubejobstep"><a class="header" href="#kubejobstep">KubeJobStep</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="kubepodstep"><a class="header" href="#kubepodstep">KubePodStep</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="containers"><a class="header" href="#containers">Containers</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="volumes"><a class="header" href="#volumes">Volumes</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="networking"><a class="header" href="#networking">Networking</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="security"><a class="header" href="#security">Security</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="observers"><a class="header" href="#observers">Observers</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="python-step"><a class="header" href="#python-step">Python Step</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="reference-1"><a class="header" href="#reference-1">Reference</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="client-api"><a class="header" href="#client-api">Client API</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="workflow-api"><a class="header" href="#workflow-api">Workflow API</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="dependencies"><a class="header" href="#dependencies">Dependencies</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="testing-guide"><a class="header" href="#testing-guide">Testing Guide</a></h1>
+<p>This guide explains how to write and run tests for k8s-maestro.</p>
+<h2 id="test-categories"><a class="header" href="#test-categories">Test Categories</a></h2>
+<p>k8s-maestro uses a three-tier test organization:</p>
+<div class="table-wrapper"><table><thead><tr><th>Category</th><th>Purpose</th><th>Cluster Required</th><th>Speed</th></tr></thead><tbody>
+<tr><td>Unit</td><td>Test individual functions and logic</td><td>No</td><td>Fast (&lt; 10s)</td></tr>
+<tr><td>Integration</td><td>Test Kubernetes API interactions</td><td>Yes (Kind)</td><td>Medium (&lt; 5min)</td></tr>
+<tr><td>E2E</td><td>Test complete workflow scenarios</td><td>Yes (Kind)</td><td>Medium (&lt; 5min)</td></tr>
+</tbody></table>
+</div>
+<h2 id="running-tests"><a class="header" href="#running-tests">Running Tests</a></h2>
+<h3 id="unit-tests"><a class="header" href="#unit-tests">Unit Tests</a></h3>
+<pre><code class="language-bash"># Run unit tests only (no Docker needed)
+cargo test --lib
+
+# Run a specific unit test
+cargo test test_create_configmap
+</code></pre>
+<h3 id="integration-tests"><a class="header" href="#integration-tests">Integration Tests</a></h3>
+<pre><code class="language-bash"># Run integration tests (requires Docker)
+cargo test --test '*' -- --ignored
+
+# Run specific integration test
+cargo test --test kind_cluster_lifecycle -- --ignored
+</code></pre>
+<h3 id="all-tests"><a class="header" href="#all-tests">All Tests</a></h3>
+<pre><code class="language-bash"># Run all tests including ignored ones
+cargo test -- --include-ignored
+</code></pre>
+<h2 id="writing-tests"><a class="header" href="#writing-tests">Writing Tests</a></h2>
+<h3 id="unit-tests-with-mocking"><a class="header" href="#unit-tests-with-mocking">Unit Tests with Mocking</a></h3>
+<p>Use the mocking module for unit tests that don't need a real cluster:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::tests::common::mocking::{MockK8sClient, mock_error, mock_resource_response};
+
+#[test]
+fn test_create_resource_success() {
+    let mut client = MockK8sClient::new()
+        .add_create_response(Ok(mock_resource_response("ConfigMap", "test-cm", "default")));
+    
+    let response = client.next_create_response().unwrap();
+    assert_eq!(response["kind"], "ConfigMap");
+}
+
+#[test]
+fn test_create_resource_already_exists() {
+    let mut client = MockK8sClient::new()
+        .add_create_response(Err(mock_error("AlreadyExists", "resource exists")));
+    
+    let result = client.next_create_response();
+    assert!(result.is_err());
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="integration-tests-with-kind"><a class="header" href="#integration-tests-with-kind">Integration Tests with Kind</a></h3>
+<p>Use the Kind cluster module for integration tests:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::tests::common::kind_cluster::KindCluster;
+use k8s_maestro::tests::common::utilities::{
+    create_configmap, apply_resource, verify_resource_exists, delete_resource_by_name,
+};
+use k8s_openapi::api::core::v1::ConfigMap;
+
+#[tokio::test]
+#[ignore = "Requires Docker"]
+async fn test_configmap_lifecycle() {
+    // Setup cluster
+    let cluster = KindCluster::new().await.expect("Failed to create cluster");
+    
+    // Create and apply ConfigMap
+    let cm = create_configmap("test-cm", "default", std::collections::BTreeMap::new());
+    apply_resource(&amp;client, &amp;cm, "default").await.expect("Failed to apply");
+    
+    // Verify it exists
+    assert!(verify_resource_exists::&lt;ConfigMap&gt;(&amp;client, "test-cm", "default").await);
+    
+    // Cleanup
+    delete_resource_by_name::&lt;ConfigMap&gt;(&amp;client, "test-cm", "default").await.ok();
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="e2e-tests-for-workflows"><a class="header" href="#e2e-tests-for-workflows">E2E Tests for Workflows</a></h3>
+<p>Use the E2E helpers for complete workflow scenarios:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::tests::e2e::setup_e2e_test;
+use k8s_maestro::tests::common::fixtures::load_workflow_fixture;
+
+#[tokio::test]
+#[ignore = "Requires Docker"]
+async fn e2e_workflow_execution() {
+    let (client, _cluster) = setup_e2e_test().await.expect("Failed to setup");
+    
+    // Load and apply workflow
+    let workflow = load_workflow_fixture("simple-workflow").expect("Failed to load");
+    
+    // Verify workflow execution...
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="test-utilities"><a class="header" href="#test-utilities">Test Utilities</a></h2>
+<h3 id="fixtures"><a class="header" href="#fixtures">Fixtures</a></h3>
+<p>Load pre-defined YAML fixtures:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::tests::common::fixtures::{
+    load_configmap_fixture,
+    load_secret_fixture,
+    load_pvc_fixture,
+};
+
+let cm = load_configmap_fixture("test-configmap").unwrap();
+let secret = load_secret_fixture("test-secret").unwrap();
+<span class="boring">}</span></code></pre></pre>
+<h3 id="resource-helpers"><a class="header" href="#resource-helpers">Resource Helpers</a></h3>
+<p>Create resources programmatically:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::tests::common::utilities::{
+    create_configmap, create_secret, create_pvc, create_namespace,
+};
+use std::collections::BTreeMap;
+
+let cm = create_configmap("my-cm", "default", BTreeMap::new());
+let secret = create_secret("my-secret", "default", BTreeMap::new());
+let ns = create_namespace("test");
+<span class="boring">}</span></code></pre></pre>
+<h3 id="validation-helpers"><a class="header" href="#validation-helpers">Validation Helpers</a></h3>
+<p>Verify resource states:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use k8s_maestro::tests::common::utilities::{
+    verify_resource_exists,
+    verify_resource_state,
+    wait_for_resource_ready,
+};
+
+// Check if resource exists
+if verify_resource_exists::&lt;ConfigMap&gt;(&amp;client, "my-cm", "default").await {
+    println!("ConfigMap exists!");
+}
+
+// Wait for resource to be ready
+wait_for_resource_ready::&lt;Pod&gt;(&amp;client, "my-pod", "default", |pod| {
+    pod.status.as_ref().map(|s| s.phase.as_deref() == Some("Running")).unwrap_or(false)
+}).await.expect("Pod never became ready");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="best-practices"><a class="header" href="#best-practices">Best Practices</a></h2>
+<ol>
+<li><strong>Use the right test category</strong>: Unit tests for logic, integration for K8s API, E2E for workflows</li>
+<li><strong>Clean up resources</strong>: Always clean up created resources in tests</li>
+<li><strong>Use unique names</strong>: Create resources with unique names to avoid conflicts</li>
+<li><strong>Mark tests appropriately</strong>: Use <code>#[ignore]</code> for tests requiring Docker</li>
+<li><strong>Keep fixtures minimal</strong>: Only include necessary fields in fixtures</li>
+</ol>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>

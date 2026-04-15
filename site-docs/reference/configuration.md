@@ -176,7 +176,7 @@ let checkpoint_config = LegacyCheckpointConfig::new()
 let workflow = WorkflowBuilder::new()
     .with_name("checkpointed-workflow")
     .with_checkpointing(checkpoint_config)
-    .add_step(JobStep::new("long-running", "python:3.11"))
+    .add_step(KubeJobStep::new("long-running", "python:3.11"))
     .build()?;
 ```
 
@@ -188,11 +188,11 @@ Set the maximum number of parallel steps.
 let workflow = WorkflowBuilder::new()
     .with_name("parallel-workflow")
     .with_parallelism(5)
-    .add_step(JobStep::new("worker-1", "python:3.11"))
-    .add_step(JobStep::new("worker-2", "python:3.11"))
-    .add_step(JobStep::new("worker-3", "python:3.11"))
-    .add_step(JobStep::new("worker-4", "python:3.11"))
-    .add_step(JobStep::new("worker-5", "python:3.11"))
+    .add_step(KubeJobStep::new("worker-1", "python:3.11"))
+    .add_step(KubeJobStep::new("worker-2", "python:3.11"))
+    .add_step(KubeJobStep::new("worker-3", "python:3.11"))
+    .add_step(KubeJobStep::new("worker-4", "python:3.11"))
+    .add_step(KubeJobStep::new("worker-5", "python:3.11"))
     .build()?;
 ```
 
@@ -206,8 +206,8 @@ use k8s_maestro::workflows::ExecutionMode;
 let workflow = WorkflowBuilder::new()
     .with_name("execution-workflow")
     .with_execution_mode(ExecutionMode::Sequential)
-    .add_step(JobStep::new("step-1", "python:3.11"))
-    .add_step(JobStep::new("step-2", "python:3.11"))
+    .add_step(KubeJobStep::new("step-1", "python:3.11"))
+    .add_step(KubeJobStep::new("step-2", "python:3.11"))
     .build()?;
 ```
 

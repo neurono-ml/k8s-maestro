@@ -1,3 +1,21 @@
+## Implementation Status Note
+
+> **Important**: This change implemented **PackageLoader** and **PythonStep** only. The sections for **RustStep**, **LuaStep**, and **WasmStep** are **aspirational features that were never implemented** - these tasks were planned but never started.
+
+### Completed ✅
+- **PackageSource/PackageLoader**: Fully implemented
+- **PythonStep**: Fully implemented with all traits, Pod spec generation, and tests
+
+### Not Implemented ❌ (Aspirational)
+- **RustStep**: Spec exists but never implemented
+- **LuaStep**: Spec exists but never implemented
+- **WasmStep**: Spec exists but never implemented
+
+### Common Features
+- Partially implemented (resource limits, volume mounts partially done in PythonStep)
+
+---
+
 ## 1. Module Structure and Dependencies
 
 - [x] 1.1 Create `src/steps/exec/mod.rs` with module exports
@@ -33,7 +51,9 @@
 - [x] 3.12 Add unit tests for PythonStepBuilder
 - [ ] 3.13 Add unit tests for Pod spec generation
 
-## 4. Rust Execution Step
+## 4. Rust Execution Step [NOT IMPLEMENTED - Aspirational]
+
+> **Note**: This section was planned but never implemented. See `specs/rust-exec-step/spec.md` for the design that was never built.
 
 - [ ] 4.1 Create `src/steps/exec/rust.rs` module
 - [ ] 4.2 Implement `RustStep` struct with all required fields
@@ -49,7 +69,9 @@
 - [ ] 4.12 Add unit tests for RustStepBuilder
 - [ ] 4.13 Add unit tests for Cargo.toml generation
 
-## 5. Lua Execution Step
+## 5. Lua Execution Step [NOT IMPLEMENTED - Aspirational]
+
+> **Note**: This section was planned but never implemented. See `specs/lua-exec-step/spec.md` for the design that was never built.
 
 - [ ] 5.1 Create `src/steps/exec/lua.rs` module
 - [ ] 5.2 Implement `LuaStep` struct with all required fields
@@ -64,7 +86,9 @@
 - [ ] 5.11 Add unit tests for LuaStepBuilder
 - [ ] 5.12 Add unit tests for script generation
 
-## 6. WASM Execution Step
+## 6. WASM Execution Step [NOT IMPLEMENTED - Aspirational]
+
+> **Note**: This section was planned but never implemented. See `specs/wasm-exec-step/spec.md` for the design that was never built.
 
 - [ ] 6.1 Create `src/steps/exec/wasm.rs` module
 - [ ] 6.2 Implement `WasmStep` struct with all required fields

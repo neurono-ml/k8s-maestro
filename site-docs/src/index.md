@@ -62,7 +62,7 @@ async fn main() -> anyhow::Result<()> {
 
     let workflow = WorkflowBuilder::new()
         .with_name("my-workflow")
-        .add_step(JobStep::new("my-job", "nginx:latest"))
+        .add_step(KubeJobStep::new("my-job", "nginx:latest"))
         .build()?;
 
     let execution = client.execute_workflow(&workflow).await?;
@@ -74,7 +74,7 @@ async fn main() -> anyhow::Result<()> {
 
 ## Community & Support
 
-- **GitHub Repository**: [https://github.com/andreclaudino/k8s-maestro](https://github.com/andreclaudino/k8s-maestro)
+- **GitHub Repository**: [https://github.com/neurono-ml/k8s-maestro](https://github.com/neurono-ml/k8s-maestro)
 - **Issues**: Report bugs and request features
 - **Contributing**: See the contributing guidelines in the main repository
 
