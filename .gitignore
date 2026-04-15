@@ -13,3 +13,4 @@ docs/*.html
 skills-lock.json
 .opencode/
 .DS_Store
+mdbook
