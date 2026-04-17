@@ -136,7 +136,8 @@ impl WaitableWorkFlowStep for KubeJobStep {
         let step_id = self.step_id.clone();
 
         async move {
-            let client = client.ok_or_else(|| anyhow::anyhow!("Client is required for wait operation"))?;
+            let client =
+                client.ok_or_else(|| anyhow::anyhow!("Client is required for wait operation"))?;
             let jobs: Api<Job> = Api::namespaced(client, &namespace);
             let job = jobs.get(&name).await?;
 
@@ -183,7 +184,8 @@ impl DeletableWorkFlowStep for KubeJobStep {
                 return Ok(());
             }
 
-            let client = client.ok_or_else(|| anyhow::anyhow!("Client is required for delete operation"))?;
+            let client =
+                client.ok_or_else(|| anyhow::anyhow!("Client is required for delete operation"))?;
             let jobs: Api<Job> = Api::namespaced(client, &namespace);
             jobs.delete(&name, &Default::default()).await?;
             Ok(())
@@ -212,7 +214,8 @@ impl DeletableWorkFlowStep for KubeJobStep {
                 return Ok(());
             }
 
-            let client = client.ok_or_else(|| anyhow::anyhow!("Client is required for delete operation"))?;
+            let client =
+                client.ok_or_else(|| anyhow::anyhow!("Client is required for delete operation"))?;
             let pods: Api<k8s_openapi::api::core::v1::Pod> = Api::namespaced(client, &namespace);
             let pod_list = pods
                 .list(&Default::default())
@@ -296,7 +299,9 @@ impl ServableWorkFlowStep for KubeJobStep {
                 return Ok(format!("DRY RUN: Would expose service {}", service_name));
             }
 
-            let client = client.ok_or_else(|| anyhow::anyhow!("Client is required for expose service operation"))?;
+            let client = client.ok_or_else(|| {
+                anyhow::anyhow!("Client is required for expose service operation")
+            })?;
             let mut selector = BTreeMap::new();
             selector.insert("job-name".to_string(), job_name);
 
@@ -333,7 +338,9 @@ impl ServableWorkFlowStep for KubeJobStep {
                 return Ok(format!("DRY RUN: Would expose ingress {}", ingress_name));
             }
 
-            let client = client.ok_or_else(|| anyhow::anyhow!("Client is required for expose ingress operation"))?;
+            let client = client.ok_or_else(|| {
+                anyhow::anyhow!("Client is required for expose ingress operation")
+            })?;
             let ingress = crate::networking::IngressBuilder::new()
                 .with_name(&ingress_name)
                 .with_namespace(&namespace)

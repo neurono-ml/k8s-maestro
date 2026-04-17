@@ -11,8 +11,8 @@
 use k8s_maestro::{
     clients::MaestroK8sClient,
     entities::MaestroContainer,
-    steps::{KubeJobStepBuilder, RestartPolicy},
     steps::traits::DeletableWorkFlowStep,
+    steps::{KubeJobStepBuilder, RestartPolicy},
 };
 use kube::Api;
 use std::time::Duration;
@@ -36,12 +36,13 @@ pub async fn main() -> anyhow::Result<()> {
     println!("  - '{}' (will fail with exit 137)\n", failing_name);
 
     // Create the success job step
-    let success_container = Box::new(MaestroContainer::new("docker.io/bash:5.2", "main")
-        .set_arguments(&[
+    let success_container = Box::new(
+        MaestroContainer::new("docker.io/bash:5.2", "main").set_arguments(&[
             "bash".to_owned(),
             "-c".to_owned(),
             "echo 'Testing success pod'; sleep 3; echo 'Job completed successfully!'".to_owned(),
-        ]));
+        ]),
+    );
 
     let success_job_step = KubeJobStepBuilder::new()
         .with_name(succeed_name)
@@ -54,12 +55,13 @@ pub async fn main() -> anyhow::Result<()> {
         .build()?;
 
     // Create the failing job step
-    let failing_container = Box::new(MaestroContainer::new("docker.io/bash:5.2", "main")
-        .set_arguments(&[
+    let failing_container = Box::new(
+        MaestroContainer::new("docker.io/bash:5.2", "main").set_arguments(&[
             "bash".to_owned(),
             "-c".to_owned(),
             "echo 'Testing failing pod'; sleep 3; exit 137".to_owned(),
-        ]));
+        ]),
+    );
 
     let failing_job_step = KubeJobStepBuilder::new()
         .with_name(failing_name)
@@ -82,15 +84,17 @@ pub async fn main() -> anyhow::Result<()> {
         let jobs_api = Api::namespaced(maestro_client.inner().clone(), namespace);
 
         // Apply both jobs
-        let success_created = jobs_api
-            .create(&Default::default(), &success_job)
-            .await?;
-        println!("Success job '{}' created", success_created.metadata.name.as_ref().unwrap());
+        let success_created = jobs_api.create(&Default::default(), &success_job).await?;
+        println!(
+            "Success job '{}' created",
+            success_created.metadata.name.as_ref().unwrap()
+        );
 
-        let failing_created = jobs_api
-            .create(&Default::default(), &failing_job)
-            .await?;
-        println!("Failing job '{}' created", failing_created.metadata.name.as_ref().unwrap());
+        let failing_created = jobs_api.create(&Default::default(), &failing_job).await?;
+        println!(
+            "Failing job '{}' created",
+            failing_created.metadata.name.as_ref().unwrap()
+        );
 
         println!("\n=== Watching workflows execute in parallel ===\n");
 
@@ -105,14 +109,20 @@ pub async fn main() -> anyhow::Result<()> {
         if let Some(status) = success_job_status.status {
             let succeeded = status.succeeded.unwrap_or(0);
             let failed = status.failed.unwrap_or(0);
-            println!("Success job status - Succeeded: {}, Failed: {}", succeeded, failed);
+            println!(
+                "Success job status - Succeeded: {}, Failed: {}",
+                succeeded, failed
+            );
         }
 
         let failing_job_status = jobs_api.get(failing_name).await?;
         if let Some(status) = failing_job_status.status {
             let succeeded = status.succeeded.unwrap_or(0);
             let failed = status.failed.unwrap_or(0);
-            println!("Failing job status - Succeeded: {}, Failed: {}", succeeded, failed);
+            println!(
+                "Failing job status - Succeeded: {}, Failed: {}",
+                succeeded, failed
+            );
         }
 
         // Demonstrate cleanup
@@ -127,7 +137,6 @@ pub async fn main() -> anyhow::Result<()> {
         failing_job_step.delete_associated_pods(dry_run).await?;
         failing_job_step.delete_workflow(dry_run).await?;
         println!("Failing job cleaned up");
-
     } else {
         println!("DRY RUN: Would create job '{}'", succeed_name);
         println!("DRY RUN: Would create job '{}'", failing_name);
@@ -146,7 +155,10 @@ pub async fn main() -> anyhow::Result<()> {
 /// - A single container running bash
 /// - A sleep command to simulate work
 /// - OnFailure restart policy for retry on failure
-fn build_sleep_job(name: &str, namespace: &str) -> anyhow::Result<k8s_openapi::api::batch::v1::Job> {
+fn build_sleep_job(
+    name: &str,
+    namespace: &str,
+) -> anyhow::Result<k8s_openapi::api::batch::v1::Job> {
     use k8s_openapi::{
         api::{
             batch::v1::{Job, JobSpec},

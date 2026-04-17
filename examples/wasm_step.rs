@@ -120,14 +120,12 @@ async fn example_basic_wasm_container(client: &MaestroK8sClient) -> anyhow::Resu
 }
 
 /// Example 2: WASM container with resource limits
-async fn example_wasm_with_resource_limits(
-    client: &MaestroK8sClient,
-) -> anyhow::Result<()> {
+async fn example_wasm_with_resource_limits(client: &MaestroK8sClient) -> anyhow::Result<()> {
     println!("=== Example 2: WASM with Resource Limits ===");
 
     // WASM modules typically require minimal resources
     let resource_limits = ResourceLimits::new()
-        .with_cpu("100m")   // Minimal CPU for WASM execution
+        .with_cpu("100m") // Minimal CPU for WASM execution
         .with_memory("64Mi") // Typical WASM module memory footprint
         .with_cpu_request("50m")
         .with_memory_request("32Mi");
@@ -152,7 +150,10 @@ async fn example_wasm_with_resource_limits(
         .with_dry_run(true)
         .build()?;
 
-    println!("✓ Created resource-limited WASM job: {}", wasm_job.step_id());
+    println!(
+        "✓ Created resource-limited WASM job: {}",
+        wasm_job.step_id()
+    );
     println!("  - CPU limit: 100m (minimal WASM execution overhead)");
     println!("  - Memory limit: 64Mi (typical WASM module footprint)");
     println!("  - Advantages: Efficient resource utilization");
@@ -178,12 +179,11 @@ async fn example_wasm_multi_container(client: &MaestroK8sClient) -> anyhow::Resu
     ]);
 
     // Sidecar container for HTTP proxy/load balancing
-    let sidecar_proxy = MaestroContainer::new("nginx:alpine", "wasm-proxy")
-        .set_arguments(&[
-            "nginx".to_string(),
-            "-g".to_string(),
-            "daemon off;".to_string(),
-        ]);
+    let sidecar_proxy = MaestroContainer::new("nginx:alpine", "wasm-proxy").set_arguments(&[
+        "nginx".to_string(),
+        "-g".to_string(),
+        "daemon off;".to_string(),
+    ]);
 
     // Build a job with main WASM container and sidecar
     let wasm_job = KubeJobStepBuilder::new()
@@ -205,16 +205,20 @@ async fn example_wasm_multi_container(client: &MaestroK8sClient) -> anyhow::Resu
 }
 
 /// Example 4: WASM container with environment configuration
-async fn example_wasm_environment_configuration(
-    client: &MaestroK8sClient,
-) -> anyhow::Result<()> {
+async fn example_wasm_environment_configuration(client: &MaestroK8sClient) -> anyhow::Result<()> {
     println!("=== Example 4: WASM Environment Configuration ===");
 
     // Configure environment variables for WASM runtime
     let mut env_vars = BTreeMap::new();
-    env_vars.insert("WASM_MODULE_PATH".to_string(), "/app/module.wasm".to_string());
+    env_vars.insert(
+        "WASM_MODULE_PATH".to_string(),
+        "/app/module.wasm".to_string(),
+    );
     env_vars.insert("WASM_RUNTIME".to_string(), "wasmtime".to_string());
-    env_vars.insert("WASM_ARGS".to_string(), "--enable-all --wasi-modules=std".to_string());
+    env_vars.insert(
+        "WASM_ARGS".to_string(),
+        "--enable-all --wasi-modules=std".to_string(),
+    );
     env_vars.insert("RUST_LOG".to_string(), "info".to_string());
 
     // Create WASM container with environment configuration
@@ -231,7 +235,10 @@ async fn example_wasm_environment_configuration(
         .with_dry_run(true)
         .build()?;
 
-    println!("✓ Created environment-configured WASM job: {}", wasm_job.step_id());
+    println!(
+        "✓ Created environment-configured WASM job: {}",
+        wasm_job.step_id()
+    );
     println!("  - WASM_MODULE_PATH: /app/module.wasm");
     println!("  - WASM_RUNTIME: wasmtime");
     println!("  - WASM_ARGS: Runtime-specific arguments");
@@ -245,15 +252,12 @@ async fn example_wasm_pod_configuration(client: &MaestroK8sClient) -> anyhow::Re
     println!("=== Example 5: WASM Pod for Long-Running Services ===");
 
     // Configure WASM for long-running service (not a one-shot job)
-    let wasm_service = MaestroContainer::new(
-        "secondstate/wasmedge:latest",
-        "wasm-service",
-    )
-    .set_arguments(&[
-        "wasmedge".to_string(),
-        "--reactor".to_string(),
-        "/app/service.wasm".to_string(),
-    ]);
+    let wasm_service = MaestroContainer::new("secondstate/wasmedge:latest", "wasm-service")
+        .set_arguments(&[
+            "wasmedge".to_string(),
+            "--reactor".to_string(),
+            "/app/service.wasm".to_string(),
+        ]);
 
     // Build a Pod step (instead of Job) for long-running WASM service
     let wasm_pod = KubePodStepBuilder::new()

@@ -45,24 +45,31 @@ impl MaestroContainer {
         self
     }
 
-    pub fn add_volume_mount(mut self, volume_name: &str, mount_path: &str, read_only: bool) -> Self {
-        self.volume_mounts.push(k8s_openapi::api::core::v1::VolumeMount {
-            name: volume_name.to_string(),
-            mount_path: mount_path.to_string(),
-            read_only: Some(read_only),
-            ..Default::default()
-        });
+    pub fn add_volume_mount(
+        mut self,
+        volume_name: &str,
+        mount_path: &str,
+        read_only: bool,
+    ) -> Self {
+        self.volume_mounts
+            .push(k8s_openapi::api::core::v1::VolumeMount {
+                name: volume_name.to_string(),
+                mount_path: mount_path.to_string(),
+                read_only: Some(read_only),
+                ..Default::default()
+            });
         self
     }
 
     pub fn add_env_from_secret(mut self, secret_name: &str) -> Self {
-        self.env_from.push(k8s_openapi::api::core::v1::EnvFromSource {
-            secret_ref: Some(k8s_openapi::api::core::v1::SecretEnvSource {
-                name: secret_name.to_string(),
-                optional: None,
-            }),
-            ..Default::default()
-        });
+        self.env_from
+            .push(k8s_openapi::api::core::v1::EnvFromSource {
+                secret_ref: Some(k8s_openapi::api::core::v1::SecretEnvSource {
+                    name: secret_name.to_string(),
+                    optional: None,
+                }),
+                ..Default::default()
+            });
         self
     }
 }
@@ -206,24 +213,31 @@ impl SidecarContainer {
         self
     }
 
-    pub fn add_volume_mount(mut self, volume_name: &str, mount_path: &str, read_only: bool) -> Self {
-        self.volume_mounts.push(k8s_openapi::api::core::v1::VolumeMount {
-            name: volume_name.to_string(),
-            mount_path: mount_path.to_string(),
-            read_only: Some(read_only),
-            ..Default::default()
-        });
+    pub fn add_volume_mount(
+        mut self,
+        volume_name: &str,
+        mount_path: &str,
+        read_only: bool,
+    ) -> Self {
+        self.volume_mounts
+            .push(k8s_openapi::api::core::v1::VolumeMount {
+                name: volume_name.to_string(),
+                mount_path: mount_path.to_string(),
+                read_only: Some(read_only),
+                ..Default::default()
+            });
         self
     }
 
     pub fn add_env_from_secret(mut self, secret_name: &str) -> Self {
-        self.env_from.push(k8s_openapi::api::core::v1::EnvFromSource {
-            secret_ref: Some(k8s_openapi::api::core::v1::SecretEnvSource {
-                name: secret_name.to_string(),
-                optional: None,
-            }),
-            ..Default::default()
-        });
+        self.env_from
+            .push(k8s_openapi::api::core::v1::EnvFromSource {
+                secret_ref: Some(k8s_openapi::api::core::v1::SecretEnvSource {
+                    name: secret_name.to_string(),
+                    optional: None,
+                }),
+                ..Default::default()
+            });
         self
     }
 }

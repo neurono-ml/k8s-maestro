@@ -11,8 +11,8 @@
 use k8s_maestro::{
     clients::MaestroK8sClient,
     entities::MaestroContainer,
-    steps::{KubeJobStepBuilder, RestartPolicy},
     steps::traits::DeletableWorkFlowStep,
+    steps::{KubeJobStepBuilder, RestartPolicy},
 };
 use kube::Api;
 
@@ -30,12 +30,13 @@ pub async fn main() -> anyhow::Result<()> {
     let maestro_client = MaestroK8sClient::new().await?;
 
     println!("Creating workflow job step: {}", job_name);
-    let container = Box::new(MaestroContainer::new("docker.io/bash:5.2", "main")
-        .set_arguments(&[
+    let container = Box::new(
+        MaestroContainer::new("docker.io/bash:5.2", "main").set_arguments(&[
             "bash".to_owned(),
             "-c".to_owned(),
             "echo 'Testing pod'; sleep 3; echo 'Finalizado'; exit 137".to_owned(),
-        ]));
+        ]),
+    );
 
     let job_step = KubeJobStepBuilder::new()
         .with_name(job_name)
@@ -55,9 +56,7 @@ pub async fn main() -> anyhow::Result<()> {
         // Build the Kubernetes Job specification
         let k8s_job = build_kubernetes_job(job_name, namespace)?;
 
-        let created_job = jobs_api
-            .create(&Default::default(), &k8s_job)
-            .await?;
+        let created_job = jobs_api.create(&Default::default(), &k8s_job).await?;
 
         let created_job_name = created_job.metadata.name.as_ref().unwrap();
         println!("Job '{}' created successfully", created_job_name);
@@ -101,7 +100,10 @@ pub async fn main() -> anyhow::Result<()> {
 /// - Runs a bash container with a sleep command
 /// - Exits with error code 137 to demonstrate cleanup
 /// - Uses OnFailure restart policy with retry attempts
-fn build_kubernetes_job(name: &str, namespace: &str) -> anyhow::Result<k8s_openapi::api::batch::v1::Job> {
+fn build_kubernetes_job(
+    name: &str,
+    namespace: &str,
+) -> anyhow::Result<k8s_openapi::api::batch::v1::Job> {
     use k8s_openapi::{
         api::{
             batch::v1::{Job, JobSpec},

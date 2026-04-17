@@ -21,6 +21,27 @@ cargo clippy
 cargo fmt --check
 ```
 
+## Pre-commit Checklist
+
+Before every commit, run the following commands and ensure all pass with zero errors and zero warnings:
+
+```bash
+# 1. Format — apply and then verify (must produce no diff)
+cargo fmt
+cargo fmt --check
+
+# 2. Lint
+cargo clippy -- -D warnings
+
+# 3. Build
+cargo check
+
+# 4. Tests
+cargo test
+```
+
+All four steps are mandatory. A commit must not be created if any step fails.
+
 ## Project Structure
 
 | Module | Description |

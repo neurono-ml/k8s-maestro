@@ -7,7 +7,10 @@
 use k8s_maestro::{
     clients::MaestroK8sClient,
     entities::MaestroContainer,
-    steps::{KubeJobStepBuilder, KubePodStepBuilder, KubeWorkFlowStep, ResourceLimits, RestartPolicy, WorkFlowStep},
+    steps::{
+        KubeJobStepBuilder, KubePodStepBuilder, KubeWorkFlowStep, ResourceLimits, RestartPolicy,
+        WorkFlowStep,
+    },
 };
 use std::collections::BTreeMap;
 
@@ -51,12 +54,11 @@ async fn example_basic_rust_job(k8s_client: &MaestroK8sClient) -> anyhow::Result
         .with_name("rust-basic-job")
         .with_namespace("default")
         .add_container(Box::new(
-            MaestroContainer::new("rust:1.75-slim", "rust-app")
-                .set_arguments(&[
-                    "sh".to_string(),
-                    "-c".to_string(),
-                    "echo 'Hello from Rust!' && rustc --version".to_string(),
-                ]),
+            MaestroContainer::new("rust:1.75-slim", "rust-app").set_arguments(&[
+                "sh".to_string(),
+                "-c".to_string(),
+                "echo 'Hello from Rust!' && rustc --version".to_string(),
+            ]),
         ))
         .with_client(k8s_client.clone())
         .with_dry_run(true) // Safe for local testing without a cluster
@@ -74,9 +76,7 @@ async fn example_basic_rust_job(k8s_client: &MaestroK8sClient) -> anyhow::Result
 ///
 /// Shows how to configure CPU/memory limits and set environment variables
 /// for a Rust application, which is useful for performance-critical workloads.
-async fn example_rust_job_with_resources(
-    k8s_client: &MaestroK8sClient,
-) -> anyhow::Result<()> {
+async fn example_rust_job_with_resources(k8s_client: &MaestroK8sClient) -> anyhow::Result<()> {
     println!("Example 2: Rust job with resource limits and environment variables");
 
     let mut env_vars = BTreeMap::new();
@@ -128,12 +128,11 @@ async fn example_parallel_rust_job(k8s_client: &MaestroK8sClient) -> anyhow::Res
         .with_name("rust-parallel-job")
         .with_namespace("default")
         .add_container(Box::new(
-            MaestroContainer::new("rust:1.75-slim", "parallel-processor")
-                .set_arguments(&[
-                    "sh".to_string(),
-                    "-c".to_string(),
-                    "cargo run --release -- --parallel --threads 8".to_string(),
-                ]),
+            MaestroContainer::new("rust:1.75-slim", "parallel-processor").set_arguments(&[
+                "sh".to_string(),
+                "-c".to_string(),
+                "cargo run --release -- --parallel --threads 8".to_string(),
+            ]),
         ))
         .with_parallelism(4) // Run 4 pods in parallel
         .with_completions(10) // Complete 10 jobs total
@@ -155,33 +154,29 @@ async fn example_parallel_rust_job(k8s_client: &MaestroK8sClient) -> anyhow::Res
 ///
 /// Shows how to create a pod with a main Rust container and a sidecar
 /// for collecting and forwarding logs, a common pattern in microservices.
-async fn example_rust_pod_with_sidecar(
-    k8s_client: &MaestroK8sClient,
-) -> anyhow::Result<()> {
+async fn example_rust_pod_with_sidecar(k8s_client: &MaestroK8sClient) -> anyhow::Result<()> {
     println!("Example 4: Rust pod with sidecar for logging");
 
     let job = KubePodStepBuilder::new()
         .with_name("rust-app-with-logging")
         .with_namespace("default")
         .add_container(Box::new(
-            MaestroContainer::new("rust:1.75-slim", "rust-application")
-                .set_arguments(&[
-                    "sh".to_string(),
-                    "-c".to_string(),
-                    "cargo run --release > /app/logs/app.log 2>&1".to_string(),
-                ]),
+            MaestroContainer::new("rust:1.75-slim", "rust-application").set_arguments(&[
+                "sh".to_string(),
+                "-c".to_string(),
+                "cargo run --release > /app/logs/app.log 2>&1".to_string(),
+            ]),
         ))
         .add_sidecar(Box::new(
-            MaestroContainer::new("fluent/fluent-bit:2.2", "log-collector")
-                .set_arguments(&[
-                    "fluent-bit".to_string(),
-                    "-i".to_string(),
-                    "tail".to_string(),
-                    "-p".to_string(),
-                    "path=/app/logs/app.log".to_string(),
-                    "-o".to_string(),
-                    "stdout".to_string(),
-                ]),
+            MaestroContainer::new("fluent/fluent-bit:2.2", "log-collector").set_arguments(&[
+                "fluent-bit".to_string(),
+                "-i".to_string(),
+                "tail".to_string(),
+                "-p".to_string(),
+                "path=/app/logs/app.log".to_string(),
+                "-o".to_string(),
+                "stdout".to_string(),
+            ]),
         ))
         .with_restart_policy(RestartPolicy::OnFailure)
         .with_client(k8s_client.clone())
@@ -208,12 +203,11 @@ async fn example_rust_pipeline(k8s_client: &MaestroK8sClient) -> anyhow::Result<
         .with_name("rust-data-ingestion")
         .with_namespace("default")
         .add_container(Box::new(
-            MaestroContainer::new("rust:1.75-slim", "ingestion")
-                .set_arguments(&[
-                    "sh".to_string(),
-                    "-c".to_string(),
-                    "cargo run --bin ingest -- --source s3://data-bucket/input/".to_string(),
-                ]),
+            MaestroContainer::new("rust:1.75-slim", "ingestion").set_arguments(&[
+                "sh".to_string(),
+                "-c".to_string(),
+                "cargo run --bin ingest -- --source s3://data-bucket/input/".to_string(),
+            ]),
         ))
         .with_client(k8s_client.clone())
         .with_dry_run(true)
@@ -253,12 +247,11 @@ async fn example_rust_pipeline(k8s_client: &MaestroK8sClient) -> anyhow::Result<
         .with_name("rust-data-validation")
         .with_namespace("default")
         .add_container(Box::new(
-            MaestroContainer::new("rust:1.75-slim", "validation")
-                .set_arguments(&[
-                    "sh".to_string(),
-                    "-c".to_string(),
-                    "cargo test --bin validate -- --nocapture".to_string(),
-                ]),
+            MaestroContainer::new("rust:1.75-slim", "validation").set_arguments(&[
+                "sh".to_string(),
+                "-c".to_string(),
+                "cargo test --bin validate -- --nocapture".to_string(),
+            ]),
         ))
         .with_backoff_limit(2)
         .with_client(k8s_client.clone())

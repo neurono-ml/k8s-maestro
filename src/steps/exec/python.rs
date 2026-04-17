@@ -64,7 +64,7 @@ impl PythonStep {
 
         let pod = self.build_pod_spec()?;
         let pods: Api<Pod> = Api::namespaced(client, &self.namespace);
-        
+
         // Watch for pod completion with timeout
         let deadline = Instant::now() + self.timeout;
         pods.create(&Default::default(), &pod).await?;
@@ -79,8 +79,7 @@ impl PythonStep {
 
             match timeout(remaining, pods.get(&self.name)).await {
                 Ok(Ok(pod)) => {
-                    let phase = pod.status.as_ref()
-                        .and_then(|s| s.phase.as_ref());
+                    let phase = pod.status.as_ref().and_then(|s| s.phase.as_ref());
                     match phase.map(|p| p.as_str()) {
                         Some("Succeeded") => {
                             return Ok(StepResult::new(&self.step_id)
@@ -92,7 +91,7 @@ impl PythonStep {
                                 .with_status(StepStatus::Failure)
                                 .with_exit_code(1));
                         }
-                        _ => {} 
+                        _ => {}
                     }
                 }
                 Ok(Err(_)) => {
@@ -109,15 +108,16 @@ impl PythonStep {
     }
 
     async fn cancel_async(&self) -> Result<()> {
-        let pods: Api<Pod> = Api::namespaced(Arc::unwrap_or_clone(self.client.clone().into_inner()), &self.namespace);
+        let pods: Api<Pod> = Api::namespaced(
+            Arc::unwrap_or_clone(self.client.clone().into_inner()),
+            &self.namespace,
+        );
         pods.delete(&self.name, &Default::default()).await?;
         Ok(())
     }
 
     pub(crate) fn build_pod_spec(&self) -> Result<Pod> {
-        use k8s_openapi::api::core::v1::{
-            Container, PodSpec, PodStatus, Volume, VolumeMount,
-        };
+        use k8s_openapi::api::core::v1::{Container, PodSpec, PodStatus, Volume, VolumeMount};
         use k8s_openapi::apimachinery::pkg::api::resource::Quantity;
 
         let mut env_vars = Vec::new();
@@ -188,10 +188,8 @@ impl PythonStep {
             let mut resources = k8s_openapi::api::core::v1::ResourceRequirements::default();
 
             if let Some(cpu) = &limits.cpu {
-                resources.limits = Some(BTreeMap::from([(
-                    "cpu".to_string(),
-                    Quantity(cpu.clone()),
-                )]));
+                resources.limits =
+                    Some(BTreeMap::from([("cpu".to_string(), Quantity(cpu.clone()))]));
             }
             if let Some(memory) = &limits.memory {
                 resources
@@ -241,10 +239,7 @@ impl PythonStep {
         }
 
         if !self.requirements.is_empty() {
-            data.insert(
-                "requirements.txt".to_string(),
-                self.requirements.join("\n"),
-            );
+            data.insert("requirements.txt".to_string(), self.requirements.join("\n"));
         }
 
         Ok(ConfigMap {
@@ -320,10 +315,7 @@ impl DeletableWorkFlowStep for PythonStep {
 
         async move {
             if dry_run || self_dry_run {
-                log::info!(
-                    "DRY RUN: Would delete resources for {}",
-                    step_id
-                );
+                log::info!("DRY RUN: Would delete resources for {}", step_id);
                 return Ok(());
             }
 
@@ -431,12 +423,14 @@ impl PythonStepBuilder {
     }
 
     pub fn with_volume_mount(mut self, mount_path: &str, volume_name: &str) -> Self {
-        self.volume_mounts.insert(mount_path.to_string(), volume_name.to_string());
+        self.volume_mounts
+            .insert(mount_path.to_string(), volume_name.to_string());
         self
     }
 
     pub fn with_env(mut self, key: &str, value: &str) -> Self {
-        self.environment_variables.insert(key.to_string(), value.to_string());
+        self.environment_variables
+            .insert(key.to_string(), value.to_string());
         self
     }
 
@@ -540,9 +534,7 @@ mod tests {
     async fn test_python_step_builder_with_resource_limits() {
         let client = MaestroK8sClient::new().await.unwrap();
 
-        let limits = ResourceLimits::new()
-            .with_cpu("500m")
-            .with_memory("256Mi");
+        let limits = ResourceLimits::new().with_cpu("500m").with_memory("256Mi");
 
         let builder = PythonStepBuilder::new()
             .with_name("test-step")
