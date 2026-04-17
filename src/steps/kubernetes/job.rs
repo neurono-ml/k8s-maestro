@@ -16,18 +16,17 @@ use kube::Api;
 use std::any::Any;
 use std::collections::BTreeMap;
 use std::pin::Pin;
-use std::sync::Arc;
 
 pub struct KubeJobStep {
     step_id: String,
     namespace: String,
     name: JobNameType,
-    // TODO: Implement proper usage of these fields to configure Kubernetes Job spec
-    // These fields are pending implementation per specification
     #[allow(dead_code)]
     containers: Vec<Box<dyn ContainerLike + Send + Sync>>,
     #[allow(dead_code)]
     sidecars: Vec<Box<dyn ContainerLike + Send + Sync>>,
+    init_containers: Vec<Box<dyn ContainerLike + Send + Sync>>,
+    volumes: Vec<k8s_openapi::api::core::v1::Volume>,
     #[allow(dead_code)]
     backoff_limit: Option<i32>,
     #[allow(dead_code)]
@@ -44,7 +43,7 @@ pub struct KubeJobStep {
     service_config: Option<ServiceConfig>,
     #[allow(dead_code)]
     ingress_config: Option<IngressConfig>,
-    client: MaestroK8sClient,
+    client: Option<MaestroK8sClient>,
     dry_run: bool,
 }
 
@@ -61,6 +60,8 @@ impl KubeJobStep {
             name: JobNameType::DefinedName(name.into()),
             containers: vec![Box::new(container)],
             sidecars: vec![],
+            init_containers: vec![],
+            volumes: vec![],
             backoff_limit: None,
             restart_policy: RestartPolicy::Never,
             ttl_seconds: None,
@@ -69,13 +70,35 @@ impl KubeJobStep {
             resource_limits: None,
             service_config: None,
             ingress_config: None,
-            client,
+            client: Some(client),
             dry_run: false,
         }
     }
 
     pub fn builder() -> KubeJobStepBuilder {
         KubeJobStepBuilder::new()
+    }
+}
+
+impl KubeJobStep {
+    pub fn containers(&self) -> &[Box<dyn ContainerLike + Send + Sync>] {
+        &self.containers
+    }
+
+    pub fn init_containers(&self) -> &[Box<dyn ContainerLike + Send + Sync>] {
+        &self.init_containers
+    }
+
+    pub fn volumes(&self) -> &[k8s_openapi::api::core::v1::Volume] {
+        &self.volumes
+    }
+
+    pub fn job_backoff_limit(&self) -> Option<i32> {
+        self.backoff_limit
+    }
+
+    pub fn namespace_str(&self) -> &str {
+        &self.namespace
     }
 }
 
@@ -104,7 +127,7 @@ impl KubeWorkFlowStep for KubeJobStep {
 
 impl WaitableWorkFlowStep for KubeJobStep {
     fn wait(&self) -> impl std::future::Future<Output = Result<StepResult>> + Send {
-        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
+        let client = self.client.as_ref().map(|c| c.inner().clone());
         let namespace = self.namespace.clone();
         let name = match &self.name {
             JobNameType::DefinedName(name) => name.clone(),
@@ -113,6 +136,7 @@ impl WaitableWorkFlowStep for KubeJobStep {
         let step_id = self.step_id.clone();
 
         async move {
+            let client = client.ok_or_else(|| anyhow::anyhow!("Client is required for wait operation"))?;
             let jobs: Api<Job> = Api::namespaced(client, &namespace);
             let job = jobs.get(&name).await?;
 
@@ -141,7 +165,7 @@ impl DeletableWorkFlowStep for KubeJobStep {
         &self,
         dry_run: bool,
     ) -> impl std::future::Future<Output = Result<()>> + Send {
-        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
+        let client = self.client.as_ref().map(|c| c.inner().clone());
         let namespace = self.namespace.clone();
         let name = match &self.name {
             JobNameType::DefinedName(name) => name.clone(),
@@ -159,6 +183,7 @@ impl DeletableWorkFlowStep for KubeJobStep {
                 return Ok(());
             }
 
+            let client = client.ok_or_else(|| anyhow::anyhow!("Client is required for delete operation"))?;
             let jobs: Api<Job> = Api::namespaced(client, &namespace);
             jobs.delete(&name, &Default::default()).await?;
             Ok(())
@@ -169,7 +194,7 @@ impl DeletableWorkFlowStep for KubeJobStep {
         &self,
         dry_run: bool,
     ) -> impl std::future::Future<Output = Result<()>> + Send {
-        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
+        let client = self.client.as_ref().map(|c| c.inner().clone());
         let namespace = self.namespace.clone();
         let job_name = match &self.name {
             JobNameType::DefinedName(name) => name.clone(),
@@ -187,6 +212,7 @@ impl DeletableWorkFlowStep for KubeJobStep {
                 return Ok(());
             }
 
+            let client = client.ok_or_else(|| anyhow::anyhow!("Client is required for delete operation"))?;
             let pods: Api<k8s_openapi::api::core::v1::Pod> = Api::namespaced(client, &namespace);
             let pod_list = pods
                 .list(&Default::default())
@@ -217,7 +243,7 @@ impl LoggableWorkFlowStep for KubeJobStep {
         &self,
         _options: crate::steps::traits::LogStreamOptions,
     ) -> Pin<Box<dyn Stream<Item = Result<String>> + Send + '_>> {
-        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
+        let client = self.client.as_ref().map(|c| c.inner().clone());
         let namespace = self.namespace.clone();
         let job_name = match &self.name {
             JobNameType::DefinedName(name) => name.clone(),
@@ -225,6 +251,7 @@ impl LoggableWorkFlowStep for KubeJobStep {
         };
 
         Box::pin(try_stream! {
+            let client = client.ok_or_else(|| anyhow::anyhow!("Client is required for log streaming"))?;
             let pods: Api<k8s_openapi::api::core::v1::Pod> = Api::namespaced(client, &namespace);
             let pod_list = pods
                 .list(&Default::default())
@@ -255,7 +282,7 @@ impl ServableWorkFlowStep for KubeJobStep {
         service_name: &str,
         port: u16,
     ) -> impl std::future::Future<Output = Result<String>> + Send {
-        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
+        let client = self.client.as_ref().map(|c| c.inner().clone());
         let namespace = self.namespace.clone();
         let job_name = match &self.name {
             JobNameType::DefinedName(name) => name.clone(),
@@ -269,6 +296,7 @@ impl ServableWorkFlowStep for KubeJobStep {
                 return Ok(format!("DRY RUN: Would expose service {}", service_name));
             }
 
+            let client = client.ok_or_else(|| anyhow::anyhow!("Client is required for expose service operation"))?;
             let mut selector = BTreeMap::new();
             selector.insert("job-name".to_string(), job_name);
 
@@ -293,7 +321,7 @@ impl ServableWorkFlowStep for KubeJobStep {
         host: &str,
         service_port: u16,
     ) -> impl std::future::Future<Output = Result<String>> + Send {
-        let client = Arc::unwrap_or_clone(self.client.clone().into_inner());
+        let client = self.client.as_ref().map(|c| c.inner().clone());
         let namespace = self.namespace.clone();
         let ingress_name = ingress_name.to_string();
         let host = host.to_string();
@@ -305,6 +333,7 @@ impl ServableWorkFlowStep for KubeJobStep {
                 return Ok(format!("DRY RUN: Would expose ingress {}", ingress_name));
             }
 
+            let client = client.ok_or_else(|| anyhow::anyhow!("Client is required for expose ingress operation"))?;
             let ingress = crate::networking::IngressBuilder::new()
                 .with_name(&ingress_name)
                 .with_namespace(&namespace)
@@ -326,6 +355,8 @@ pub struct KubeJobStepBuilder {
     name: JobNameType,
     containers: Vec<Box<dyn ContainerLike + Send + Sync>>,
     sidecars: Vec<Box<dyn ContainerLike + Send + Sync>>,
+    init_containers: Vec<Box<dyn ContainerLike + Send + Sync>>,
+    volumes: Vec<k8s_openapi::api::core::v1::Volume>,
     backoff_limit: Option<i32>,
     restart_policy: RestartPolicy,
     ttl_seconds: Option<i32>,
@@ -345,6 +376,8 @@ impl KubeJobStepBuilder {
             name: JobNameType::DefinedName(String::new()),
             containers: Vec::new(),
             sidecars: Vec::new(),
+            init_containers: Vec::new(),
+            volumes: Vec::new(),
             backoff_limit: None,
             restart_policy: RestartPolicy::Never,
             ttl_seconds: None,
@@ -380,6 +413,16 @@ impl KubeJobStepBuilder {
 
     pub fn add_sidecar(mut self, sidecar: Box<dyn ContainerLike + Send + Sync>) -> Self {
         self.sidecars.push(sidecar);
+        self
+    }
+
+    pub fn add_init_container(mut self, container: Box<dyn ContainerLike + Send + Sync>) -> Self {
+        self.init_containers.push(container);
+        self
+    }
+
+    pub fn add_volume(mut self, volume: k8s_openapi::api::core::v1::Volume) -> Self {
+        self.volumes.push(volume);
         self
     }
 
@@ -457,9 +500,7 @@ impl KubeJobStepBuilder {
             JobNameType::GenerateName(prefix) => prefix.clone(),
         };
 
-        let client = self
-            .client
-            .ok_or_else(|| anyhow::anyhow!("Client is required"))?;
+        let client = self.client;
 
         Ok(KubeJobStep {
             step_id,
@@ -467,6 +508,8 @@ impl KubeJobStepBuilder {
             name,
             containers: self.containers,
             sidecars: self.sidecars,
+            init_containers: self.init_containers,
+            volumes: self.volumes,
             backoff_limit: self.backoff_limit,
             restart_policy: self.restart_policy,
             ttl_seconds: self.ttl_seconds,
