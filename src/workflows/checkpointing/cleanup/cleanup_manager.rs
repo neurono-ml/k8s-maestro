@@ -66,7 +66,7 @@ impl CleanupManager {
 
         for (_workflow_id, checkpoints_ref) in workflow_checkpoints.iter() {
             let mut checkpoints_by_age: Vec<_> = checkpoints_ref.clone();
-            checkpoints_by_age.sort_by(|a, b| b.1.cmp(&a.1));
+            checkpoints_by_age.sort_by_key(|b| std::cmp::Reverse(b.1));
 
             if let Some(max_age) = self.policy.max_age {
                 for (workflow_id, checkpoint_time) in checkpoints_ref.iter() {
