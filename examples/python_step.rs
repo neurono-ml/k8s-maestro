@@ -3,10 +3,11 @@
 //! This example demonstrates how to use Python steps in workflows
 //! with real API calls and actual configuration options.
 
+use k8s_maestro::steps::{ExecutableWorkFlowStep, WorkFlowStep};
 use k8s_maestro::{
-    clients::MaestroK8sClient, MaestroClientBuilder, WorkflowBuilder, PythonStepBuilder, ResourceLimits,
+    clients::MaestroK8sClient, MaestroClientBuilder, PythonStepBuilder, ResourceLimits,
+    WorkflowBuilder,
 };
-use k8s_maestro::steps::{WorkFlowStep, ExecutableWorkFlowStep};
 use std::time::Duration;
 
 #[tokio::main]
@@ -28,7 +29,7 @@ async fn main() -> anyhow::Result<()> {
     println!("Creating Maestro client (dry run mode)...");
     let maestro_client = MaestroClientBuilder::new()
         .with_namespace("default")
-        .with_dry_run(true)  // Set to false to actually execute
+        .with_dry_run(true) // Set to false to actually execute
         .build()?;
     println!("✓ Maestro client created in dry-run mode\n");
 
@@ -103,10 +104,7 @@ print(f"\nAverage age: {df['age'].mean()}")
 print(f"Age range: {df['age'].min()} - {df['age'].max()}")
 "#;
 
-    let requirements = vec![
-        "pandas>=2.0.0",
-        "numpy>=1.24.0",
-    ];
+    let requirements = vec!["pandas>=2.0.0", "numpy>=1.24.0"];
 
     let step = PythonStepBuilder::new()
         .with_name("python-with-requirements")
@@ -116,7 +114,10 @@ print(f"Age range: {df['age'].min()} - {df['age'].max()}")
         .with_dry_run(true)
         .build()?;
 
-    println!("✓ Created Python step with requirements: {}", step.step_id());
+    println!(
+        "✓ Created Python step with requirements: {}",
+        step.step_id()
+    );
     println!("  - Packages: {}", requirements.join(", "));
     println!("  - Code size: {} bytes", python_code.len());
 
@@ -148,9 +149,9 @@ print("Task completed!")
 "#;
 
     let resource_limits = ResourceLimits::new()
-        .with_cpu("500m")           // 0.5 CPU cores
-        .with_cpu_request("250m")   // 0.25 CPU cores requested
-        .with_memory("512Mi")       // 512 MB memory limit
+        .with_cpu("500m") // 0.5 CPU cores
+        .with_cpu_request("250m") // 0.25 CPU cores requested
+        .with_memory("512Mi") // 512 MB memory limit
         .with_memory_request("256Mi"); // 256 MB memory requested
 
     let step = PythonStepBuilder::new()
@@ -163,7 +164,10 @@ print("Task completed!")
         .with_dry_run(true)
         .build()?;
 
-    println!("✓ Created Python step with resource limits: {}", step.step_id());
+    println!(
+        "✓ Created Python step with resource limits: {}",
+        step.step_id()
+    );
     println!("  - CPU limit: 500m");
     println!("  - CPU request: 250m");
     println!("  - Memory limit: 512Mi");
@@ -177,7 +181,9 @@ print("Task completed!")
 }
 
 /// Example 4: Python step with environment variables
-async fn example_python_with_environment_variables(k8s_client: &MaestroK8sClient) -> anyhow::Result<()> {
+async fn example_python_with_environment_variables(
+    k8s_client: &MaestroK8sClient,
+) -> anyhow::Result<()> {
     println!("\nExample 4: Python step with environment variables");
     println!("──────────────────────────────────────────────────");
 
@@ -219,7 +225,10 @@ print("Processing complete!")
         .with_dry_run(true)
         .build()?;
 
-    println!("✓ Created Python step with environment variables: {}", step.step_id());
+    println!(
+        "✓ Created Python step with environment variables: {}",
+        step.step_id()
+    );
     println!("  - DATABASE_URL: postgresql://localhost:5432/mydb");
     println!("  - API_KEY: sk-proj-*** (redacted)");
     println!("  - DEBUG_MODE: true");
@@ -242,13 +251,15 @@ async fn example_python_workflow(
     // Step 1: Data preparation
     let prepare_step = PythonStepBuilder::new()
         .with_name("prepare-data")
-        .with_code(r#"
+        .with_code(
+            r#"
 import json
 data = {'records': [i for i in range(100)]}
 with open('/output/data.json', 'w') as f:
     json.dump(data, f)
 print(f"Prepared {len(data['records'])} records")
-"#)
+"#,
+        )
         .with_client(k8s_client.clone())
         .with_dry_run(true)
         .build()?;
@@ -256,7 +267,8 @@ print(f"Prepared {len(data['records'])} records")
     // Step 2: Data processing
     let process_step = PythonStepBuilder::new()
         .with_name("process-data")
-        .with_code(r#"
+        .with_code(
+            r#"
 import json
 with open('/output/data.json', 'r') as f:
     data = json.load(f)
@@ -264,7 +276,8 @@ with open('/output/data.json', 'r') as f:
 processed = [x * 2 for x in data['records']]
 print(f"Processed {len(processed)} records")
 print(f"Sample results: {processed[:5]}")
-"#)
+"#,
+        )
         .with_client(k8s_client.clone())
         .with_dry_run(true)
         .build()?;
@@ -272,7 +285,8 @@ print(f"Sample results: {processed[:5]}")
     // Step 3: Data analysis
     let analyze_step = PythonStepBuilder::new()
         .with_name("analyze-data")
-        .with_code(r#"
+        .with_code(
+            r#"
 import json
 with open('/output/data.json', 'r') as f:
     data = json.load(f)
@@ -284,7 +298,8 @@ print(f"  Min: {min(records)}")
 print(f"  Max: {max(records)}")
 print(f"  Sum: {sum(records)}")
 print(f"  Average: {sum(records)/len(records):.2f}")
-"#)
+"#,
+        )
         .with_client(k8s_client.clone())
         .with_dry_run(true)
         .build()?;
@@ -301,7 +316,7 @@ print(f"  Average: {sum(records)/len(records):.2f}")
         .add_step(prepare_step)
         .add_step(process_step)
         .add_step(analyze_step)
-        .with_parallelism(1)  // Execute sequentially
+        .with_parallelism(1) // Execute sequentially
         .build()?;
 
     println!("\n✓ Built workflow: {}", workflow.name);

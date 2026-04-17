@@ -39,7 +39,7 @@ pub async fn main() -> anyhow::Result<()> {
     // Create the job using Kubernetes API directly
     let jobs_api = kube::Api::<Job>::namespaced(
         maestro_client.clone().into_inner().as_ref().clone(),
-        namespace
+        namespace,
     );
 
     if !dry_run {

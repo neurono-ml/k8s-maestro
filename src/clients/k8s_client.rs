@@ -11,8 +11,10 @@ impl MaestroK8sClient {
     pub async fn new() -> anyhow::Result<Self> {
         let config = Config::infer().await?;
         let client = KubeClient::try_from(config)?;
-        
-        Ok(Self { client: Arc::new(client) })
+
+        Ok(Self {
+            client: Arc::new(client),
+        })
     }
 
     pub fn inner(&self) -> &KubeClient {
@@ -30,10 +32,11 @@ impl MaestroK8sClient {
 
 impl Clone for MaestroK8sClient {
     fn clone(&self) -> Self {
-        Self { client: self.client.clone() }
+        Self {
+            client: self.client.clone(),
+        }
     }
 }
-
 
 #[cfg(test)]
 mod tests {
